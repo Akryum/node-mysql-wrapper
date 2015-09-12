@@ -9,7 +9,7 @@ import * as Promise from 'bluebird';
 export var EQUAL_TO_PROPERTY_SYMBOL = '=';
 
 class SelectQuery<T> implements IQuery<T> { // T for Table's result type.
-   
+
     constructor(public _table: Table<T>) {
 
     }
@@ -66,7 +66,7 @@ class SelectQuery<T> implements IQuery<T> { // T for Table's result type.
      */
     promise(rawCriteria: any, callback?: (_results: T[]) => any): Promise<T[]> {
         return new Promise<T[]>((resolve, reject) => {
-            
+
             var criteria = this._table.criteriaDivider.divide(rawCriteria);
             let query = "SELECT " + criteria.selectFromClause(this._table) + " FROM " + this._table.name + criteria.whereClause + criteria.queryRules.toString();
 

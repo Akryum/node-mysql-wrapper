@@ -94,6 +94,9 @@ var CriteriaBuilder = (function () {
             return this.rawCriteria;
         }
     };
+    CriteriaBuilder.from = function (table) {
+        return new CriteriaBuilder(table);
+    };
     return CriteriaBuilder;
 })();
 exports.default = CriteriaBuilder;

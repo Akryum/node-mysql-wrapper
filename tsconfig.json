@@ -11,7 +11,6 @@
     "experimentalDecorators": false,
     "outDir": "./compiled",
     "charset": "UTF-8",
-    "listFiles": true,
     "noLib": true,
     "diagnostics": true,
     "declaration": false

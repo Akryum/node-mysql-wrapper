@@ -1,7 +1,9 @@
-# node-mysql-wrapper
-
 [![NPM Version][npm-image]][npm-url]
 [![Node.js Version][node-version-image]][node-version-url]
+
+# node-mysql-wrapper
+
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/nodets/node-mysql-wrapper?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 
 ## Table of Contents
@@ -91,8 +93,10 @@ Thanks goes to the people who have contributed code to this module, see the
 If you'd like to discuss this module, or ask questions about it, please use one
 of the following:
 
+* **Chat**: https://gitter.im/nodets/node-mysql-wrapper
 * **Mailing list**: https://groups.google.com/forum/#!forum/node-mysql-wrapper
-* **IRC Channel**: http://irc.lc/freenode/node-mysql-wrapper/ 
+* **IRC channel**: http://irc.lc/freenode/node-mysql-wrapper/ 
+
 
 ## Establishing connections
 
