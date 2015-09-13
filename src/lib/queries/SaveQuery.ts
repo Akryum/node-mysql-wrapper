@@ -36,6 +36,16 @@ class SaveQuery<T> implements IQuery<T> {
 
                     }
                     this._table.connection.notice(this._table.name, _query, obj);
+                    if (this._table.isObservable) {
+                        let _foundObsItem = this._table.observer.findItem(primaryKeyValue);
+                        if (_foundObsItem !== undefined && _foundObsItem.isObservable) {
+                            //dhladi uparxei stin lista parakolouthiseis kai kapios exei dwsei listener, tote:
+                            let _propertiesWereChanged:string[]  = this._table.observer.getChangedPropertiesOf(obj);
+                            _propertiesWereChanged.forEach(_propertyChangedName=>{
+                                _foundObsItem.notifyPropertyChanged(_propertyChangedName);
+                            });
+                        }
+                    }
                     resolve(obj);
                     if (callback) {
                         callback(obj); //an kai kanonika auto to kanei mono t
@@ -58,6 +68,9 @@ class SaveQuery<T> implements IQuery<T> {
                     primaryKeyValue = result.insertId;
 
                     this._table.connection.notice(this._table.name, _query, obj);
+                    if (this._table.isObservable) {
+                        this._table.observer.addItem(obj);
+                    }
                     resolve(obj);
                     if (callback) {
                         callback(obj);

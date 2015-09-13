@@ -1,11 +1,12 @@
 ﻿import Connection from "./Connection";
 import Helper from "./Helper";
 import {ICriteriaParts, CriteriaDivider} from "./CriteriaDivider";
-import {SelectQueryRules, RawRules,TABLE_RULES_PROPERTY} from "./queries/SelectQueryRules";
+import {SelectQueryRules, RawRules, TABLE_RULES_PROPERTY} from "./queries/SelectQueryRules";
 import SelectQuery from "./queries/SelectQuery";
 import SaveQuery from "./queries/SaveQuery";
 import {default as DeleteQuery, DeleteAnswer} from "./queries/DeleteQuery";
 import CriteriaBuilder from "./CriteriaBuilder";
+import ObservableCollection from "./ObservableCollection";
 
 import * as Promise from 'bluebird';
 
@@ -19,6 +20,7 @@ class Table<T> {
     private _selectQuery: SelectQuery<T>
     private _saveQuery: SaveQuery<T>;
     private _deleteQuery: DeleteQuery<T>;
+    private _observableCollection: ObservableCollection<T>;
 
     constructor(tableName: string, connection: Connection) {
         this._name = tableName;
@@ -68,6 +70,17 @@ class Table<T> {
     get criteria(): CriteriaBuilder<T> {
         return new CriteriaBuilder<T>(this);
     }
+    
+    /**
+    * Returns the ObservableCollection if first .observe(true)/observe() has been called, otherwise returns undefined.
+    */
+    get observer(): ObservableCollection<T> {
+        return this._observableCollection;
+    }
+
+    get isObservable(): boolean {
+        return this._observableCollection !== undefined && this._observableCollection.isObservable;
+    }
 
     on(evtType: string, callback: (parsedResults: any[]) => void): void {
         this.connection.watch(this.name, evtType, callback);
@@ -75,6 +88,17 @@ class Table<T> {
 
     off(evtType: string, callbackToRemove: (parsedResults: any[]) => void): void {
         this.connection.unwatch(this.name, evtType, callbackToRemove);
+    }
+
+    observe(trueOrFalse?: boolean): ObservableCollection<T> {
+        if ((trueOrFalse === void 0 || trueOrFalse) && this._observableCollection === undefined) { //or undefined ofc/void 0
+            this._observableCollection = new ObservableCollection<T>(this);
+        } else if (this._observableCollection !== undefined) {
+            //but false
+            this._observableCollection.forgetItem();
+            this._observableCollection = undefined;
+        }
+        return this._observableCollection;
     }
 
     has(extendedFunctionName: string): boolean {
@@ -215,7 +239,6 @@ class Table<T> {
     remove(criteriaOrID: any | number | string, callback?: (_result: DeleteAnswer) => any): Promise<DeleteAnswer> {
         return this._deleteQuery.execute(criteriaOrID, callback);
     }
-
 
 }
 

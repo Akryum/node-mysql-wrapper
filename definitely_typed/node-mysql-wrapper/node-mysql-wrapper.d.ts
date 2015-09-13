@@ -33,6 +33,8 @@ declare module "node-mysql-wrapper" {
     };
 
     type TableToSearchPart = { tableName: string, propertyName: string };
+    type onCollectionChangedCallback = <ObservableItem>(eventArgs: CollectionChangedEventArgs<ObservableItem>) => void;
+    type onPropertyChangedCallback = (eventArgs: PropertyChangedEventArgs) => void;
 
     interface Map<T> {
         [index: string]: T;
@@ -300,7 +302,71 @@ declare module "node-mysql-wrapper" {
         execute(criteriaOrID: any | number | string, callback?: (_result: DeleteAnswer) => any): Promise<DeleteAnswer>;
     }
 
+    enum CollectionChangedAction {
+        ADD, REMOVE, RESET//for now I will use only add, remove and reset . replace and move is for future., REPLACE, MOVE
+    }
 
+    class CollectionChangedEventArgs<T> {
+        action: CollectionChangedAction;
+        oldItems: ObservableItem<T>[];
+        newItems: ObservableItem<T>[];
+        oldStartingIndex: number;
+        newStartingIndex: number;
+
+        constructor(action?: CollectionChangedAction, oldItems?: ObservableItem<T>[], newItems?: ObservableItem<T>[], oldStartingIndex?: number, newStartingIndex?: number);
+    }
+
+    class PropertyChangedEventArgs {
+        propertyName: string;
+        constructor();
+    }
+
+    class ObservableItem<T> {
+
+        constructor(item: T);
+        isObservable: boolean;
+
+        forget(): void;
+
+        notifyPropertyChanged(propertyName: string): void;
+        onPropertyChanged(callback: onPropertyChangedCallback): void;
+    }
+
+    class ObservableCollection<T> {//T=result type of Table
+
+        list: ObservableItem<T>[];
+        listeners: onCollectionChangedCallback[];
+
+        constructor(table: Table<T>);
+
+        length: number;
+
+        isObservable(): boolean;
+        //for pure item
+        indexOf(item: T): number;
+	
+        //for observable item
+        findItem(itemId: string | number): ObservableItem<T>;
+
+
+        getItem(index: number): ObservableItem<T>;
+
+        //for pure item
+        addItem(...items: T[]): ObservableCollection<T>;
+	
+        //for pure item
+        removeItem(...items: T[]): ObservableCollection<T>;
+
+        forgetItem(...items: T[]): ObservableCollection<T>;
+
+        reset(): ObservableCollection<T>;
+
+        getChangedPropertiesOf(newObj: any): string[];
+
+        notifyCollectionChanged(evtArgs: CollectionChangedEventArgs<T>): void;
+
+        onCollectionChanged(callback: onCollectionChangedCallback): void;
+    }
 
     class Connection extends EventEmitter {
         
@@ -438,6 +504,10 @@ declare module "node-mysql-wrapper" {
     }
 
     class Table<T> {
+        /** Private keywords here are useless but I put them. 
+         * If the developer wants to see the properties of the Table class, he/she just comes here.
+        */
+
         private _name: string;
         private _connection: Connection;
         private _columns: string[];
@@ -447,8 +517,11 @@ declare module "node-mysql-wrapper" {
         private _selectQuery: SelectQuery<T>
         private _saveQuery: SaveQuery<T>;
         private _deleteQuery: DeleteQuery<T>;
+        private _observableCollection: ObservableCollection<T>;
         constructor(tableName: string, connection: Connection);
 
+
+      
         /**
          * An array of all columns' names inside this table.
          */
@@ -489,6 +562,17 @@ declare module "node-mysql-wrapper" {
         criteria: CriteriaBuilder<T>;
         
         /**
+        * Returns the ObservableCollection if first .observe(true)/observe() has been called, otherwise returns undefined.
+        */
+        observer(): ObservableCollection<T>;
+        
+        /*
+        * Returns true if this table is observable from the observer, In order to enable observe call .observe(true); 
+        * @return {boolean}
+        */
+        isObservable(): boolean;
+        
+        /**
         * Adds or turn on an event listener/watcher on a table for a 'database event'.
         * @param {string} evtType the event type you want to watch, one of these: ["INSERT", "UPDATE", "REMOVE", "SAVE"].
         * @param {function} callback Callback which has one parameter(typeof any[]) which filled by the parsedResults (results after query executed and exports to object(s)). 
@@ -505,7 +589,13 @@ declare module "node-mysql-wrapper" {
          * @return {nothing}
          */
         off(evtType: string, callbackToRemove: (parsedResults: any[]) => void): void;
-        
+
+        /** Enable or disable the use of ObservableCollection for added/removed/updated items in this table, default is disabled.
+         * @param {boolean} trueOrFalse
+         * @return {ObservableCollection} ObservableCollection
+         */
+        observe(trueOrFalse?: boolean): ObservableCollection<T>;
+         
         /**
          * Use it when you want to check if extended function is exists here.
          * @param {string} extendedFunctionName the name of the function you want to check.
