@@ -1,7 +1,7 @@
 import Table from "./Table";
 import Helper from "./Helper";
 
-export type onCollectionChangedCallback = <ObservableItem>(eventArgs: CollectionChangedEventArgs<ObservableItem>) => void;
+export type onCollectionChangedCallback = <T>(eventArgs: CollectionChangedEventArgs<T>) => void;
 export type onPropertyChangedCallback = (eventArgs: PropertyChangedEventArgs) => void;
 
 export enum CollectionChangedAction {

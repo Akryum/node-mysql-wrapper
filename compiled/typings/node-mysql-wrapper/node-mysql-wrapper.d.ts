@@ -33,7 +33,7 @@ declare module "node-mysql-wrapper" {
     };
 
     type TableToSearchPart = { tableName: string, propertyName: string };
-    type onCollectionChangedCallback = <ObservableItem>(eventArgs: CollectionChangedEventArgs<ObservableItem>) => void;
+    type onCollectionChangedCallback = <T>(eventArgs: CollectionChangedEventArgs<T>) => void;
     type onPropertyChangedCallback = (eventArgs: PropertyChangedEventArgs) => void;
 
     interface Map<T> {
