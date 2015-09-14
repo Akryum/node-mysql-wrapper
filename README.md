@@ -39,7 +39,7 @@ $ npm install nodets/node-mysql-wrapper
 ## Introduction
 
 This is a node.js wrapper for node-mysql driver package. It is written in TypeScript, does not
-require compiling (all JavaScript files you need are inside the 'compiled' folder)  and is 100% GPL-3.0 licensed.
+require compiling (all JavaScript files you need are inside the 'compiled' folder).
 
 Here is an example on how to use it:
 
@@ -532,6 +532,10 @@ INSERT INTO `user_infos` VALUES ('4', '23', '23 user hometown');
 
 ## Todo
 *  Waiting for stable yield/*async support
+
+## Licence
+
+This project is licensed under the MIT license.
 
 [npm-image]: https://img.shields.io/npm/v/node-mysql-wrapper.svg
 [npm-url]: https://npmjs.org/package/node-mysql-wrapper
