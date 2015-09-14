@@ -1,5 +1,5 @@
-[![NPM Version][npm-image]][npm-url]
 [![Node.js Version][node-version-image]][node-version-url]
+[![npm version](https://badge.fury.io/js/node-mysql-wrapper.svg)](http://badge.fury.io/js/node-mysql-wrapper)
 
 # node-mysql-wrapper
 
