@@ -313,7 +313,7 @@ declare module "node-mysql-wrapper" {
         oldStartingIndex: number;
         newStartingIndex: number;
 
-        constructor(action?: CollectionChangedAction, oldItems?: ObservableItem<T>[], newItems?: ObservableItem<T>[], oldStartingIndex?: number, newStartingIndex?: number);
+        constructor(action: CollectionChangedAction, oldItems?: ObservableItem<T>[], newItems?: ObservableItem<T>[], oldStartingIndex?: number, newStartingIndex?: number);
     }
 
     class PropertyChangedEventArgs {
@@ -342,9 +342,9 @@ declare module "node-mysql-wrapper" {
 
         length: number;
 
-        isObservable(): boolean;
+        isObservable: boolean;
         //for pure item
-        indexOf(item: T): number;
+        indexOf(item: T | string | number): number;
 	
         //for observable item
         findItem(itemId: string | number): ObservableItem<T>;

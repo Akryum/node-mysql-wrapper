@@ -37,6 +37,12 @@ var Helper = (function () {
         var getType = {};
         return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
     };
+    Helper.isString = function (something) {
+        return typeof something === 'string' || something instanceof String;
+    };
+    Helper.isNumber = function (something) {
+        return !isNaN(something - 0) && something !== null && something !== "" && something !== false;
+    };
     Helper.hasRules = function (obj) {
         return obj !== undefined && obj[SelectQueryRules_1.TABLE_RULES_PROPERTY] !== undefined;
     };

@@ -44,13 +44,21 @@ class Helper {
         return result;
     }
 
-    static isFunction(functionToCheck:any):boolean {
+    static isFunction(functionToCheck: any): boolean {
         let getType = {};
         return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
     }
-    
-    static hasRules(obj:any):boolean{
-       return obj!==undefined && obj[TABLE_RULES_PROPERTY] !==undefined; 
+
+    static isString(something: any): boolean {
+        return typeof something === 'string' || something instanceof String;
+    }
+
+    static isNumber(something: any): boolean {
+        return !isNaN(something - 0) && something !== null && something !== "" && something !== false;
+    }
+
+    static hasRules(obj: any): boolean {
+        return obj !== undefined && obj[TABLE_RULES_PROPERTY] !== undefined;
     }
 
 

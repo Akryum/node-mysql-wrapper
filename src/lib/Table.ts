@@ -161,13 +161,17 @@ class Table<T> {
 
     }
 
-    getPrimaryKeyValue(jsObject): number|string {
+    getPrimaryKeyValue(jsObject: any): number|string {
         let returnValue: string|number = 0;
         let primaryKeyObjectProperty = Helper.toObjectProperty(this.primaryKey);
         if (jsObject) {
             if (jsObject.constructor === Array) {
 
-            } else {
+            }
+            else if (Helper.isString(jsObject) || Helper.isNumber(jsObject)) { //is already ID:string or number 
+                return jsObject;
+            }
+            else { //is raw criteria object
                 if (jsObject.hasOwnProperty(primaryKeyObjectProperty)) {
                     this[this.primaryKey] = jsObject[primaryKeyObjectProperty];
 

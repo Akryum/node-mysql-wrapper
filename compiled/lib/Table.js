@@ -160,6 +160,9 @@ var Table = (function () {
         if (jsObject) {
             if (jsObject.constructor === Array) {
             }
+            else if (Helper_1.default.isString(jsObject) || Helper_1.default.isNumber(jsObject)) {
+                return jsObject;
+            }
             else {
                 if (jsObject.hasOwnProperty(primaryKeyObjectProperty)) {
                     this[this.primaryKey] = jsObject[primaryKeyObjectProperty];

@@ -10,12 +10,12 @@ export enum CollectionChangedAction {
 
 export class CollectionChangedEventArgs<T> {
 	action: CollectionChangedAction;
-	oldItems: ObservableItem<T>[] = [];
-	newItems: ObservableItem<T>[] = [];
-	oldStartingIndex: number = -1;
-	newStartingIndex: number = -1;
+	oldItems: ObservableItem<T>[];
+	newItems: ObservableItem<T>[];
+	oldStartingIndex: number;
+	newStartingIndex: number;
 
-	constructor(action?: CollectionChangedAction, oldItems?: ObservableItem<T>[], newItems?: ObservableItem<T>[], oldStartingIndex?: number, newStartingIndex?: number) {
+	constructor(action: CollectionChangedAction, oldItems: ObservableItem<T>[]=[], newItems: ObservableItem<T>[]=[], oldStartingIndex: number=-1, newStartingIndex: number=-1) {
 		this.action = action;
 		this.oldItems = oldItems;
 		this.newItems = newItems;
@@ -25,7 +25,7 @@ export class CollectionChangedEventArgs<T> {
 }
 
 export class PropertyChangedEventArgs {
-	constructor(public propertyName: string,public oldValue:any) {
+	constructor(public propertyName: string, public oldValue: any) {
 
 	}
 }
@@ -46,8 +46,8 @@ export class ObservableItem<T> {
 		this.listeners = [];
 	}
 
-	notifyPropertyChanged(propertyName: string,oldvalue:any): void {
-		let evtArgs: PropertyChangedEventArgs = new PropertyChangedEventArgs(propertyName,oldvalue);
+	notifyPropertyChanged(propertyName: string, oldvalue: any): void {
+		let evtArgs: PropertyChangedEventArgs = new PropertyChangedEventArgs(propertyName, oldvalue);
 
 		this.listeners.forEach(listener=> {
 			listener(evtArgs);
@@ -76,15 +76,21 @@ class ObservableCollection<T> {//T=result type of Table
 	}
 	
 	//for pure item
-	indexOf(item: T): number {
+	indexOf(item: T | string | number): number {
 		for (let i = 0; i < this.list.length; i++) {
 			let _itemIn = this.list[i].item;
 			let _primaryKey = Helper.toObjectProperty(this.table.primaryKey);
 
-			if (item[_primaryKey] === _itemIn[_primaryKey]) {
-				return i;
-			}
+			if (Helper.isString(item) || Helper.isNumber(item)) { //this is an ID, not an object. ( this happens on DeleteQuery).
+				if (item === _itemIn[_primaryKey]) {
+					return i;
+				}
+			} else {
 
+				if (item[_primaryKey] === _itemIn[_primaryKey]) {
+					return i;
+				}
+			}
 		}
 		return -1;
 	}
@@ -112,8 +118,7 @@ class ObservableCollection<T> {//T=result type of Table
 	addItem(...items: T[]): ObservableItem<T> {
 
 		let startingIndex = this.list.length === 0 ? 1 : this.list.length;
-		let evtArgs: CollectionChangedEventArgs<T> = new CollectionChangedEventArgs<T>();
-		evtArgs.action = CollectionChangedAction.ADD;
+		let evtArgs: CollectionChangedEventArgs<T> = new CollectionChangedEventArgs<T>(CollectionChangedAction.ADD);
 		evtArgs.newStartingIndex = startingIndex;
 		let newItemPushed;
 		items.forEach(item=> {
@@ -131,11 +136,10 @@ class ObservableCollection<T> {//T=result type of Table
 	//for pure item
 	removeItem(...items: T[]): ObservableCollection<T> {
 		let startingIndex = this.indexOf(items[0]);
-		if (startingIndex > 0) {
+		if (startingIndex >= 0) {
 			//actualy have something to be removed
 		
-			let evtArgs: CollectionChangedEventArgs<T> = new CollectionChangedEventArgs<T>();
-			evtArgs.action = CollectionChangedAction.REMOVE;
+			let evtArgs: CollectionChangedEventArgs<T> = new CollectionChangedEventArgs<T>(CollectionChangedAction.REMOVE);
 			evtArgs.oldStartingIndex = startingIndex;
 			items.forEach(item => {
 				let _index = this.indexOf(item);
@@ -166,20 +170,19 @@ class ObservableCollection<T> {//T=result type of Table
 
 	reset(): ObservableCollection<T> {
 		let startingIndex = this.list.length - 1;
+		let evtArgs: CollectionChangedEventArgs<T> = new CollectionChangedEventArgs<T>(CollectionChangedAction.RESET);
 
-		let evtArgs: CollectionChangedEventArgs<T> = new CollectionChangedEventArgs<T>();
-		evtArgs.action = CollectionChangedAction.RESET;
 		evtArgs.oldStartingIndex = startingIndex;
 		evtArgs.oldItems = this.list.slice(0); // copy without reference.
 		this.list = []; //reset the actual list
 		this.notifyCollectionChanged(evtArgs);
 
 		return this;
-	}
+	} 
 
 	getChangedPropertiesOf(newObj: any): string[] {
 		let arr: string[] = [];
-		let oldObj = this.findItem(newObj[Helper.toObjectProperty(this.table.primaryKey)]); 
+		let oldObj = this.findItem(newObj[Helper.toObjectProperty(this.table.primaryKey)]);
 		if (oldObj !== undefined) {
 			Helper.forEachKey(newObj, (key) => {
 				if (oldObj.item[key] !== newObj[key]) {

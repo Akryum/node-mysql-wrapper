@@ -7,6 +7,7 @@
 		"noLib": false
 	},
 	"files": [
-		"./node-mysql-wrapper-test.ts"
+		"./node-mysql-wrapper-test.ts",
+		"./observable-tests.ts"
 	]
 }
