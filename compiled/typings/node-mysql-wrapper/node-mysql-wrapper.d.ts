@@ -33,7 +33,7 @@ declare module "node-mysql-wrapper" {
     };
 
     type TableToSearchPart = { tableName: string, propertyName: string };
-    type onCollectionChangedCallback = <T>(eventArgs: CollectionChangedEventArgs<T>) => void;
+    //type onCollectionChangedCallback = <T>(eventArgs: CollectionChangedEventArgs<T>) => void;
     type onPropertyChangedCallback = (eventArgs: PropertyChangedEventArgs) => void;
 
     interface Map<T> {
@@ -318,11 +318,12 @@ declare module "node-mysql-wrapper" {
 
     class PropertyChangedEventArgs {
         propertyName: string;
-        constructor();
+        oldValue:any;
+        constructor(propName:string,oldVal:any);
     }
 
     class ObservableItem<T> {
-
+        item:T;
         constructor(item: T);
         isObservable: boolean;
 
@@ -335,7 +336,7 @@ declare module "node-mysql-wrapper" {
     class ObservableCollection<T> {//T=result type of Table
 
         list: ObservableItem<T>[];
-        listeners: onCollectionChangedCallback[];
+        listeners: ((eventArgs: CollectionChangedEventArgs<T>)=>void)[];
 
         constructor(table: Table<T>);
 
@@ -352,7 +353,7 @@ declare module "node-mysql-wrapper" {
         getItem(index: number): ObservableItem<T>;
 
         //for pure item
-        addItem(...items: T[]): ObservableCollection<T>;
+        addItem(...items: T[]): ObservableItem<T>;
 	
         //for pure item
         removeItem(...items: T[]): ObservableCollection<T>;
@@ -365,7 +366,7 @@ declare module "node-mysql-wrapper" {
 
         notifyCollectionChanged(evtArgs: CollectionChangedEventArgs<T>): void;
 
-        onCollectionChanged(callback: onCollectionChangedCallback): void;
+        onCollectionChanged(callback: (eventArgs: CollectionChangedEventArgs<T>)=>void): void;
     }
 
     class Connection extends EventEmitter {
@@ -564,7 +565,7 @@ declare module "node-mysql-wrapper" {
         /**
         * Returns the ObservableCollection if first .observe(true)/observe() has been called, otherwise returns undefined.
         */
-        observer(): ObservableCollection<T>;
+        observer: ObservableCollection<T>;
         
         /*
         * Returns true if this table is observable from the observer, In order to enable observe call .observe(true); 

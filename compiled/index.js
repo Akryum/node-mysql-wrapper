@@ -2,6 +2,7 @@ var Connection_1 = require("./lib/Connection");
 var Wrapper_1 = require("./lib/Wrapper");
 var SelectQueryRules_1 = require("./lib/queries/SelectQueryRules");
 var CriteriaBuilder_1 = require("./lib/CriteriaBuilder");
+var ObservableCollection_1 = require("./lib/ObservableCollection");
 if (Function.prototype["name"] === undefined) {
     Object.defineProperty(Function.prototype, 'name', {
         get: function () {
@@ -24,3 +25,4 @@ function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection) {
 exports.wrap = wrap;
 exports.SelectQueryRules = SelectQueryRules_1.SelectQueryRules;
 exports.CriteriaBuilder = CriteriaBuilder_1.default;
+exports.CollectionChangedAction = ObservableCollection_1.CollectionChangedAction;

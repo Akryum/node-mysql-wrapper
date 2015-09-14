@@ -33,9 +33,9 @@ class SelectQuery<T> implements IQuery<T> { // T for Table's result type.
 
                     tableFindPromise.then((childResults) => {
                         if (childResults.length === 1 &&
-                            Helper.hasRules(criteriaJsObject) &&
+                            Helper.hasRules(criteriaJsObject) && (
                             (criteriaJsObject[TABLE_RULES_PROPERTY].limit !== undefined && criteriaJsObject[TABLE_RULES_PROPERTY].limit === 1) ||
-                            (criteriaJsObject[TABLE_RULES_PROPERTY].limitEnd !== undefined && criteriaJsObject[TABLE_RULES_PROPERTY].limitEnd === 1)) {
+                            (criteriaJsObject[TABLE_RULES_PROPERTY].limitEnd !== undefined && criteriaJsObject[TABLE_RULES_PROPERTY].limitEnd === 1))) {
                             //edw an vriskeis mono ena result ALLA kai o developer epsaxne mono gia ena result, tote min kaneis to property ws array.
                             obj[tablePropertyName] = this._table.objectFromRow(childResults[0]);
 

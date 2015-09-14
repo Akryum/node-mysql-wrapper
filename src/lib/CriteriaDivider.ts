@@ -15,7 +15,7 @@ export interface ICriteriaParts {
 }
 
 export class CriteriaParts implements ICriteriaParts {
-    constructor(public rawCriteriaObject?: any, public tables?: TableToSearchPart[], public noDatabaseProperties?: string[], public whereClause?: string, public queryRules?: SelectQueryRules) {
+    constructor(public rawCriteriaObject: any={}, public tables: TableToSearchPart[]=[], public noDatabaseProperties: string[]=[], public whereClause: string="", public queryRules?: SelectQueryRules) {
 
     }
 
@@ -61,6 +61,7 @@ export class CriteriaDivider<T> {
 
     divide(rawCriteriaObject: any): CriteriaParts {
         let _criteria: CriteriaParts = new CriteriaParts();
+        
         let colsToSearch: string[] = [];
         let exceptColumns: string[] = [];
 

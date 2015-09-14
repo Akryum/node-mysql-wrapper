@@ -5,6 +5,7 @@ var SelectQuery_1 = require("./queries/SelectQuery");
 var SaveQuery_1 = require("./queries/SaveQuery");
 var DeleteQuery_1 = require("./queries/DeleteQuery");
 var CriteriaBuilder_1 = require("./CriteriaBuilder");
+var ObservableCollection_1 = require("./ObservableCollection");
 var Promise = require('bluebird');
 var Table = (function () {
     function Table(tableName, connection) {
@@ -74,11 +75,35 @@ var Table = (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(Table.prototype, "observer", {
+        get: function () {
+            return this._observableCollection;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Table.prototype, "isObservable", {
+        get: function () {
+            return this._observableCollection !== undefined && this._observableCollection.isObservable;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Table.prototype.on = function (evtType, callback) {
         this.connection.watch(this.name, evtType, callback);
     };
     Table.prototype.off = function (evtType, callbackToRemove) {
         this.connection.unwatch(this.name, evtType, callbackToRemove);
+    };
+    Table.prototype.observe = function (trueOrFalse) {
+        if ((trueOrFalse === void 0 || trueOrFalse) && this._observableCollection === undefined) {
+            this._observableCollection = new ObservableCollection_1.default(this);
+        }
+        else if (this._observableCollection !== undefined) {
+            this._observableCollection.forgetItem();
+            this._observableCollection = undefined;
+        }
+        return this._observableCollection;
     };
     Table.prototype.has = function (extendedFunctionName) {
         return this[extendedFunctionName] !== undefined;

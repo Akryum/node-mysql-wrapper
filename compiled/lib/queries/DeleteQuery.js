@@ -2,6 +2,12 @@ var DeleteQuery = (function () {
     function DeleteQuery(_table) {
         this._table = _table;
     }
+    DeleteQuery.prototype.notifyObserver = function (deletedPrimaryKey) {
+        var _item;
+        if (this._table.isObservable && ((_item = this._table.observer.findItem(deletedPrimaryKey).item) !== undefined)) {
+            this._table.observer.removeItem(_item);
+        }
+    };
     DeleteQuery.prototype.execute = function (criteriaOrID, callback) {
         var _this = this;
         return new Promise(function (resolve, reject) {
@@ -37,6 +43,7 @@ var DeleteQuery = (function () {
                     }
                     var _objReturned = { affectedRows: result.affectedRows, table: _this._table.name };
                     _this._table.connection.notice(_this._table.name, _query, [_objReturned]);
+                    _this.notifyObserver(criteriaOrID);
                     resolve(_objReturned);
                     if (callback) {
                         callback(_objReturned);

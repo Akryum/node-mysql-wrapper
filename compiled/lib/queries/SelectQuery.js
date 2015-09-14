@@ -24,9 +24,8 @@ var SelectQuery = (function () {
                     var tableFindPromise = table.find(criteriaJsObject);
                     tableFindPromise.then(function (childResults) {
                         if (childResults.length === 1 &&
-                            Helper_1.default.hasRules(criteriaJsObject) &&
-                            (criteriaJsObject[SelectQueryRules_1.TABLE_RULES_PROPERTY].limit !== undefined && criteriaJsObject[SelectQueryRules_1.TABLE_RULES_PROPERTY].limit === 1) ||
-                            (criteriaJsObject[SelectQueryRules_1.TABLE_RULES_PROPERTY].limitEnd !== undefined && criteriaJsObject[SelectQueryRules_1.TABLE_RULES_PROPERTY].limitEnd === 1)) {
+                            Helper_1.default.hasRules(criteriaJsObject) && ((criteriaJsObject[SelectQueryRules_1.TABLE_RULES_PROPERTY].limit !== undefined && criteriaJsObject[SelectQueryRules_1.TABLE_RULES_PROPERTY].limit === 1) ||
+                            (criteriaJsObject[SelectQueryRules_1.TABLE_RULES_PROPERTY].limitEnd !== undefined && criteriaJsObject[SelectQueryRules_1.TABLE_RULES_PROPERTY].limitEnd === 1))) {
                             obj[tablePropertyName] = _this._table.objectFromRow(childResults[0]);
                         }
                         else {

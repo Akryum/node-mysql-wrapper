@@ -95,7 +95,7 @@ class Table<T> {
             this._observableCollection = new ObservableCollection<T>(this);
         } else if (this._observableCollection !== undefined) {
             //but false
-            this._observableCollection.forgetItem();
+            this._observableCollection.forgetItem();// no params = forget all.
             this._observableCollection = undefined;
         }
         return this._observableCollection;

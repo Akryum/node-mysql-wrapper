@@ -2,6 +2,10 @@ var Helper_1 = require("./Helper");
 var SelectQueryRules_1 = require("./queries/SelectQueryRules");
 var CriteriaParts = (function () {
     function CriteriaParts(rawCriteriaObject, tables, noDatabaseProperties, whereClause, queryRules) {
+        if (rawCriteriaObject === void 0) { rawCriteriaObject = {}; }
+        if (tables === void 0) { tables = []; }
+        if (noDatabaseProperties === void 0) { noDatabaseProperties = []; }
+        if (whereClause === void 0) { whereClause = ""; }
         this.rawCriteriaObject = rawCriteriaObject;
         this.tables = tables;
         this.noDatabaseProperties = noDatabaseProperties;

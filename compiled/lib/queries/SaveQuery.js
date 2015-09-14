@@ -2,7 +2,6 @@ var Helper_1 = require("../Helper");
 var SaveQuery = (function () {
     function SaveQuery(_table) {
         this._table = _table;
-        this._table = _table;
     }
     SaveQuery.prototype.execute = function (criteriaRawJsObject, callback) {
         var _this = this;
@@ -24,6 +23,17 @@ var SaveQuery = (function () {
                         reject(err);
                     }
                     _this._table.connection.notice(_this._table.name, _query, obj);
+                    if (_this._table.isObservable) {
+                        var _foundObsItem = _this._table.observer.findItem(primaryKeyValue);
+                        if (_foundObsItem !== undefined && _foundObsItem.isObservable) {
+                            var _propertiesWereChanged = _this._table.observer.getChangedPropertiesOf(obj);
+                            _propertiesWereChanged.forEach(function (_propertyChangedName) {
+                                var _oldValue = _foundObsItem.item[_propertyChangedName];
+                                _foundObsItem.item[_propertyChangedName] = obj[_propertyChangedName];
+                                _foundObsItem.notifyPropertyChanged(_propertyChangedName, _oldValue);
+                            });
+                        }
+                    }
                     resolve(obj);
                     if (callback) {
                         callback(obj);

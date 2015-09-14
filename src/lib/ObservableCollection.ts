@@ -1,7 +1,7 @@
 import Table from "./Table";
 import Helper from "./Helper";
 
-export type onCollectionChangedCallback = <T>(eventArgs: CollectionChangedEventArgs<T>) => void;
+//export type onCollectionChangedCallback = <T>(eventArgs: CollectionChangedEventArgs<T>) => void;
 export type onPropertyChangedCallback = (eventArgs: PropertyChangedEventArgs) => void;
 
 export enum CollectionChangedAction {
@@ -25,7 +25,7 @@ export class CollectionChangedEventArgs<T> {
 }
 
 export class PropertyChangedEventArgs {
-	constructor(public propertyName: string) {
+	constructor(public propertyName: string,public oldValue:any) {
 
 	}
 }
@@ -46,8 +46,8 @@ export class ObservableItem<T> {
 		this.listeners = [];
 	}
 
-	notifyPropertyChanged(propertyName: string): void {
-		let evtArgs: PropertyChangedEventArgs = new PropertyChangedEventArgs(propertyName);
+	notifyPropertyChanged(propertyName: string,oldvalue:any): void {
+		let evtArgs: PropertyChangedEventArgs = new PropertyChangedEventArgs(propertyName,oldvalue);
 
 		this.listeners.forEach(listener=> {
 			listener(evtArgs);
@@ -62,9 +62,8 @@ export class ObservableItem<T> {
 }
 
 class ObservableCollection<T> {//T=result type of Table
-
 	private list: ObservableItem<T>[] = [];
-	private listeners: onCollectionChangedCallback[] = [];
+	private listeners: ((eventArgs: CollectionChangedEventArgs<T>) => void)[] = [];
 
 	constructor(protected table: Table<T>) { }
 
@@ -80,7 +79,7 @@ class ObservableCollection<T> {//T=result type of Table
 	indexOf(item: T): number {
 		for (let i = 0; i < this.list.length; i++) {
 			let _itemIn = this.list[i].item;
-			let _primaryKey = this.table.primaryKey;
+			let _primaryKey = Helper.toObjectProperty(this.table.primaryKey);
 
 			if (item[_primaryKey] === _itemIn[_primaryKey]) {
 				return i;
@@ -94,7 +93,7 @@ class ObservableCollection<T> {//T=result type of Table
 	findItem(itemId: string | number): ObservableItem<T> {
 		for (let i = 0; i < this.list.length; i++) {
 			let _itemIn = this.list[i];
-			let _primaryKey = this.table.primaryKey;
+			let _primaryKey = Helper.toObjectProperty(this.table.primaryKey);
 
 			if (itemId === _itemIn.item[_primaryKey]) {
 				return _itemIn;
@@ -110,20 +109,23 @@ class ObservableCollection<T> {//T=result type of Table
 	}
 
 	//for pure item
-	addItem(...items: T[]): ObservableCollection<T> {
+	addItem(...items: T[]): ObservableItem<T> {
 
 		let startingIndex = this.list.length === 0 ? 1 : this.list.length;
 		let evtArgs: CollectionChangedEventArgs<T> = new CollectionChangedEventArgs<T>();
 		evtArgs.action = CollectionChangedAction.ADD;
 		evtArgs.newStartingIndex = startingIndex;
-
+		let newItemPushed;
 		items.forEach(item=> {
-			this.list.push(new ObservableItem(item));
+			newItemPushed = new ObservableItem(Helper.copyObject(item)); //kanw copy gt aliws px me user.username dn 9a kanei trigger ti nea allagh 
+			this.list.push(newItemPushed);
+
 		});
 
-		evtArgs.newItems = this.list;
+		evtArgs.newItems = this.list; //here it just the whole new list no the new items just added
+		
 		this.notifyCollectionChanged(evtArgs);
-		return this;
+		return newItemPushed;
 	}
 	
 	//for pure item
@@ -177,7 +179,7 @@ class ObservableCollection<T> {//T=result type of Table
 
 	getChangedPropertiesOf(newObj: any): string[] {
 		let arr: string[] = [];
-		let oldObj = this.findItem(newObj[this.table.primaryKey]);
+		let oldObj = this.findItem(newObj[Helper.toObjectProperty(this.table.primaryKey)]); 
 		if (oldObj !== undefined) {
 			Helper.forEachKey(newObj, (key) => {
 				if (oldObj.item[key] !== newObj[key]) {
@@ -196,7 +198,7 @@ class ObservableCollection<T> {//T=result type of Table
 		});
 	}
 
-	onCollectionChanged(callback: onCollectionChangedCallback): void {
+	onCollectionChanged(callback: (eventArgs: CollectionChangedEventArgs<T>) => void): void {
 		this.listeners.push(callback);
 	}
 

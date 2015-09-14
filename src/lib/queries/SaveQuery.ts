@@ -6,7 +6,7 @@ import IQuery from"./IQuery";
 class SaveQuery<T> implements IQuery<T> {
 
     constructor(public _table: Table<T>) {
-        this._table = _table;
+
     }
 
     //save(criteriaRawJsObject: any): Promise<T | any>; //without callback
@@ -36,13 +36,17 @@ class SaveQuery<T> implements IQuery<T> {
 
                     }
                     this._table.connection.notice(this._table.name, _query, obj);
+
                     if (this._table.isObservable) {
                         let _foundObsItem = this._table.observer.findItem(primaryKeyValue);
+
                         if (_foundObsItem !== undefined && _foundObsItem.isObservable) {
                             //dhladi uparxei stin lista parakolouthiseis kai kapios exei dwsei listener, tote:
-                            let _propertiesWereChanged:string[]  = this._table.observer.getChangedPropertiesOf(obj);
-                            _propertiesWereChanged.forEach(_propertyChangedName=>{
-                                _foundObsItem.notifyPropertyChanged(_propertyChangedName);
+                            let _propertiesWereChanged: string[] = this._table.observer.getChangedPropertiesOf(obj);
+                            _propertiesWereChanged.forEach(_propertyChangedName=> {
+                                let _oldValue = _foundObsItem.item[_propertyChangedName]; 
+                                _foundObsItem.item[_propertyChangedName] = obj[_propertyChangedName]; //update the actual item's property value.
+                                _foundObsItem.notifyPropertyChanged(_propertyChangedName, _oldValue);
                             });
                         }
                     }
@@ -68,9 +72,9 @@ class SaveQuery<T> implements IQuery<T> {
                     primaryKeyValue = result.insertId;
 
                     this._table.connection.notice(this._table.name, _query, obj);
-                    if (this._table.isObservable) {
-                        this._table.observer.addItem(obj);
-                    }
+                    /* never do it, user will choose if wants to be observe of any object if (this._table.isObservable) {
+                         this._table.observer.addItem(obj);
+                     }*/
                     resolve(obj);
                     if (callback) {
                         callback(obj);

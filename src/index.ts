@@ -2,7 +2,7 @@
 import Wrapper from "./lib/Wrapper";
 import {SelectQueryRules} from "./lib/queries/SelectQueryRules";
 import CriteriaBuilder from "./lib/CriteriaBuilder";
-
+import {CollectionChangedAction} from "./lib/ObservableCollection";
 import * as Mysql from "mysql";
 
 if (Function.prototype["name"] === undefined) {
@@ -29,3 +29,4 @@ export function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection
 
 exports.SelectQueryRules =  SelectQueryRules;
 exports.CriteriaBuilder = CriteriaBuilder;
+exports.CollectionChangedAction = CollectionChangedAction;
