@@ -1,5 +1,6 @@
 var Helper_1 = require("../Helper");
 var SelectQueryRules_1 = require("./SelectQueryRules");
+var ObservableObject_1 = require("../ObservableObject");
 var Promise = require('bluebird');
 exports.EQUAL_TO_PROPERTY_SYMBOL = '=';
 var SelectQuery = (function () {
@@ -60,10 +61,14 @@ var SelectQuery = (function () {
                     parseQueryResultsPromises.push(_this.parseQueryResult(result, criteria));
                 });
                 Promise.all(parseQueryResultsPromises).then(function (_objects) {
+                    var returnedObservableObjects = [];
+                    _objects.forEach(function (_rawObject) {
+                        returnedObservableObjects.push(new ObservableObject_1.default(_rawObject));
+                    });
                     if (callback !== undefined) {
-                        callback(_objects);
+                        callback(returnedObservableObjects);
                     }
-                    resolve(_objects);
+                    resolve(returnedObservableObjects);
                 });
             });
         });

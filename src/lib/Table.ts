@@ -172,14 +172,14 @@ class Table<T> {
                 return jsObject;
             }
             else { //is raw criteria object
-                if (jsObject.hasOwnProperty(primaryKeyObjectProperty)) {
-                    this[this.primaryKey] = jsObject[primaryKeyObjectProperty];
+           
+                if (jsObject.hasOwnProperty(primaryKeyObjectProperty) || jsObject[primaryKeyObjectProperty] !== undefined) { //auto to || to evala gt exw arxisei na kanw to observable property...pou to emurable einai false.
+                    returnValue = jsObject[primaryKeyObjectProperty];
 
                 } else {
-                    this[this.primaryKey] = 0;
+                    returnValue = 0;
                 }
-                // this.primaryKeyValue =
-                returnValue = this[this.primaryKey]; //If we want the value but we dont know the of primary key's column's name.
+
             }
         }
         return returnValue;

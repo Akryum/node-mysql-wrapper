@@ -3,6 +3,7 @@ import Table from "../Table";
 import {SelectQueryRules, TABLE_RULES_PROPERTY} from "./SelectQueryRules";
 import {ICriteriaParts} from "../CriteriaDivider";
 import IQuery from"./IQuery";
+import ObservableObject from "../ObservableObject";
 
 import * as Promise from 'bluebird';
 
@@ -34,8 +35,8 @@ class SelectQuery<T> implements IQuery<T> { // T for Table's result type.
                     tableFindPromise.then((childResults) => {
                         if (childResults.length === 1 &&
                             Helper.hasRules(criteriaJsObject) && (
-                            (criteriaJsObject[TABLE_RULES_PROPERTY].limit !== undefined && criteriaJsObject[TABLE_RULES_PROPERTY].limit === 1) ||
-                            (criteriaJsObject[TABLE_RULES_PROPERTY].limitEnd !== undefined && criteriaJsObject[TABLE_RULES_PROPERTY].limitEnd === 1))) {
+                                (criteriaJsObject[TABLE_RULES_PROPERTY].limit !== undefined && criteriaJsObject[TABLE_RULES_PROPERTY].limit === 1) ||
+                                (criteriaJsObject[TABLE_RULES_PROPERTY].limitEnd !== undefined && criteriaJsObject[TABLE_RULES_PROPERTY].limitEnd === 1))) {
                             //edw an vriskeis mono ena result ALLA kai o developer epsaxne mono gia ena result, tote min kaneis to property ws array.
                             obj[tablePropertyName] = this._table.objectFromRow(childResults[0]);
 
@@ -82,12 +83,18 @@ class SelectQuery<T> implements IQuery<T> { // T for Table's result type.
                 });
 
                 Promise.all(parseQueryResultsPromises).then((_objects: T[]) => {
-
+                    let returnedObservableObjects = [];
+                    _objects.forEach(_rawObject=> {
+                        
+                        returnedObservableObjects.push(new ObservableObject(_rawObject));
+                    });
                     if (callback !== undefined) {
-                        callback(_objects);
+                        // callback(_objects);
+                        callback(returnedObservableObjects);
                     }
 
-                    resolve(_objects);
+                    //  resolve(_objects);
+                    resolve(returnedObservableObjects);
                 });
 
             });

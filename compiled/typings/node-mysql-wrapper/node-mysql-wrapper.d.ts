@@ -302,6 +302,33 @@ declare module "node-mysql-wrapper" {
         execute(criteriaOrID: any | number | string, callback?: (_result: DeleteAnswer) => any): Promise<DeleteAnswer>;
     }
 
+
+    class PropertyChangedArgs {
+        propertyName: string;
+        oldValue: any;
+        constructor(propertyName: string, oldValue: any);
+    }
+
+    type PropertyChangedCallback = (args: PropertyChangedArgs) => any;
+
+    class ObservableObject {
+
+        static RESERVED_PROPERTY_NAMES: string[];
+        private propertyChangedListeners: PropertyChangedCallback[];
+        
+        private makeObservable(obj: any):void;
+        
+        constructor();
+        constructor(obj?: any);
+        
+        onPropertyChanged(listener: PropertyChangedCallback): void;
+
+        private notifyPropertyChanged(propertyName: string, oldValue: any): void;
+
+        toJSON(...excludeProperties: string[]): any;
+
+    }
+
     enum CollectionChangedAction {
         ADD, REMOVE, RESET//for now I will use only add, remove and reset . replace and move is for future., REPLACE, MOVE
     }
@@ -318,12 +345,12 @@ declare module "node-mysql-wrapper" {
 
     class PropertyChangedEventArgs {
         propertyName: string;
-        oldValue:any;
-        constructor(propName:string,oldVal:any);
+        oldValue: any;
+        constructor(propName: string, oldVal: any);
     }
 
     class ObservableItem<T> {
-        item:T;
+        item: T;
         constructor(item: T);
         isObservable: boolean;
 
@@ -336,7 +363,7 @@ declare module "node-mysql-wrapper" {
     class ObservableCollection<T> {//T=result type of Table
 
         list: ObservableItem<T>[];
-        listeners: ((eventArgs: CollectionChangedEventArgs<T>)=>void)[];
+        listeners: ((eventArgs: CollectionChangedEventArgs<T>) => void)[];
 
         constructor(table: Table<T>);
 
@@ -366,7 +393,7 @@ declare module "node-mysql-wrapper" {
 
         notifyCollectionChanged(evtArgs: CollectionChangedEventArgs<T>): void;
 
-        onCollectionChanged(callback: (eventArgs: CollectionChangedEventArgs<T>)=>void): void;
+        onCollectionChanged(callback: (eventArgs: CollectionChangedEventArgs<T>) => void): void;
     }
 
     class Connection extends EventEmitter {
@@ -504,7 +531,7 @@ declare module "node-mysql-wrapper" {
         table<T>(tableName: string): Table<T>;
     }
 
-    class Table<T> {
+    class Table<T>  {
         /** Private keywords here are useless but I put them. 
          * If the developer wants to see the properties of the Table class, he/she just comes here.
         */

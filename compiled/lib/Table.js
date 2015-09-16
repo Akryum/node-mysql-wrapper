@@ -164,13 +164,12 @@ var Table = (function () {
                 return jsObject;
             }
             else {
-                if (jsObject.hasOwnProperty(primaryKeyObjectProperty)) {
-                    this[this.primaryKey] = jsObject[primaryKeyObjectProperty];
+                if (jsObject.hasOwnProperty(primaryKeyObjectProperty) || jsObject[primaryKeyObjectProperty] !== undefined) {
+                    returnValue = jsObject[primaryKeyObjectProperty];
                 }
                 else {
-                    this[this.primaryKey] = 0;
+                    returnValue = 0;
                 }
-                returnValue = this[this.primaryKey];
             }
         }
         return returnValue;
