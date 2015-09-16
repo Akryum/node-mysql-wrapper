@@ -46,11 +46,6 @@ export function observable<T>(obj: T): T & ObservableObject {
     return extendTypes(obj, new ObservableObject(obj));
 }
 
-class User{
-    firstname:string;
-    lastname:string;
-}
-
 exports.SelectQueryRules = SelectQueryRules;
 exports.CriteriaBuilder = CriteriaBuilder;
 exports.ObservableObject = ObservableObject;
