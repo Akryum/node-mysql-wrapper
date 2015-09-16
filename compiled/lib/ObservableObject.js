@@ -1,35 +1,33 @@
-var Helper_1 = require("./Helper");
-var PropertyChangedArgs = (function () {
-    function PropertyChangedArgs(propertyName, oldValue) {
+import Helper from "./Helper";
+import { TABLE_RULES_PROPERTY } from "./queries/SelectQueryRules";
+export class PropertyChangedArgs {
+    constructor(propertyName, oldValue) {
         this.propertyName = propertyName;
         this.oldValue = oldValue;
     }
-    return PropertyChangedArgs;
-})();
-exports.PropertyChangedArgs = PropertyChangedArgs;
-var ObservableObject = (function () {
-    function ObservableObject(obj) {
+}
+class ObservableObject {
+    constructor(obj) {
         if (obj) {
             this.makeObservable(obj);
         }
     }
-    ObservableObject.prototype.makeObservable = function (obj) {
-        var _this = this;
+    makeObservable(obj) {
         for (var key in obj) {
             this["_" + key] = obj[key];
         }
-        Helper_1.default.forEachKey(this, function (key) {
+        Helper.forEachKey(this, key => {
             var propertyName = key["substr"](1);
             if (ObservableObject.RESERVED_PROPERTY_NAMES.indexOf(propertyName) === -1) {
                 Object.defineProperty(ObservableObject.prototype, propertyName, {
-                    get: function () {
-                        return _this[key];
+                    get: () => {
+                        return this[key];
                     },
-                    set: function (_value) {
-                        if (_value !== undefined && _this[key] !== _value) {
-                            var oldValue = _this[key];
-                            _this[key] = _value;
-                            _this.notifyPropertyChanged(propertyName, oldValue);
+                    set: (_value) => {
+                        if (_value !== undefined && this[key] !== _value) {
+                            let oldValue = this[key];
+                            this[key] = _value;
+                            this.notifyPropertyChanged(propertyName, oldValue);
                         }
                     },
                     enumerable: false,
@@ -37,37 +35,34 @@ var ObservableObject = (function () {
                 });
             }
         });
-    };
-    ObservableObject.prototype.onPropertyChanged = function (listener) {
+    }
+    onPropertyChanged(listener) {
         if (!this.propertyChangedListeners)
             this.propertyChangedListeners = [];
         this.propertyChangedListeners.push(listener);
-    };
-    ObservableObject.prototype.notifyPropertyChanged = function (propertyName, oldValue) {
+    }
+    _forget() {
+        this.propertyChangedListeners = [];
+    }
+    notifyPropertyChanged(propertyName, oldValue) {
         if (this.propertyChangedListeners && this.propertyChangedListeners.length > 0) {
-            for (var i = 0; i < this.propertyChangedListeners.length; i++) {
+            for (let i = 0; i < this.propertyChangedListeners.length; i++) {
                 this.propertyChangedListeners[i](new PropertyChangedArgs(propertyName, oldValue));
             }
         }
-    };
-    ObservableObject.prototype.toJSON = function () {
-        var _this = this;
-        var excludeProperties = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            excludeProperties[_i - 0] = arguments[_i];
-        }
-        var rawObject = {};
-        Helper_1.default.forEachKey(this, function (_key) {
+    }
+    toJSON(...excludeProperties) {
+        let rawObject = {};
+        Helper.forEachKey(this, _key => {
             if (ObservableObject.RESERVED_PROPERTY_NAMES.indexOf(_key) == -1) {
-                var key = Helper_1.default.toObjectProperty(_key.substr(1));
-                if (key !== "tableRules" && excludeProperties.indexOf(key) == -1) {
-                    rawObject[key] = _this[key];
+                let key = Helper.toObjectProperty(_key.substr(1));
+                if (key !== TABLE_RULES_PROPERTY && excludeProperties.indexOf(key) == -1) {
+                    rawObject[key] = this[key];
                 }
             }
         });
         return rawObject;
-    };
-    ObservableObject.RESERVED_PROPERTY_NAMES = ["propertyChangedListeners", "notifyPropertyChanged", "onPropertyChanged", "toJSON", "makeObservable"];
-    return ObservableObject;
-})();
-exports.default = ObservableObject;
+    }
+}
+ObservableObject.RESERVED_PROPERTY_NAMES = ["propertyChangedListeners", "notifyPropertyChanged", "onPropertyChanged", "toJSON", "makeObservable", "_forget"];
+export default ObservableObject;

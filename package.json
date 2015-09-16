@@ -16,6 +16,7 @@
     "gulp-typescript": "^2.8.2",
     "gulp-zip": "^3.0.2",
     "streamqueue": "^1.1.1",
+    "typescript": "^1.6.0-beta",
     "yargs": "^3.24.0"
   },
   "repository": {

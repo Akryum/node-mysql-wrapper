@@ -5,11 +5,9 @@ import {SelectQueryRules} from "./queries/SelectQueryRules";
 import * as Promise from 'bluebird';
 import * as Mysql from 'mysql';
 
-
-
-class Wrapper {
+class Database {
     connection: Connection;
-    readyListenerCallbacks = new Array<Function>();            //()=>void
+    readyListenerCallbacks = new Array<Function>();
 
     constructor(connection?: Connection) {
         this.setConnection(connection);
@@ -119,4 +117,4 @@ class Wrapper {
 
 }
 
-export default Wrapper;
+export default Database;

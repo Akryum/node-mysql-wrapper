@@ -3,7 +3,7 @@
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
-import wrapper2 = require("node-mysql-wrapper");
+import * as  wrapper2 from "node-mysql-wrapper";
 var db = wrapper2.wrap("mysql://kataras:pass@127.0.0.1/taglub?debug=false&charset=utf8");
 
 class User { //or interface
@@ -39,7 +39,8 @@ db.ready(() => {
 
     var usersDb = db.table<User>("users");
     //or var usersDb = db.table("users"); if you don't want intel auto complete from your ide/editor
-    var usersCollection = usersDb.observe(true);
+    //var usersCollection = usersDb.observe(true);
+    var usersCollection = new wrapper2.ObservableCollection (usersDb);
     usersCollection.onCollectionChanged((eventArgs) => {
         console.log('collection changed');
         switch (eventArgs.action) {
@@ -56,11 +57,8 @@ db.ready(() => {
         console.log("TEST1: \n");
         console.log("FOUND USER WITH USERNAME: " + _user.username);
 
-        var itemAdded = usersCollection.addItem(_user); //addItem returns the last added item. the inside item is a copy of the _user, no reference. applied.
-        itemAdded.onPropertyChanged(propertyArgs=> {
-            console.log(propertyArgs.propertyName + ' property has changed from user with ID:' + itemAdded.item.userId + " old value: "+propertyArgs.oldValue + " to new value: "+itemAdded.item[propertyArgs.propertyName]);
-        });
-          _user.username = "JUST A NEW username for the user ID 16"; 
+     
+        _user.username = "JUST A NEW username for the user ID 16"; 
         //or: {userId:16,username:  "JUST A NEW username for the user ID 16"}
         usersDb.save(_user).then(() => { console.log('user saved from query'); });
 

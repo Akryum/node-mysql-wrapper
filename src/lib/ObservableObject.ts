@@ -1,4 +1,5 @@
 import Helper from "./Helper";
+import {TABLE_RULES_PROPERTY} from "./queries/SelectQueryRules";
 
 export class PropertyChangedArgs {
 	constructor(public propertyName: string, public oldValue: any) {
@@ -10,7 +11,7 @@ export type PropertyChangedCallback = (args: PropertyChangedArgs) => any;
 
 class ObservableObject {
 
-	static RESERVED_PROPERTY_NAMES: string[] = ["propertyChangedListeners", "notifyPropertyChanged","onPropertyChanged", "toJSON","makeObservable"];
+	static RESERVED_PROPERTY_NAMES: string[] = ["propertyChangedListeners", "notifyPropertyChanged", "onPropertyChanged", "toJSON", "makeObservable", "_forget"];
 
 	private propertyChangedListeners: PropertyChangedCallback[];
 
@@ -56,6 +57,10 @@ class ObservableObject {
 		this.propertyChangedListeners.push(listener);
 	}
 
+	_forget(): void {
+		this.propertyChangedListeners = [];
+	}
+
 	private notifyPropertyChanged(propertyName: string, oldValue: any): void {
 		if (this.propertyChangedListeners && this.propertyChangedListeners.length > 0) {
 			for (let i = 0; i < this.propertyChangedListeners.length; i++) {
@@ -70,9 +75,9 @@ class ObservableObject {
 		Helper.forEachKey(this, _key=> {
 			//epidi ta exw _ ta real properties tou table:
 			if (ObservableObject.RESERVED_PROPERTY_NAMES.indexOf(_key) == -1) {
-		
-				let key = Helper.toObjectProperty( _key.substr(1));	// vgazoume to _ gia na mi ginei UserId anti gia userId px.
-				if (key !== "tableRules" && excludeProperties.indexOf(key) == -1) {
+
+				let key = Helper.toObjectProperty(_key.substr(1));	// vgazoume to _ gia na mi ginei UserId anti gia userId px.
+				if (key !== TABLE_RULES_PROPERTY && excludeProperties.indexOf(key) == -1) {
 					rawObject[key] = this[key];
 				}
 			}

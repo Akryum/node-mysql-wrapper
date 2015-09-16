@@ -3,10 +3,10 @@
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
-import wrapper2 = require("node-mysql-wrapper");
+import * as wrapper2 from "node-mysql-wrapper";
 var db = wrapper2.wrap("mysql://kataras:pass@127.0.0.1/taglub?debug=false&charset=utf8");
 
-class User extends wrapper2.ObservableObject { //or interface
+class User {
     userId: number;
     username: string;
     mail: string;
@@ -16,7 +16,7 @@ class User extends wrapper2.ObservableObject { //or interface
     info: UserInfo;
 }
 
-interface Comment {
+interface Comment {//or interface
     commentId: number;
     content: string;
     likes: CommentLike[];
@@ -34,20 +34,11 @@ interface UserInfo {
     hometown: string;
 }
 
-
-function userChanged(user: User): (args: wrapper2.PropertyChangedEventArgs) => void {
-
-    return (propertyArgs) => {
-        console.log(propertyArgs.propertyName + ' property has changed from user with ID:' + user.userId + " old value: " +
-            propertyArgs.oldValue + " to new value: " + user[propertyArgs.propertyName]);
-
-    };
-}
-
 db.ready(() => {
-    var usersDb = db.table<User>("users");
+    var usersTable = db.table<User>("users");
+    
     //or var usersDb = db.table("users"); if you don't want intel auto complete from your ide/editor
-    var usersCollection = usersDb.observe(true);
+    var usersCollection = new wrapper2.ObservableCollection(usersTable);
     usersCollection.onCollectionChanged((eventArgs) => {
         console.log('collection changed');
         switch (eventArgs.action) {
@@ -59,17 +50,19 @@ db.ready(() => {
                 break;
         }
     });
-    
-    
-    var _criteria16 = usersDb.criteria.where("userId",16).joinAs("myComments","comments","userId").orderBy("userId",true).limit(1).build();
-    
-    usersDb.findSingle(_criteria16, user=> {
+
+
+    var _criteria16 = usersTable.criteria.where("userId", 16).joinAs("myComments", "comments", "userId").orderBy("userId", true).limit(1).build();
+
+    usersTable.findSingle(_criteria16, result=> {
+        var user = wrapper2.observable(result);
+
         user.onPropertyChanged((args) => {
-            console.log(args.propertyName + " Has changed to " + user[args.propertyName] + " from "+ args.oldValue);
+            console.log(args.propertyName + " Has changed to " + user[args.propertyName] + " from " + args.oldValue);
         });
-        
+
         user.username = "just a test...";
-        console.dir(user.toJSON("password","myComments")); //except password and myComments property fields.
+        console.dir(user.toJSON("password", "myComments")); //except password and myComments property fields.
     });
 
     /*  usersDb.findById(16, (_user) => {

@@ -1,13 +1,26 @@
 {
 	"compilerOptions": {
-		"module": "commonjs",
-		"target": "ES5",
-		"listFiles": true,
+		"noImplicitAny": false,
+		"removeComments": true,
+		"preserveConstEnums": true,
+		"sourceMap": false,
+		"target": "es6",
+		"noEmit": false,
+		"noEmitOnError": true,
+		"experimentalDecorators": false,
+		"charset": "UTF-8",
+		"noLib": true,
 		"diagnostics": true,
-		"noLib": false
+		"declaration": false
 	},
 	"files": [
+		"./lib.d.ts",
 		"./node-mysql-wrapper-test.ts",
 		"./observable-tests.ts"
-	]
+	],
+	"exclude": [
+		"node_modules",
+		".vscode"
+	],
+	"typescript.tsdk": "C:/Users/Makis-PC/AppData/Roaming/npm/node_modules/typescript/lib"
 }

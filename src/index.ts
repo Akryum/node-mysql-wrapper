@@ -1,11 +1,10 @@
 ﻿import Connection from "./lib/Connection";
-import Wrapper from "./lib/Wrapper";
+import Database from "./lib/Database";
 import {SelectQueryRules} from "./lib/queries/SelectQueryRules";
 import CriteriaBuilder from "./lib/CriteriaBuilder";
 import {CollectionChangedAction} from "./lib/ObservableCollection";
 import Helper from "./lib/Helper";
 import ObservableObject from "./lib/ObservableObject";
-
 import * as Mysql from "mysql";
 
 if (Function.prototype["name"] === undefined) {
@@ -19,18 +18,40 @@ if (Function.prototype["name"] === undefined) {
     });
 }
 
-export function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection |  string, ...useTables: any[]): Wrapper {
+export function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): Database {
     let mysqlCon = new Connection(mysqlUrlOrObjectOrMysqlAlreadyConnection);
-    let mysqlWrapper = new Wrapper(mysqlCon);
+    let mysqlDatabase = new Database(mysqlCon);
 
     if (useTables) {
-        mysqlWrapper.useOnly(useTables);
+        mysqlDatabase.useOnly(useTables);
     }
 
-    return mysqlWrapper;
+    return mysqlDatabase;
 }
 
-exports.SelectQueryRules =  SelectQueryRules;
+function extendTypes<T, U>(first: T, second: U): T & U {
+    let result = <T & U>{};
+    for (let id in first) {
+        result[id] = first[id];
+    }
+    for (let id in second) {
+        if (!result.hasOwnProperty(id)) {
+            result[id] = second[id];
+        }
+    }
+    return result;
+}
+
+export function observable<T>(obj: T): T & ObservableObject {
+    return extendTypes(obj, new ObservableObject(obj));
+}
+
+class User{
+    firstname:string;
+    lastname:string;
+}
+
+exports.SelectQueryRules = SelectQueryRules;
 exports.CriteriaBuilder = CriteriaBuilder;
 exports.ObservableObject = ObservableObject;
 exports.CollectionChangedAction = CollectionChangedAction;

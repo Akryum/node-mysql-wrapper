@@ -14,15 +14,6 @@ class DeleteQuery<T> implements IQuery<T>{
 
     }
 
-
-    notifyObserver(deletedPrimaryKey: string|number) {
-        let _item;
-        // if (this._table.isObservable && (_item = this._table.observer.findItem(deletedPrimaryKey).item) && _item !== undefined) { an den doulepsei to katw as valw auto
-        if (this._table.isObservable && ((_item = this._table.observer.findItem(deletedPrimaryKey).item) !== undefined)) {
-            this._table.observer.removeItem(_item); //maybe 3 loops for this.list inside observable collection, on the future I'll find a way to away it:)
-        }
-    }
-    
     execute(criteriaOrID: any | number | string, callback?: (_result: DeleteAnswer) => any): Promise<DeleteAnswer> {
         return new Promise<DeleteAnswer>((resolve, reject) => {
             let primaryKeyValue = this._table.getPrimaryKeyValue(criteriaOrID);
@@ -48,10 +39,10 @@ class DeleteQuery<T> implements IQuery<T>{
                     let _objReturned = { affectedRows: result.affectedRows, table: this._table.name };
 
                     this._table.connection.notice(this._table.name, _query, [_objReturned]);
-                    
+
                     resolve(_objReturned);
                     if (callback) {
-                        callback(_objReturned);  //an kai kanonika auto to kanei mono t
+                        callback(_objReturned); 
                     }
                 });
             } else {
@@ -65,17 +56,14 @@ class DeleteQuery<T> implements IQuery<T>{
                     let _objReturned = { affectedRows: result.affectedRows, table: this._table.name };
 
                     this._table.connection.notice(this._table.name, _query, [_objReturned]);
-                    this.notifyObserver(criteriaOrID);
                     resolve(_objReturned);
                     if (callback) {
-                        callback(_objReturned); //an kai kanonika auto to kanei mono t
+                        callback(_objReturned);
                     }
                 });
             }
         });
     }
 }
-
-
 
 export default DeleteQuery;

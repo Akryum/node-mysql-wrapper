@@ -7,12 +7,14 @@ var zip = require("gulp-zip"),
 	pjson = require("./package.json");
 //var concat = require("gulp-concat"); maybe for future
 
-var tsProject = typescript.createProject("tsconfig.json"); //use of tscofnig for compiler's settings
+var tsProject = typescript.createProject("tsconfig.json", {
+    typescript: require('typescript') //to make use typescript 1.6 compiler 
+}); //use of tscofnig for compiler's settings
 
 
 gulp.task("src", function () {
 
-	return gulp.src(["src/**/*.ts","src/**/**/*.ts"]) //lib, and lib/queries. //except lib.d.ts. Maybe for future use:  { base: './src/' }
+	return gulp.src(["src/**/*.ts", "src/**/**/*.ts"]) //lib, and lib/queries. //except lib.d.ts. Maybe for future use:  { base: './src/' }
 		.pipe(typescript(tsProject))
 		.pipe(gulp.dest("./compiled/"))
 		.pipe(gulp.dest("./examples_javascript/node_modules/node-mysql-wrapper/compiled/"))
@@ -39,7 +41,7 @@ gulp.task("zip", function () {
 	}
     var date = new Date();/*.toISOString().replace(/[^0-9]/g, '')*/
 	var unorderedDate = date.toLocaleDateString().split("-");
-	var dateStr = unorderedDate[2] + "-" +unorderedDate[1] + "-"+unorderedDate[0];//date.getDate() + "-"+date.getMonth()+"-"+date.getFullYear();
+	var dateStr = unorderedDate[2] + "-" + unorderedDate[1] + "-" + unorderedDate[0];//date.getDate() + "-"+date.getMonth()+"-"+date.getFullYear();
 	
 	var stream = streamqueue({ objectMode: true });
 

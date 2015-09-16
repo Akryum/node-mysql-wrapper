@@ -1,7 +1,7 @@
-var Helper_1 = require("../Helper");
-exports.TABLE_RULES_PROPERTY = "tableRules";
-var SelectQueryRules = (function () {
-    function SelectQueryRules() {
+import Helper from "../Helper";
+export var TABLE_RULES_PROPERTY = "tableRules";
+export class SelectQueryRules {
+    constructor() {
         this.manuallyEndClause = "";
         this.manuallyBeginClause = "";
         this.orderByColumn = "";
@@ -12,17 +12,17 @@ var SelectQueryRules = (function () {
         this.tableName = "";
         this.exceptColumns = [];
     }
-    SelectQueryRules.build = function (parentRule) {
-        var _rules = new SelectQueryRules();
+    static build(parentRule) {
+        let _rules = new SelectQueryRules();
         if (parentRule) {
             _rules.from(parentRule);
         }
         return _rules;
-    };
-    SelectQueryRules.prototype.last = function (propertyClauseName) {
+    }
+    last(propertyClauseName) {
         this.lastPropertyClauseName = propertyClauseName;
-    };
-    SelectQueryRules.prototype.table = function (realTableName) {
+    }
+    table(realTableName) {
         if (realTableName === undefined || realTableName === "") {
             this.tableName = "";
         }
@@ -30,12 +30,8 @@ var SelectQueryRules = (function () {
             this.tableName = realTableName;
         }
         return this;
-    };
-    SelectQueryRules.prototype.except = function () {
-        var columns = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            columns[_i - 0] = arguments[_i];
-        }
+    }
+    except(...columns) {
         if (columns !== undefined && columns.length > 0) {
             this.exceptColumns = columns;
         }
@@ -43,15 +39,11 @@ var SelectQueryRules = (function () {
             this.exceptColumns = [];
         }
         return this;
-    };
-    SelectQueryRules.prototype.exclude = function () {
-        var columns = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            columns[_i - 0] = arguments[_i];
-        }
+    }
+    exclude(...columns) {
         return this.except(columns.toString());
-    };
-    SelectQueryRules.prototype.orderBy = function (columnKey, descending) {
+    }
+    orderBy(columnKey, descending) {
         if (!columnKey || (columnKey !== undefined && columnKey === "")) {
             this.orderByColumn = "";
         }
@@ -66,8 +58,8 @@ var SelectQueryRules = (function () {
             }
         }
         return this;
-    };
-    SelectQueryRules.prototype.groupBy = function (columnKey) {
+    }
+    groupBy(columnKey) {
         if (!columnKey || (columnKey !== undefined && columnKey === "")) {
             this.groupByColumn = "";
         }
@@ -76,8 +68,8 @@ var SelectQueryRules = (function () {
             this.last("groupByColumn");
         }
         return this;
-    };
-    SelectQueryRules.prototype.limit = function (limitRowsOrStart, limitEnd) {
+    }
+    limit(limitRowsOrStart, limitEnd) {
         if (limitEnd === undefined && limitRowsOrStart === undefined) {
             this.limitStart = 0;
             this.limitEnd = 0;
@@ -94,22 +86,22 @@ var SelectQueryRules = (function () {
             this.last("limitEnd");
         }
         return this;
-    };
-    SelectQueryRules.prototype.appendToBegin = function (manualAfterWhereString) {
+    }
+    appendToBegin(manualAfterWhereString) {
         if (manualAfterWhereString !== undefined && manualAfterWhereString.length > 0) {
             this.manuallyBeginClause += manualAfterWhereString;
             this.last("manuallyBeginClause");
         }
         return this;
-    };
-    SelectQueryRules.prototype.appendToEnd = function (manualAfterWhereString) {
+    }
+    appendToEnd(manualAfterWhereString) {
         if (manualAfterWhereString !== undefined && manualAfterWhereString.length > 0) {
             this.manuallyEndClause += manualAfterWhereString;
             this.last("manuallyEndClause");
         }
         return this;
-    };
-    SelectQueryRules.prototype.append = function (appendToCurrent) {
+    }
+    append(appendToCurrent) {
         if (appendToCurrent !== undefined && appendToCurrent.length > 0) {
             if (this.lastPropertyClauseName !== undefined && this.lastPropertyClauseName.length > 1) {
                 this[this.lastPropertyClauseName] += appendToCurrent;
@@ -119,36 +111,36 @@ var SelectQueryRules = (function () {
             }
         }
         return this;
-    };
-    SelectQueryRules.prototype.clearOrderBy = function () {
+    }
+    clearOrderBy() {
         this.orderByColumn = "";
         this.orderByDescColumn = "";
         return this;
-    };
-    SelectQueryRules.prototype.clearGroupBy = function () {
+    }
+    clearGroupBy() {
         this.groupByColumn = "";
         return this;
-    };
-    SelectQueryRules.prototype.clearLimit = function () {
+    }
+    clearLimit() {
         this.limitStart = 0;
         this.limitEnd = 0;
         return this;
-    };
-    SelectQueryRules.prototype.clearEndClause = function () {
+    }
+    clearEndClause() {
         this.manuallyEndClause = "";
         return this;
-    };
-    SelectQueryRules.prototype.clearBeginClause = function () {
+    }
+    clearBeginClause() {
         this.manuallyBeginClause = "";
         return this;
-    };
-    SelectQueryRules.prototype.clear = function () {
+    }
+    clear() {
         this.last("");
         this.tableName = "";
         this.exceptColumns = [];
         return this.clearBeginClause().clearOrderBy().clearGroupBy().clearLimit().clearEndClause();
-    };
-    SelectQueryRules.prototype.from = function (parentRule) {
+    }
+    from(parentRule) {
         if (this.manuallyBeginClause.length < 1) {
             this.manuallyBeginClause = parentRule.manuallyBeginClause;
         }
@@ -169,8 +161,8 @@ var SelectQueryRules = (function () {
             this.manuallyEndClause = parentRule.manuallyEndClause;
         }
         return this;
-    };
-    SelectQueryRules.prototype.isEmpty = function () {
+    }
+    isEmpty() {
         if (this.exceptColumns.length < 1 && this.tableName.length < 1 && this.manuallyBeginClause.length < 1 && this.orderByColumn.length < 1 && this.orderByDescColumn.length < 1 && this.groupByColumn.length < 1
             && this.limitStart === 0 && this.limitEnd === 0 && this.manuallyEndClause.length < 1) {
             return true;
@@ -178,23 +170,23 @@ var SelectQueryRules = (function () {
         else {
             return false;
         }
-    };
-    SelectQueryRules.prototype.toString = function () {
+    }
+    toString() {
         return SelectQueryRules.toString(this);
-    };
-    SelectQueryRules.prototype.toRawObject = function () {
+    }
+    toRawObject() {
         return SelectQueryRules.toRawObject(this);
-    };
-    SelectQueryRules.toString = function (rules) {
-        var afterWhere = "";
-        var _orderbyClause = "";
-        var _groupByClause = rules.groupByColumn.length > 1 ? " GROUP BY " + Helper_1.default.toRowProperty(rules.groupByColumn) + " " : "";
-        var _limitClause = rules.limitEnd > 0 ? " LIMIT " + rules.limitStart + ", " + rules.limitEnd : "";
+    }
+    static toString(rules) {
+        let afterWhere = "";
+        let _orderbyClause = "";
+        let _groupByClause = rules.groupByColumn.length > 1 ? " GROUP BY " + Helper.toRowProperty(rules.groupByColumn) + " " : "";
+        let _limitClause = rules.limitEnd > 0 ? " LIMIT " + rules.limitStart + ", " + rules.limitEnd : "";
         if (rules.orderByColumn.length > 1) {
-            _orderbyClause = " ORDER BY " + Helper_1.default.toRowProperty(rules.orderByColumn) + " ";
+            _orderbyClause = " ORDER BY " + Helper.toRowProperty(rules.orderByColumn) + " ";
         }
         else if (rules.orderByDescColumn.length > 1) {
-            _orderbyClause = " ORDER BY " + Helper_1.default.toRowProperty(rules.orderByDescColumn) + " DESC ";
+            _orderbyClause = " ORDER BY " + Helper.toRowProperty(rules.orderByDescColumn) + " DESC ";
         }
         if (rules.groupByColumn.length > 1 && (rules.orderByColumn.length > 1 || rules.orderByDescColumn.length > 1)) {
             afterWhere = _orderbyClause;
@@ -204,12 +196,12 @@ var SelectQueryRules = (function () {
             afterWhere = _orderbyClause + _groupByClause + _limitClause;
         }
         return rules.manuallyBeginClause + afterWhere + rules.manuallyEndClause;
-    };
-    SelectQueryRules.toRawObject = function (rules) {
+    }
+    static toRawObject(rules) {
         if (rules.isEmpty()) {
             return undefined;
         }
-        var obj;
+        let obj;
         if (rules.tableName.length > 1) {
             obj.table = rules.tableName;
         }
@@ -236,9 +228,9 @@ var SelectQueryRules = (function () {
             obj.limitEnd = rules.limitEnd;
         }
         return obj;
-    };
-    SelectQueryRules.fromRawObject = function (obj) {
-        var rules = new SelectQueryRules();
+    }
+    static fromRawObject(obj) {
+        let rules = new SelectQueryRules();
         if (obj.table !== undefined && obj.table.length > 1) {
             rules.table(obj.table);
         }
@@ -265,7 +257,5 @@ var SelectQueryRules = (function () {
         rules.groupBy(obj.groupBy);
         rules.appendToEnd(obj.end);
         return rules;
-    };
-    return SelectQueryRules;
-})();
-exports.SelectQueryRules = SelectQueryRules;
+    }
+}

@@ -1,11 +1,10 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
     "noImplicitAny": false,
     "removeComments": true,
     "preserveConstEnums": true,
     "sourceMap": false,
-    "target": "es5",
+    "target": "es6",
     "noEmit": false,
     "noEmitOnError": true,
     "experimentalDecorators": false,
@@ -30,7 +29,7 @@
     "./src/lib/Connection.ts",
     "./src/lib/Table.ts",
     "./src/lib/Helper.ts",
-    "./src/lib/Wrapper.ts"
+    "./src/lib/Database.ts"
   ],
   "exclude": [
     "./src/typings"

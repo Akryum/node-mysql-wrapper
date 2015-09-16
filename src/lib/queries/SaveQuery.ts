@@ -2,16 +2,13 @@ import Helper from "../Helper";
 import Table from "../Table";
 import IQuery from"./IQuery";
 
-
 class SaveQuery<T> implements IQuery<T> {
 
     constructor(public _table: Table<T>) {
 
     }
-
-    //save(criteriaRawJsObject: any): Promise<T | any>; //without callback
+ 
     execute(criteriaRawJsObject: any, callback?: (_result: T | any) => any): Promise<T | any> {
-        //sta arguments borw na perniounte ta values me tin seira, ton properties pou exei to model-jsObject
         return new Promise<T | any>((resolve, reject) => {
             let primaryKeyValue = this._table.getPrimaryKeyValue(criteriaRawJsObject);
 
@@ -31,28 +28,13 @@ class SaveQuery<T> implements IQuery<T> {
                 let _query = "UPDATE " + this._table.name + " SET " + colummnsAndValuesStr + " WHERE " + this._table.primaryKey + " =  " + primaryKeyValue;
                 this._table.connection.query(_query, (err, result) => {
                     if (err) {
-                        // console.dir(err);
                         reject(err);
-
                     }
                     this._table.connection.notice(this._table.name, _query, obj);
 
-                    if (this._table.isObservable) {
-                        let _foundObsItem = this._table.observer.findItem(primaryKeyValue);
-
-                        if (_foundObsItem !== undefined && _foundObsItem.isObservable) {
-                            //dhladi uparxei stin lista parakolouthiseis kai kapios exei dwsei listener, tote:
-                            let _propertiesWereChanged: string[] = this._table.observer.getChangedPropertiesOf(obj);
-                            _propertiesWereChanged.forEach(_propertyChangedName=> {
-                                let _oldValue = _foundObsItem.item[_propertyChangedName]; 
-                                _foundObsItem.item[_propertyChangedName] = obj[_propertyChangedName]; //update the actual item's property value.
-                                _foundObsItem.notifyPropertyChanged(_propertyChangedName, _oldValue);
-                            });
-                        }
-                    }
                     resolve(obj);
                     if (callback) {
-                        callback(obj); //an kai kanonika auto to kanei mono t
+                        callback(obj); 
                     }
                 });
 
@@ -60,21 +42,18 @@ class SaveQuery<T> implements IQuery<T> {
                 //create
                 let _query = "INSERT INTO ?? (??) VALUES(?) ";
                 this._table.connection.query(_query, (err, result) => {
-                    if (err) { // console.dir(err);
+                    if (err) {
                         reject(err);
                     }
-                    // jsObject[this.primaryKey] = result.insertId;
+
 
                     let primaryKeyJsObjectProperty = Helper.toObjectProperty(this._table.primaryKey);
 
                     obj[primaryKeyJsObjectProperty] = result.insertId;
-                    //criteriaRawJsObject[primaryKeyJsObjectProperty] = result.insertId;
                     primaryKeyValue = result.insertId;
 
                     this._table.connection.notice(this._table.name, _query, obj);
-                    /* never do it, user will choose if wants to be observe of any object if (this._table.isObservable) {
-                         this._table.observer.addItem(obj);
-                     }*/
+                
                     resolve(obj);
                     if (callback) {
                         callback(obj);

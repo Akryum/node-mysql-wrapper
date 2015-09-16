@@ -1,44 +1,42 @@
-var Helper_1 = require("../Helper");
-var SelectQueryRules_1 = require("./SelectQueryRules");
-var ObservableObject_1 = require("../ObservableObject");
-var Promise = require('bluebird');
-exports.EQUAL_TO_PROPERTY_SYMBOL = '=';
-var SelectQuery = (function () {
-    function SelectQuery(_table) {
+import Helper from "../Helper";
+import { TABLE_RULES_PROPERTY } from "./SelectQueryRules";
+import * as Promise from 'bluebird';
+export var EQUAL_TO_PROPERTY_SYMBOL = '=';
+class SelectQuery {
+    constructor(_table) {
         this._table = _table;
     }
-    SelectQuery.prototype.parseQueryResult = function (result, criteria) {
-        var _this = this;
-        return new Promise(function (resolve) {
-            var obj = _this._table.objectFromRow(result);
+    parseQueryResult(result, criteria) {
+        return new Promise((resolve) => {
+            let obj = this._table.objectFromRow(result);
             if (criteria.tables.length > 0) {
-                var tableFindPromiseList = [];
-                criteria.tables.forEach(function (_tableProperty) {
-                    var table = _this._table.connection.table(_tableProperty.tableName);
-                    var tablePropertyName = Helper_1.default.toObjectProperty(_tableProperty.propertyName);
-                    var criteriaJsObject = Helper_1.default.copyObject(criteria.rawCriteriaObject[tablePropertyName]);
-                    Helper_1.default.forEachKey(criteriaJsObject, function (propertyName) {
-                        if (criteriaJsObject[propertyName] === exports.EQUAL_TO_PROPERTY_SYMBOL) {
-                            criteriaJsObject[propertyName] = result[Helper_1.default.toRowProperty(propertyName)];
+                let tableFindPromiseList = [];
+                criteria.tables.forEach((_tableProperty) => {
+                    let table = this._table.connection.table(_tableProperty.tableName);
+                    let tablePropertyName = Helper.toObjectProperty(_tableProperty.propertyName);
+                    let criteriaJsObject = Helper.copyObject(criteria.rawCriteriaObject[tablePropertyName]);
+                    Helper.forEachKey(criteriaJsObject, (propertyName) => {
+                        if (criteriaJsObject[propertyName] === EQUAL_TO_PROPERTY_SYMBOL) {
+                            criteriaJsObject[propertyName] = result[Helper.toRowProperty(propertyName)];
                         }
                     });
-                    var tableFindPromise = table.find(criteriaJsObject);
-                    tableFindPromise.then(function (childResults) {
+                    let tableFindPromise = table.find(criteriaJsObject);
+                    tableFindPromise.then((childResults) => {
                         if (childResults.length === 1 &&
-                            Helper_1.default.hasRules(criteriaJsObject) && ((criteriaJsObject[SelectQueryRules_1.TABLE_RULES_PROPERTY].limit !== undefined && criteriaJsObject[SelectQueryRules_1.TABLE_RULES_PROPERTY].limit === 1) ||
-                            (criteriaJsObject[SelectQueryRules_1.TABLE_RULES_PROPERTY].limitEnd !== undefined && criteriaJsObject[SelectQueryRules_1.TABLE_RULES_PROPERTY].limitEnd === 1))) {
-                            obj[tablePropertyName] = _this._table.objectFromRow(childResults[0]);
+                            Helper.hasRules(criteriaJsObject) && ((criteriaJsObject[TABLE_RULES_PROPERTY].limit !== undefined && criteriaJsObject[TABLE_RULES_PROPERTY].limit === 1) ||
+                            (criteriaJsObject[TABLE_RULES_PROPERTY].limitEnd !== undefined && criteriaJsObject[TABLE_RULES_PROPERTY].limitEnd === 1))) {
+                            obj[tablePropertyName] = this._table.objectFromRow(childResults[0]);
                         }
                         else {
                             obj[tablePropertyName] = [];
-                            childResults.forEach(function (childResult) {
-                                obj[tablePropertyName].push(_this._table.objectFromRow(childResult));
+                            childResults.forEach((childResult) => {
+                                obj[tablePropertyName].push(this._table.objectFromRow(childResult));
                             });
                         }
                     });
                     tableFindPromiseList.push(tableFindPromise);
                 });
-                Promise.all(tableFindPromiseList).then(function () {
+                Promise.all(tableFindPromiseList).then(() => {
                     resolve(obj);
                 });
             }
@@ -46,36 +44,30 @@ var SelectQuery = (function () {
                 resolve(obj);
             }
         });
-    };
-    SelectQuery.prototype.promise = function (rawCriteria, callback) {
-        var _this = this;
-        return new Promise(function (resolve, reject) {
-            var criteria = _this._table.criteriaDivider.divide(rawCriteria);
-            var query = "SELECT " + criteria.selectFromClause(_this._table) + " FROM " + _this._table.name + criteria.whereClause + criteria.queryRules.toString();
-            _this._table.connection.query(query, function (error, results) {
+    }
+    promise(rawCriteria, callback) {
+        return new Promise((resolve, reject) => {
+            var criteria = this._table.criteriaDivider.divide(rawCriteria);
+            let query = "SELECT " + criteria.selectFromClause(this._table) + " FROM " + this._table.name + criteria.whereClause + criteria.queryRules.toString();
+            this._table.connection.query(query, (error, results) => {
                 if (error || !results) {
                     reject(error + ' Error. On find');
                 }
-                var parseQueryResultsPromises = [];
-                results.forEach(function (result) {
-                    parseQueryResultsPromises.push(_this.parseQueryResult(result, criteria));
+                let parseQueryResultsPromises = [];
+                results.forEach((result) => {
+                    parseQueryResultsPromises.push(this.parseQueryResult(result, criteria));
                 });
-                Promise.all(parseQueryResultsPromises).then(function (_objects) {
-                    var returnedObservableObjects = [];
-                    _objects.forEach(function (_rawObject) {
-                        returnedObservableObjects.push(new ObservableObject_1.default(_rawObject));
-                    });
+                Promise.all(parseQueryResultsPromises).then((_objects) => {
                     if (callback !== undefined) {
-                        callback(returnedObservableObjects);
+                        callback(_objects);
                     }
-                    resolve(returnedObservableObjects);
+                    resolve(_objects);
                 });
             });
         });
-    };
-    SelectQuery.prototype.execute = function (rawCriteria, callback) {
+    }
+    execute(rawCriteria, callback) {
         return this.promise(rawCriteria);
-    };
-    return SelectQuery;
-})();
-exports.default = SelectQuery;
+    }
+}
+export default SelectQuery;

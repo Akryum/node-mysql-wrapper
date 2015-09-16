@@ -1,7 +1,7 @@
-var SelectQueryRules_1 = require("./queries/SelectQueryRules");
-var Helper_1 = require("./Helper");
-var CriteriaBuilder = (function () {
-    function CriteriaBuilder(primaryTable, tablePropertyName, parentBuilder) {
+import { TABLE_RULES_PROPERTY } from "./queries/SelectQueryRules";
+import Helper from "./Helper";
+class CriteriaBuilder {
+    constructor(primaryTable, tablePropertyName, parentBuilder) {
         this.primaryTable = primaryTable;
         this.tablePropertyName = tablePropertyName;
         this.parentBuilder = parentBuilder;
@@ -10,93 +10,83 @@ var CriteriaBuilder = (function () {
             this.rawCriteria = parentBuilder.rawCriteria[tablePropertyName];
         }
     }
-    CriteriaBuilder.prototype.where = function (key, value) {
+    where(key, value) {
         this.rawCriteria[key] = value;
         return this;
-    };
-    CriteriaBuilder.prototype.createRulesIfNotExists = function () {
-        if (!Helper_1.default.hasRules(this.rawCriteria)) {
-            this.rawCriteria[SelectQueryRules_1.TABLE_RULES_PROPERTY] = {};
+    }
+    createRulesIfNotExists() {
+        if (!Helper.hasRules(this.rawCriteria)) {
+            this.rawCriteria[TABLE_RULES_PROPERTY] = {};
         }
-    };
-    CriteriaBuilder.prototype.except = function () {
-        var columns = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            columns[_i - 0] = arguments[_i];
-        }
+    }
+    except(...columns) {
         console.log("\nEXCEPT: ", columns);
         if (columns !== undefined) {
             this.createRulesIfNotExists();
-            this.rawCriteria[SelectQueryRules_1.TABLE_RULES_PROPERTY]["except"] = columns;
+            this.rawCriteria[TABLE_RULES_PROPERTY]["except"] = columns;
         }
         return this;
-    };
-    CriteriaBuilder.prototype.exclude = function () {
-        var columns = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            columns[_i - 0] = arguments[_i];
-        }
+    }
+    exclude(...columns) {
         return this.except(columns.toString());
-    };
-    CriteriaBuilder.prototype.orderBy = function (column, desceding) {
-        if (desceding === void 0) { desceding = false; }
+    }
+    orderBy(column, desceding = false) {
         this.createRulesIfNotExists();
-        this.rawCriteria[SelectQueryRules_1.TABLE_RULES_PROPERTY]["orderBy" + (desceding ? "Desc" : "")] = column;
+        this.rawCriteria[TABLE_RULES_PROPERTY]["orderBy" + (desceding ? "Desc" : "")] = column;
         return this;
-    };
-    CriteriaBuilder.prototype.limit = function (start, end) {
+    }
+    limit(start, end) {
         this.createRulesIfNotExists();
         if (end !== undefined && end > start) {
-            this.rawCriteria[SelectQueryRules_1.TABLE_RULES_PROPERTY]["limitStart"] = start;
-            this.rawCriteria[SelectQueryRules_1.TABLE_RULES_PROPERTY]["limitEnd"] = end;
+            this.rawCriteria[TABLE_RULES_PROPERTY]["limitStart"] = start;
+            this.rawCriteria[TABLE_RULES_PROPERTY]["limitEnd"] = end;
         }
         else {
-            this.rawCriteria[SelectQueryRules_1.TABLE_RULES_PROPERTY]["limit"] = start;
+            this.rawCriteria[TABLE_RULES_PROPERTY]["limit"] = start;
         }
         return this;
-    };
-    CriteriaBuilder.prototype.join = function (realTableName, foreignColumnName) {
-        var _joinedTable = {};
+    }
+    join(realTableName, foreignColumnName) {
+        let _joinedTable = {};
         _joinedTable[foreignColumnName] = "=";
         this.rawCriteria[realTableName] = _joinedTable;
         return this;
-    };
-    CriteriaBuilder.prototype.joinAs = function (tableNameProperty, realTableName, foreignColumnName) {
+    }
+    joinAs(tableNameProperty, realTableName, foreignColumnName) {
         //this.childTables.push(tableNameProperty,realTableName);
         //den ginete edw mexri na kanw kai to 'as' sta criteria mesa sto selectquery, to opoio 9a kanw twra.	this.rawCriteria[]
         //this.createRulesIfNotExists();
-        var _joinedTable = {};
+        let _joinedTable = {};
         _joinedTable[foreignColumnName] = "=";
-        _joinedTable[SelectQueryRules_1.TABLE_RULES_PROPERTY] = { table: realTableName };
+        _joinedTable[TABLE_RULES_PROPERTY] = { table: realTableName };
         this.rawCriteria[tableNameProperty] = _joinedTable;
         return this;
-    };
-    CriteriaBuilder.prototype.at = function (tableNameProperty) {
+    }
+    at(tableNameProperty) {
         return new CriteriaBuilder(this.primaryTable, tableNameProperty, this);
-    };
-    CriteriaBuilder.prototype.parent = function () {
+    }
+    parent() {
         this.parentBuilder.rawCriteria[this.tablePropertyName] = this.rawCriteria;
         return this.parentBuilder;
-    };
-    CriteriaBuilder.prototype.original = function () {
+    }
+    original() {
         if (this.parentBuilder !== undefined) {
             return this.parent().original();
         }
         else {
             return this;
         }
-    };
-    CriteriaBuilder.prototype.build = function () {
+    }
+    build() {
         if (this.parentBuilder !== undefined) {
             return this.parent().build();
         }
         else {
             return this.rawCriteria;
         }
-    };
-    CriteriaBuilder.from = function (table) {
+    }
+    static from(table) {
         return new CriteriaBuilder(table);
-    };
-    return CriteriaBuilder;
-})();
-exports.default = CriteriaBuilder;
+    }
+}
+export default CriteriaBuilder;

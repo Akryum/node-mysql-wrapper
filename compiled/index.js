@@ -1,10 +1,10 @@
-var Connection_1 = require("./lib/Connection");
-var Wrapper_1 = require("./lib/Wrapper");
-var SelectQueryRules_1 = require("./lib/queries/SelectQueryRules");
-var CriteriaBuilder_1 = require("./lib/CriteriaBuilder");
-var ObservableCollection_1 = require("./lib/ObservableCollection");
-var Helper_1 = require("./lib/Helper");
-var ObservableObject_1 = require("./lib/ObservableObject");
+import Connection from "./lib/Connection";
+import Database from "./lib/Database";
+import { SelectQueryRules } from "./lib/queries/SelectQueryRules";
+import CriteriaBuilder from "./lib/CriteriaBuilder";
+import { CollectionChangedAction } from "./lib/ObservableCollection";
+import Helper from "./lib/Helper";
+import ObservableObject from "./lib/ObservableObject";
 if (Function.prototype["name"] === undefined) {
     Object.defineProperty(Function.prototype, 'name', {
         get: function () {
@@ -12,21 +12,31 @@ if (Function.prototype["name"] === undefined) {
         }
     });
 }
-function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection) {
-    var useTables = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        useTables[_i - 1] = arguments[_i];
-    }
-    var mysqlCon = new Connection_1.default(mysqlUrlOrObjectOrMysqlAlreadyConnection);
-    var mysqlWrapper = new Wrapper_1.default(mysqlCon);
+export function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection, ...useTables) {
+    let mysqlCon = new Connection(mysqlUrlOrObjectOrMysqlAlreadyConnection);
+    let mysqlDatabase = new Database(mysqlCon);
     if (useTables) {
-        mysqlWrapper.useOnly(useTables);
+        mysqlDatabase.useOnly(useTables);
     }
-    return mysqlWrapper;
+    return mysqlDatabase;
 }
-exports.wrap = wrap;
-exports.SelectQueryRules = SelectQueryRules_1.SelectQueryRules;
-exports.CriteriaBuilder = CriteriaBuilder_1.default;
-exports.ObservableObject = ObservableObject_1.default;
-exports.CollectionChangedAction = ObservableCollection_1.CollectionChangedAction;
-exports.Helper = Helper_1.default;
+function extendTypes(first, second) {
+    let result = {};
+    for (let id in first) {
+        result[id] = first[id];
+    }
+    for (let id in second) {
+        if (!result.hasOwnProperty(id)) {
+            result[id] = second[id];
+        }
+    }
+    return result;
+}
+export function observable(obj) {
+    return extendTypes(obj, new ObservableObject(obj));
+}
+exports.SelectQueryRules = SelectQueryRules;
+exports.CriteriaBuilder = CriteriaBuilder;
+exports.ObservableObject = ObservableObject;
+exports.CollectionChangedAction = CollectionChangedAction;
+exports.Helper = Helper;
