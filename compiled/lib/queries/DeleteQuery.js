@@ -1,27 +1,28 @@
-class DeleteQuery {
-    constructor(_table) {
+var DeleteQuery = (function () {
+    function DeleteQuery(_table) {
         this._table = _table;
     }
-    execute(criteriaOrID, callback) {
-        return new Promise((resolve, reject) => {
-            let primaryKeyValue = this._table.getPrimaryKeyValue(criteriaOrID);
+    DeleteQuery.prototype.execute = function (criteriaOrID, callback) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            var primaryKeyValue = _this._table.getPrimaryKeyValue(criteriaOrID);
             if (!primaryKeyValue || primaryKeyValue <= 0) {
-                let arr = this._table.getRowAsArray(criteriaOrID);
-                let objectValues = arr[1];
-                let colummnsAndValues = [];
-                for (let i = 0; i < colummnsAndValues.length; i++) {
-                    colummnsAndValues.push(colummnsAndValues[i] + "=" + this._table.connection.escape(objectValues[i]));
+                var arr = _this._table.getRowAsArray(criteriaOrID);
+                var objectValues = arr[1];
+                var colummnsAndValues = [];
+                for (var i = 0; i < colummnsAndValues.length; i++) {
+                    colummnsAndValues.push(colummnsAndValues[i] + "=" + _this._table.connection.escape(objectValues[i]));
                 }
                 if (colummnsAndValues.length === 0) {
                     reject('No criteria found in model! ');
                 }
-                let _query = "DELETE FROM " + this._table.name + " WHERE " + colummnsAndValues.join(' AND ');
-                this._table.connection.query(_query, (err, result) => {
+                var _query = "DELETE FROM " + _this._table.name + " WHERE " + colummnsAndValues.join(' AND ');
+                _this._table.connection.query(_query, function (err, result) {
                     if (err) {
                         reject(err);
                     }
-                    let _objReturned = { affectedRows: result.affectedRows, table: this._table.name };
-                    this._table.connection.notice(this._table.name, _query, [_objReturned]);
+                    var _objReturned = { affectedRows: result.affectedRows, table: _this._table.name };
+                    _this._table.connection.notice(_this._table.name, _query, [_objReturned]);
                     resolve(_objReturned);
                     if (callback) {
                         callback(_objReturned);
@@ -29,13 +30,13 @@ class DeleteQuery {
                 });
             }
             else {
-                let _query = "DELETE FROM " + this._table.name + " WHERE " + this._table.primaryKey + " = " + criteriaOrID;
-                this._table.connection.query(_query, (err, result) => {
+                var _query = "DELETE FROM " + _this._table.name + " WHERE " + _this._table.primaryKey + " = " + criteriaOrID;
+                _this._table.connection.query(_query, function (err, result) {
                     if (err) {
                         reject(err);
                     }
-                    let _objReturned = { affectedRows: result.affectedRows, table: this._table.name };
-                    this._table.connection.notice(this._table.name, _query, [_objReturned]);
+                    var _objReturned = { affectedRows: result.affectedRows, table: _this._table.name };
+                    _this._table.connection.notice(_this._table.name, _query, [_objReturned]);
                     resolve(_objReturned);
                     if (callback) {
                         callback(_objReturned);
@@ -43,6 +44,8 @@ class DeleteQuery {
                 });
             }
         });
-    }
-}
-export default DeleteQuery;
+    };
+    return DeleteQuery;
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = DeleteQuery;

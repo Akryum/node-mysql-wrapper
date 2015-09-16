@@ -1,3 +1,4 @@
 {
-	"editor.fontSize": 17
+	"editor.fontSize": 17,
+	"typescript.tsdk": "C:/Users/Makis-PC/AppData/Roaming/npm/node_modules/typescript/lib"
 }

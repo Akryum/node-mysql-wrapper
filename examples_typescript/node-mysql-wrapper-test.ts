@@ -3,7 +3,8 @@
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
-import * as  wrapper2 from "node-mysql-wrapper";
+import * as wrapper2 from "node-mysql-wrapper";
+
 var db = wrapper2.wrap("mysql://kataras:pass@127.0.0.1/taglub?debug=false&charset=utf8");
 
 class User { //or interface

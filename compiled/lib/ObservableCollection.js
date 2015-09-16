@@ -1,36 +1,50 @@
-import Helper from "./Helper";
-export var CollectionChangedAction;
+var Helper_1 = require("./Helper");
 (function (CollectionChangedAction) {
     CollectionChangedAction[CollectionChangedAction["ADD"] = 0] = "ADD";
     CollectionChangedAction[CollectionChangedAction["REMOVE"] = 1] = "REMOVE";
     CollectionChangedAction[CollectionChangedAction["RESET"] = 2] = "RESET";
-})(CollectionChangedAction || (CollectionChangedAction = {}));
-export class CollectionChangedEventArgs {
-    constructor(action, oldItems = [], newItems = [], oldStartingIndex = -1, newStartingIndex = -1) {
+})(exports.CollectionChangedAction || (exports.CollectionChangedAction = {}));
+var CollectionChangedAction = exports.CollectionChangedAction;
+var CollectionChangedEventArgs = (function () {
+    function CollectionChangedEventArgs(action, oldItems, newItems, oldStartingIndex, newStartingIndex) {
+        if (oldItems === void 0) { oldItems = []; }
+        if (newItems === void 0) { newItems = []; }
+        if (oldStartingIndex === void 0) { oldStartingIndex = -1; }
+        if (newStartingIndex === void 0) { newStartingIndex = -1; }
         this.action = action;
         this.oldItems = oldItems;
         this.newItems = newItems;
         this.oldStartingIndex = oldStartingIndex;
         this.newStartingIndex = newStartingIndex;
     }
-}
-class ObservableCollection {
-    constructor(table) {
+    return CollectionChangedEventArgs;
+})();
+exports.CollectionChangedEventArgs = CollectionChangedEventArgs;
+var ObservableCollection = (function () {
+    function ObservableCollection(table) {
         this.table = table;
         this.list = [];
         this.listeners = [];
     }
-    get length() {
-        return this.list.length;
-    }
-    get isObservable() {
-        return this.listeners.length > 0;
-    }
-    indexOf(item) {
-        for (let i = 0; i < this.list.length; i++) {
-            let _itemIn = this.list[i];
-            let _primaryKey = Helper.toObjectProperty(this.table.primaryKey);
-            if (Helper.isString(item) || Helper.isNumber(item)) {
+    Object.defineProperty(ObservableCollection.prototype, "length", {
+        get: function () {
+            return this.list.length;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ObservableCollection.prototype, "isObservable", {
+        get: function () {
+            return this.listeners.length > 0;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    ObservableCollection.prototype.indexOf = function (item) {
+        for (var i = 0; i < this.list.length; i++) {
+            var _itemIn = this.list[i];
+            var _primaryKey = Helper_1.default.toObjectProperty(this.table.primaryKey);
+            if (Helper_1.default.isString(item) || Helper_1.default.isNumber(item)) {
                 if (item === _itemIn[_primaryKey]) {
                     return i;
                 }
@@ -42,75 +56,92 @@ class ObservableCollection {
             }
         }
         return -1;
-    }
-    findItem(itemId) {
-        for (let i = 0; i < this.list.length; i++) {
-            let _itemIn = this.list[i];
-            let _primaryKey = Helper.toObjectProperty(this.table.primaryKey);
+    };
+    ObservableCollection.prototype.findItem = function (itemId) {
+        for (var i = 0; i < this.list.length; i++) {
+            var _itemIn = this.list[i];
+            var _primaryKey = Helper_1.default.toObjectProperty(this.table.primaryKey);
             if (itemId === _itemIn[_primaryKey]) {
                 return _itemIn;
             }
         }
         return undefined;
-    }
-    getItem(index) {
+    };
+    ObservableCollection.prototype.getItem = function (index) {
         return this.list[index];
-    }
-    addItem(...items) {
-        let startingIndex = this.list.length === 0 ? 1 : this.list.length;
-        let evtArgs = new CollectionChangedEventArgs(CollectionChangedAction.ADD);
+    };
+    ObservableCollection.prototype.addItem = function () {
+        var _this = this;
+        var items = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            items[_i - 0] = arguments[_i];
+        }
+        var startingIndex = this.list.length === 0 ? 1 : this.list.length;
+        var evtArgs = new CollectionChangedEventArgs(CollectionChangedAction.ADD);
         evtArgs.newStartingIndex = startingIndex;
-        let newItemPushed;
-        items.forEach(item => {
-            this.list.push(item);
+        var newItemPushed;
+        items.forEach(function (item) {
+            _this.list.push(item);
         });
         evtArgs.newItems = this.list;
         this.notifyCollectionChanged(evtArgs);
         return newItemPushed;
-    }
-    removeItem(...items) {
-        let startingIndex = this.indexOf(items[0]);
+    };
+    ObservableCollection.prototype.removeItem = function () {
+        var _this = this;
+        var items = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            items[_i - 0] = arguments[_i];
+        }
+        var startingIndex = this.indexOf(items[0]);
         if (startingIndex >= 0) {
-            let evtArgs = new CollectionChangedEventArgs(CollectionChangedAction.REMOVE);
+            var evtArgs = new CollectionChangedEventArgs(CollectionChangedAction.REMOVE);
             evtArgs.oldStartingIndex = startingIndex;
-            items.forEach(item => {
-                let _index = this.indexOf(item);
-                let itemWhichDeleted = this.list[_index];
+            items.forEach(function (item) {
+                var _index = _this.indexOf(item);
+                var itemWhichDeleted = _this.list[_index];
                 evtArgs.oldItems.push(itemWhichDeleted);
-                this.list.splice(_index, 1);
+                _this.list.splice(_index, 1);
             });
             this.notifyCollectionChanged(evtArgs);
         }
         return this;
-    }
-    forgetItem(...items) {
+    };
+    ObservableCollection.prototype.forgetItem = function () {
+        var _this = this;
+        var items = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            items[_i - 0] = arguments[_i];
+        }
         if (items === undefined || items.length === 0) {
             this.listeners = [];
             this.list = [];
         }
         else {
-            items.forEach(item => {
-                this.list.splice(this.indexOf(item), 1);
+            items.forEach(function (item) {
+                _this.list.splice(_this.indexOf(item), 1);
             });
         }
         return this;
-    }
-    reset() {
-        let startingIndex = this.list.length - 1;
-        let evtArgs = new CollectionChangedEventArgs(CollectionChangedAction.RESET);
+    };
+    ObservableCollection.prototype.reset = function () {
+        var startingIndex = this.list.length - 1;
+        var evtArgs = new CollectionChangedEventArgs(CollectionChangedAction.RESET);
         evtArgs.oldStartingIndex = startingIndex;
         evtArgs.oldItems = this.list.slice(0);
         this.list = [];
         this.notifyCollectionChanged(evtArgs);
         return this;
-    }
-    notifyCollectionChanged(evtArgs) {
-        this.listeners.forEach(listener => {
+    };
+    ObservableCollection.prototype.notifyCollectionChanged = function (evtArgs) {
+        this.listeners.forEach(function (listener) {
             listener(evtArgs);
         });
-    }
-    onCollectionChanged(callback) {
+    };
+    ObservableCollection.prototype.onCollectionChanged = function (callback) {
         this.listeners.push(callback);
-    }
-}
-export default ObservableCollection;
+    };
+    return ObservableCollection;
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = ObservableCollection;

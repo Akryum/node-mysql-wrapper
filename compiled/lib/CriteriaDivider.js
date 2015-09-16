@@ -1,20 +1,24 @@
-import Helper from "./Helper";
-import { SelectQueryRules, TABLE_RULES_PROPERTY } from "./queries/SelectQueryRules";
-export class CriteriaParts {
-    constructor(rawCriteriaObject = {}, tables = [], noDatabaseProperties = [], whereClause = "", queryRules) {
+var Helper_1 = require("./Helper");
+var SelectQueryRules_1 = require("./queries/SelectQueryRules");
+var CriteriaParts = (function () {
+    function CriteriaParts(rawCriteriaObject, tables, noDatabaseProperties, whereClause, queryRules) {
+        if (rawCriteriaObject === void 0) { rawCriteriaObject = {}; }
+        if (tables === void 0) { tables = []; }
+        if (noDatabaseProperties === void 0) { noDatabaseProperties = []; }
+        if (whereClause === void 0) { whereClause = ""; }
         this.rawCriteriaObject = rawCriteriaObject;
         this.tables = tables;
         this.noDatabaseProperties = noDatabaseProperties;
         this.whereClause = whereClause;
         this.queryRules = queryRules;
     }
-    selectFromClause(_table) {
-        let columnsToSelectString = "*";
+    CriteriaParts.prototype.selectFromClause = function (_table) {
+        var columnsToSelectString = "*";
         if (this.queryRules.exceptColumns.length > 0) {
-            let columnsToSelect = _table.columns;
-            this.queryRules.exceptColumns.forEach(col => {
-                let exceptColumn = Helper.toRowProperty(col);
-                let _colIndex;
+            var columnsToSelect = _table.columns;
+            this.queryRules.exceptColumns.forEach(function (col) {
+                var exceptColumn = Helper_1.default.toRowProperty(col);
+                var _colIndex;
                 if ((_colIndex = columnsToSelect.indexOf(exceptColumn)) !== -1) {
                     columnsToSelect.splice(_colIndex, 1);
                 }
@@ -28,29 +32,32 @@ export class CriteriaParts {
             columnsToSelectString = _table.primaryKey + ", " + columnsToSelectString;
         }
         return columnsToSelectString;
-    }
-}
-export class CriteriaDivider {
-    constructor(table) {
+    };
+    return CriteriaParts;
+})();
+exports.CriteriaParts = CriteriaParts;
+var CriteriaDivider = (function () {
+    function CriteriaDivider(table) {
         this._table = table;
     }
-    divide(rawCriteriaObject) {
-        let _criteria = new CriteriaParts();
-        let colsToSearch = [];
-        let exceptColumns = [];
-        if (Helper.hasRules(rawCriteriaObject)) {
-            _criteria.queryRules = SelectQueryRules.fromRawObject(rawCriteriaObject[TABLE_RULES_PROPERTY]);
+    CriteriaDivider.prototype.divide = function (rawCriteriaObject) {
+        var _this = this;
+        var _criteria = new CriteriaParts();
+        var colsToSearch = [];
+        var exceptColumns = [];
+        if (Helper_1.default.hasRules(rawCriteriaObject)) {
+            _criteria.queryRules = SelectQueryRules_1.SelectQueryRules.fromRawObject(rawCriteriaObject[SelectQueryRules_1.TABLE_RULES_PROPERTY]);
         }
         else {
-            _criteria.queryRules = new SelectQueryRules().from(this._table.rules);
+            _criteria.queryRules = new SelectQueryRules_1.SelectQueryRules().from(this._table.rules);
         }
-        Helper.forEachKey(rawCriteriaObject, (objectKey) => {
-            let colName = Helper.toRowProperty(objectKey);
-            if ((this._table.columns.indexOf(colName) !== -1 && _criteria.queryRules.exceptColumns.indexOf(colName) !== -1) || this._table.primaryKey === colName) {
-                colsToSearch.push(colName + " = " + this._table.connection.escape(rawCriteriaObject[objectKey]));
+        Helper_1.default.forEachKey(rawCriteriaObject, function (objectKey) {
+            var colName = Helper_1.default.toRowProperty(objectKey);
+            if ((_this._table.columns.indexOf(colName) !== -1 && _criteria.queryRules.exceptColumns.indexOf(colName) !== -1) || _this._table.primaryKey === colName) {
+                colsToSearch.push(colName + " = " + _this._table.connection.escape(rawCriteriaObject[objectKey]));
             }
             else {
-                if (this._table.connection.table(colName) !== undefined) {
+                if (_this._table.connection.table(colName) !== undefined) {
                     _criteria.tables.push({ tableName: colName, propertyName: colName });
                 }
                 else {
@@ -58,12 +65,12 @@ export class CriteriaDivider {
                 }
             }
         });
-        _criteria.noDatabaseProperties.forEach(key => {
-            let prop = rawCriteriaObject[key];
-            if (Helper.hasRules(prop)) {
-                let realTableName = prop[TABLE_RULES_PROPERTY]["table"];
+        _criteria.noDatabaseProperties.forEach(function (key) {
+            var prop = rawCriteriaObject[key];
+            if (Helper_1.default.hasRules(prop)) {
+                var realTableName = prop[SelectQueryRules_1.TABLE_RULES_PROPERTY]["table"];
                 if (realTableName !== undefined) {
-                    _criteria.tables.push({ tableName: Helper.toRowProperty(realTableName), propertyName: key });
+                    _criteria.tables.push({ tableName: Helper_1.default.toRowProperty(realTableName), propertyName: key });
                 }
             }
         });
@@ -71,5 +78,7 @@ export class CriteriaDivider {
             _criteria.whereClause = " WHERE " + colsToSearch.join(" AND ");
         }
         return _criteria;
-    }
-}
+    };
+    return CriteriaDivider;
+})();
+exports.CriteriaDivider = CriteriaDivider;
