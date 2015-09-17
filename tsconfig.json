@@ -16,6 +16,8 @@
     "declaration": false
   },
   "files": [
+    "./src/typings/bluebird/bluebird.d.ts",
+    "./src/typings/mysql/mysql.d.ts",
     "./src/index.ts",
     "./src/lib/CriteriaBuilder.ts",
     "./src/lib/CriteriaDivider.ts",

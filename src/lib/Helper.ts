@@ -8,7 +8,7 @@ class Helper {
     constructor() { }
 
     static copyObject<T>(object: T): T {
-        let objectCopy = <T> {};
+        let objectCopy = <T>{};
         for (let key in object) {
             if (object.hasOwnProperty(key)) {
                 objectCopy[key] = object[key];
@@ -68,6 +68,19 @@ class Helper {
 
     static hasRules(obj: any): boolean {
         return obj !== undefined && obj[TABLE_RULES_PROPERTY] !== undefined;
+    }
+
+    static extendTypes<T, U>(first: T, second: U): T & U {
+        let result = <T & U>{};
+        for (let id in first) {
+            result[id] = first[id];
+        }
+        for (let id in second) {
+            if (!result.hasOwnProperty(id)) {
+                result[id] = second[id];
+            }
+        }
+        return result;
     }
 
 

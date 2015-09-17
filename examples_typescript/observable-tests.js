@@ -1,31 +1,20 @@
-/// <reference path="./node_modules/node-mysql-wrapper/compiled/typings/node-mysql-wrapper/node-mysql-wrapper.d.ts" />
 var express = require('express');
+var http = require('http');
+var wrapper2 = require("node-mysql-wrapper");
 var app = express();
-var server = require('http').createServer(app);
-import * as wrapper2 from "node-mysql-wrapper";
+var server = http.createServer(app);
 var db = wrapper2.wrap("mysql://kataras:pass@127.0.0.1/taglub?debug=false&charset=utf8");
-class User {
-    constructor() {
+var User = (function () {
+    function User() {
         this.comments = [];
         this.myComments = [];
     }
-}
-function extendTypes(first, second) {
-    let result = {};
-    for (let id in first) {
-        result[id] = first[id];
-    }
-    for (let id in second) {
-        if (!result.hasOwnProperty(id)) {
-            result[id] = second[id];
-        }
-    }
-    return result;
-}
-db.ready(() => {
+    return User;
+})();
+db.ready(function () {
     var usersTable = db.table("users");
     var usersCollection = new wrapper2.ObservableCollection(usersTable);
-    usersCollection.onCollectionChanged((eventArgs) => {
+    usersCollection.onCollectionChanged(function (eventArgs) {
         console.log('collection changed');
         switch (eventArgs.action) {
             case wrapper2.CollectionChangedAction.ADD:
@@ -37,9 +26,9 @@ db.ready(() => {
         }
     });
     var _criteria16 = usersTable.criteria.where("userId", 16).joinAs("myComments", "comments", "userId").orderBy("userId", true).limit(1).build();
-    usersTable.findSingle(_criteria16, result => {
+    usersTable.findSingle(_criteria16, function (result) {
         var user = wrapper2.observable(result);
-        user.onPropertyChanged((args) => {
+        user.onPropertyChanged(function (args) {
             console.log(args.propertyName + " Has changed to " + user[args.propertyName] + " from " + args.oldValue);
         });
         user.username = "just a test...";

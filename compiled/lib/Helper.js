@@ -46,6 +46,18 @@ var Helper = (function () {
     Helper.hasRules = function (obj) {
         return obj !== undefined && obj[SelectQueryRules_1.TABLE_RULES_PROPERTY] !== undefined;
     };
+    Helper.extendTypes = function (first, second) {
+        var result = {};
+        for (var id in first) {
+            result[id] = first[id];
+        }
+        for (var id in second) {
+            if (!result.hasOwnProperty(id)) {
+                result[id] = second[id];
+            }
+        }
+        return result;
+    };
     return Helper;
 })();
 Object.defineProperty(exports, "__esModule", { value: true });

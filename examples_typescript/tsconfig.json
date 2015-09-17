@@ -15,8 +15,10 @@
 		"declaration": false
 	},
 	"files": [
-		"./node-mysql-wrapper-test.ts",
-		"./observable-tests.ts"
+		"./observable-tests.ts",
+		"./typings/node/node.d.ts",
+		"./typings/express/express.d.ts",
+		"./typings/node-mysql-wrapper/node-mysql-wrapper.d.ts"
 	],
 	"exclude": [
 		"node_modules",

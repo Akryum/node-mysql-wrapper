@@ -1,7 +1,4 @@
-﻿/// <reference path="../typings/mysql/mysql.d.ts"/>
-/// <reference path="../typings/bluebird/bluebird.d.ts"/> 
-/// <reference path="./Table.ts"/> 
-import * as Mysql from 'mysql';
+﻿import * as Mysql from 'mysql';
 import * as Util from 'util';
 import * as Promise from 'bluebird';
 import {EventEmitter} from 'events';

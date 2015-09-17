@@ -44,8 +44,6 @@
   "bugs": {
     "url": "https://github.com/nodets/node-mysql-wrapper/issues"
   },
-  "typings": [
-    "compiled/typings/node-mysql-wrapper/node-mysql-wrapper.d.ts"
-  ],
+  "typings": "compiled/typings/node-mysql-wrapper/node-mysql-wrapper.d.ts",
   "homepage": "https://github.com/nodets/node-mysql-wrapper#readme"
 }

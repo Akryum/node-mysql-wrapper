@@ -25,29 +25,13 @@ function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection) {
     return mysqlDatabase;
 }
 exports.wrap = wrap;
-function extendTypes(first, second) {
-    var result = {};
-    for (var id in first) {
-        result[id] = first[id];
-    }
-    for (var id in second) {
-        if (!result.hasOwnProperty(id)) {
-            result[id] = second[id];
-        }
-    }
-    return result;
-}
 function observable(obj) {
-    return extendTypes(obj, new ObservableObject_1.default(obj));
+    return new ObservableObject_1.default(obj);
 }
 exports.observable = observable;
-var User = (function () {
-    function User() {
-    }
-    return User;
-})();
 exports.SelectQueryRules = SelectQueryRules_1.SelectQueryRules;
 exports.CriteriaBuilder = CriteriaBuilder_1.default;
 exports.ObservableObject = ObservableObject_1.default;
+exports.ObservableCollection = ObservableCollection_1.default;
 exports.CollectionChangedAction = ObservableCollection_1.CollectionChangedAction;
 exports.Helper = Helper_1.default;

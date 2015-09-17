@@ -3,9 +3,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-/// <reference path="../typings/mysql/mysql.d.ts"/>
-/// <reference path="../typings/bluebird/bluebird.d.ts"/> 
-/// <reference path="./Table.ts"/> 
 var Mysql = require('mysql');
 var Promise = require('bluebird');
 var events_1 = require('events');
