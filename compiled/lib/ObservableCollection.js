@@ -1,4 +1,5 @@
 var Helper_1 = require("./Helper");
+var ObservableObject_1 = require("./ObservableObject");
 (function (CollectionChangedAction) {
     CollectionChangedAction[CollectionChangedAction["ADD"] = 0] = "ADD";
     CollectionChangedAction[CollectionChangedAction["REMOVE"] = 1] = "REMOVE";
@@ -69,6 +70,15 @@ var ObservableCollection = (function () {
     };
     ObservableCollection.prototype.getItem = function (index) {
         return this.list[index];
+    };
+    ObservableCollection.prototype.getItemObservable = function (index) {
+        var item = this.getItem(index);
+        if (item[ObservableObject_1.default.RESERVED_PROPERTY_NAMES[0]] !== undefined) {
+            return item;
+        }
+        else {
+            return new ObservableObject_1.default(item);
+        }
     };
     ObservableCollection.prototype.addItem = function () {
         var _this = this;

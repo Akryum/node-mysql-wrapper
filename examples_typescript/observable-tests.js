@@ -26,13 +26,18 @@ db.ready(function () {
         }
     });
     var _criteria16 = usersTable.criteria.where("userId", 16).joinAs("myComments", "comments", "userId").orderBy("userId", true).limit(1).build();
-    usersTable.findSingle(_criteria16, function (result) {
-        var user = wrapper2.observable(result);
+    usersTable.findSingle(_criteria16, function (userRow) {
+        var user = wrapper2.observable(userRow);
+        usersCollection.addItem(user);
         user.onPropertyChanged(function (args) {
             console.log(args.propertyName + " Has changed to " + user[args.propertyName] + " from " + args.oldValue);
         });
-        user.username = "just a test...";
-        console.dir(user.toJSON("password", "myComments"));
+        user.username = "new username for 16...";
+        usersTable.save(user).then(function () {
+        });
+        usersTable.remove(user).then(function () {
+            usersCollection.removeItem(user);
+        });
     });
 });
 server.on('uncaughtException', function (err) {

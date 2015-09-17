@@ -42,12 +42,12 @@ class DeleteQuery<T> implements IQuery<T>{
 
                     resolve(_objReturned);
                     if (callback) {
-                        callback(_objReturned); 
+                        callback(_objReturned);
                     }
                 });
             } else {
                 //SAVE REMOVE BY ID
-                let _query = "DELETE FROM " + this._table.name + " WHERE " + this._table.primaryKey + " = " + criteriaOrID;
+                let _query = "DELETE FROM " + this._table.name + " WHERE " + this._table.primaryKey + " = " + primaryKeyValue;
                 this._table.connection.query(_query, (err, result) => {
                     if (err) {
                         // console.dir(err);

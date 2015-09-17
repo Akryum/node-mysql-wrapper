@@ -30,7 +30,7 @@ var DeleteQuery = (function () {
                 });
             }
             else {
-                var _query = "DELETE FROM " + _this._table.name + " WHERE " + _this._table.primaryKey + " = " + criteriaOrID;
+                var _query = "DELETE FROM " + _this._table.name + " WHERE " + _this._table.primaryKey + " = " + primaryKeyValue;
                 _this._table.connection.query(_query, function (err, result) {
                     if (err) {
                         reject(err);

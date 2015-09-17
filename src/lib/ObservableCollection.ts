@@ -1,5 +1,6 @@
 import Table from "./Table";
 import Helper from "./Helper";
+import ObservableObject from"./ObservableObject";
 
 export enum CollectionChangedAction {
 	ADD, REMOVE, RESET//for now I will use only add, remove and reset . replace and move is for future., REPLACE, MOVE
@@ -7,12 +8,12 @@ export enum CollectionChangedAction {
 
 export class CollectionChangedEventArgs<T> {
 	action: CollectionChangedAction;
-	oldItems: T[];
-	newItems: T[];
+	oldItems: (T | (T & ObservableObject))[];
+	newItems: (T | (T & ObservableObject))[];
 	oldStartingIndex: number;
 	newStartingIndex: number;
 
-	constructor(action: CollectionChangedAction, oldItems: T[] = [], newItems: T[] = [], oldStartingIndex: number = -1, newStartingIndex: number = -1) {
+	constructor(action: CollectionChangedAction, oldItems: (T | (T & ObservableObject))[] = [], newItems: (T | (T & ObservableObject))[] = [], oldStartingIndex: number = -1, newStartingIndex: number = -1) {
 		this.action = action;
 		this.oldItems = oldItems;
 		this.newItems = newItems;
@@ -22,7 +23,8 @@ export class CollectionChangedEventArgs<T> {
 }
 
 class ObservableCollection<T> {//T=result type of Table
-	private list: T[] = [];
+ 
+	private list: (T | (T & ObservableObject))[] = [];
 	private listeners: ((eventArgs: CollectionChangedEventArgs<T>) => void)[] = [];
 
 	constructor(protected table: Table<T>) { }
@@ -51,10 +53,11 @@ class ObservableCollection<T> {//T=result type of Table
 				}
 			}
 		}
+
 		return -1;
 	}
 
-	findItem(itemId: string | number): T {
+	findItem(itemId: string | number): (T | (T & ObservableObject)) {
 		for (let i = 0; i < this.list.length; i++) {
 			let _itemIn = this.list[i];
 			let _primaryKey = Helper.toObjectProperty(this.table.primaryKey);
@@ -72,8 +75,17 @@ class ObservableCollection<T> {//T=result type of Table
 		return this.list[index];
 	}
 
+	getItemObservable(index: number): T & ObservableObject {
+		let item = this.getItem(index);
+		if (item[ObservableObject.RESERVED_PROPERTY_NAMES[0]] !== undefined) { //means it is already ObservableObject
+			return <T & ObservableObject>item;
+		} else {
+			return <T & ObservableObject>new ObservableObject(item);
+		}
+	}
+
 	//for pure item
-	addItem(...items: T[]): T {
+	addItem(...items: (T | (T & ObservableObject))[]): (T | (T & ObservableObject)) {
 
 		let startingIndex = this.list.length === 0 ? 1 : this.list.length;
 		let evtArgs: CollectionChangedEventArgs<T> = new CollectionChangedEventArgs<T>(CollectionChangedAction.ADD);
@@ -91,7 +103,7 @@ class ObservableCollection<T> {//T=result type of Table
 	}
 	
 	//for pure item
-	removeItem(...items: T[]): ObservableCollection<T> {
+	removeItem(...items: (T | (T & ObservableObject))[]): ObservableCollection<T> {
 		let startingIndex = this.indexOf(items[0]);
 		if (startingIndex >= 0) {
 			//actualy have something to be removed
@@ -112,7 +124,7 @@ class ObservableCollection<T> {//T=result type of Table
 		return this;
 	}
 
-	forgetItem(...items: T[]): ObservableCollection<T> {
+	forgetItem(...items: (T | (T & ObservableObject))[]): ObservableCollection<T> {
 		if (items === undefined || items.length === 0) {
 			this.listeners = [];
 			this.list = [];

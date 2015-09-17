@@ -339,26 +339,27 @@ declare module "node-mysql-wrapper" {
 
     class CollectionChangedEventArgs<T> {
         action: CollectionChangedAction;
-        oldItems: T[];
-        newItems: T[];
+        oldItems: (T | (T & ObservableObject))[];
+        newItems: (T | (T & ObservableObject))[];
         oldStartingIndex: number;
         newStartingIndex: number;
 
-        constructor(action: CollectionChangedAction, oldItems?: T[], newItems?: T[], oldStartingIndex?: number, newStartingIndex?: number);
+        constructor(action: CollectionChangedAction, oldItems?: (T | (T & ObservableObject))[], newItems?: (T | (T & ObservableObject))[], oldStartingIndex?: number, newStartingIndex?: number);
     }
 
 
     class ObservableCollection<T> {//T=result type of Table
-        list: T[];
+        list: (T | (T & ObservableObject))[];
         listeners: ((eventArgs: CollectionChangedEventArgs<T>) => void)[];
         constructor(table: Table<T>);
         length: number;
         indexOf(item: T | string | number): number;
         findItem(itemId: string | number): T;
         getItem(index: number): T;
-        addItem(...items: T[]): T;
-        removeItem(...items: T[]): ObservableCollection<T>;
-        forgetItem(...items: T[]): ObservableCollection<T>;
+        getItemObservable(index: number): T & ObservableObject;
+        addItem(...items:(T | (T & ObservableObject))[]):  (T | (T & ObservableObject));
+        removeItem(...items:(T | (T & ObservableObject))[]): ObservableCollection<T>;
+        forgetItem(...items: (T | (T & ObservableObject))[]): ObservableCollection<T>;
         reset(): ObservableCollection<T>;
         notifyCollectionChanged(evtArgs: CollectionChangedEventArgs<T>): void;
         onCollectionChanged(callback: (eventArgs: CollectionChangedEventArgs<T>) => void): void;
