@@ -8,6 +8,7 @@ var Promise = require('bluebird');
 var events_1 = require('events');
 var Table_1 = require("./Table");
 var Helper_1 = require("./Helper");
+var ZongJi = require("zongji");
 var Connection = (function (_super) {
     __extends(Connection, _super);
     function Connection(connection) {
@@ -21,6 +22,9 @@ var Connection = (function (_super) {
         if (typeof connection === "string" || connection instanceof String) {
             this.attach(Mysql.createConnection(connection));
         }
+        else if (connection["host"] !== undefined) {
+            this.attach(Mysql.createConnection(connection));
+        }
         else {
             this.attach(connection);
         }
@@ -30,6 +34,9 @@ var Connection = (function (_super) {
     };
     Connection.prototype.end = function (callback) {
         var _this = this;
+        if (this.zongji) {
+            this.zongji.stop();
+        }
         this.eventTypes.forEach(function (_evt) {
             _this.removeAllListeners(_evt);
         });
@@ -39,10 +46,22 @@ var Connection = (function (_super) {
     };
     Connection.prototype.destroy = function () {
         var _this = this;
+        if (this.zongji) {
+            this.zongji.stop();
+        }
         this.eventTypes.forEach(function (_evt) {
             _this.removeAllListeners(_evt);
         });
         this.connection.destroy();
+    };
+    Connection.prototype.watchDatabaseEvents = function () {
+        this.zongji = new ZongJi(this.connection.config);
+        this.zongji.on('binlog', function (evt) {
+            evt.dump();
+        });
+        this.zongji.start({
+            includeEvents: ['tablemap', 'writerows', 'updaterows', 'deleterows']
+        });
     };
     Connection.prototype.link = function (readyCallback) {
         var _this = this;

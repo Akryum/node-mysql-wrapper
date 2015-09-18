@@ -28,6 +28,7 @@
     "./src/lib/queries/DeleteQuery.ts",
     "./src/lib/ObservableObject.ts",
     "./src/lib/ObservableCollection.ts",
+    "./src/lib/BinaryLogHelper.ts",
     "./src/lib/Connection.ts",
     "./src/lib/Table.ts",
     "./src/lib/Helper.ts",

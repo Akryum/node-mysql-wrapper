@@ -8,7 +8,8 @@
   },
   "dependencies": {
     "bluebird": "^2.9.34",
-    "mysql": "^2.8.0"
+    "mysql": "^2.8.0",
+    "zongji": "^0.3.2"
   },
   "devDependencies": {
     "gulp": "^3.9.0",

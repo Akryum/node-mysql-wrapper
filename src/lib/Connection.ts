@@ -4,24 +4,29 @@ import * as Promise from 'bluebird';
 import {EventEmitter} from 'events';
 import Table from "./Table";
 import Helper from "./Helper";
+import {ZongJiInterface} from "./BinaryLogHelper"; //ALSO BAD BUT I HAVE TO DO IT....
+var ZongJi: ZongJiInterface = require("zongji"); //THIS IS THE ONLY WAY I CAN DO IT, I MADE DEFINITIONS FOR ZONGJI BUT THEY AREN'T WORKING BECAUSE OF CLASS...
 
 class Connection extends EventEmitter {
     connection: Mysql.IConnection;
     eventTypes = ["INSERT", "UPDATE", "REMOVE", "SAVE"];
     tableNamesToUseOnly = [];
     tables: Table<any>[] = [];
+    zongji: any; //ZongJi
 
-    constructor(connection: string | Mysql.IConnection) {
+    constructor(connection: string | Mysql.IConnection | Mysql.IConnectionConfig) {
         super();
         this.create(connection);
     }
 
-    create(connection: string | Mysql.IConnection): void {
+    create(connection: string | Mysql.IConnection | Mysql.IConnectionConfig): void {
         if (typeof connection === "string" || connection instanceof String) {
             this.attach(Mysql.createConnection(connection));
-
-        } else {   //means that is mysql already connection
-            this.attach(connection);
+        } else if (connection["host"] !== undefined) { //means IConnectionConfig
+            this.attach(Mysql.createConnection(connection));
+        }
+        else {   //means that is mysql already connection
+            this.attach(<Mysql.IConnection>connection);
         }
     }
 
@@ -30,6 +35,9 @@ class Connection extends EventEmitter {
     }
 
     end(callback?: (error: any) => void): void {
+        if (this.zongji) {
+            this.zongji.stop();
+        }
         this.eventTypes.forEach(_evt=> {
             this.removeAllListeners(_evt);
         });
@@ -41,10 +49,25 @@ class Connection extends EventEmitter {
     }
 
     destroy(): void {
+        if (this.zongji) {
+            this.zongji.stop();
+        }
         this.eventTypes.forEach(_evt=> {
             this.removeAllListeners(_evt);
         });
         this.connection.destroy();
+    }
+
+    watchDatabaseEvents(): void {
+
+        this.zongji = new ZongJi(this.connection.config);
+        this.zongji.on('binlog', function(evt) {
+            evt.dump();
+        });
+
+        this.zongji.start({
+            includeEvents: ['tablemap', 'writerows', 'updaterows', 'deleterows']
+        });
     }
 
     link(readyCallback?: () => void): Promise<void> {
@@ -59,8 +82,8 @@ class Connection extends EventEmitter {
                    
                     //console.log('MYSQL: connected as id ' + self.connection.threadId);
                     this.fetchDatabaseInfornation().then(() => {
+                        //ONLY FOR MY MACHINE - TESTS this.watchDatabaseEvents();
                         resolve();
-                        // self.noticeReady();
                     });
 
 

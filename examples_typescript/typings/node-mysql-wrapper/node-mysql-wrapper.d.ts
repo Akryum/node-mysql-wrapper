@@ -357,8 +357,8 @@ declare module "node-mysql-wrapper" {
         findItem(itemId: string | number): T;
         getItem(index: number): T;
         getItemObservable(index: number): T & ObservableObject;
-        addItem(...items:(T | (T & ObservableObject))[]):  (T | (T & ObservableObject));
-        removeItem(...items:(T | (T & ObservableObject))[]): ObservableCollection<T>;
+        addItem(...items: (T | (T & ObservableObject))[]): (T | (T & ObservableObject));
+        removeItem(...items: (T | (T & ObservableObject))[]): ObservableCollection<T>;
         forgetItem(...items: (T | (T & ObservableObject))[]): ObservableCollection<T>;
         reset(): ObservableCollection<T>;
         notifyCollectionChanged(evtArgs: CollectionChangedEventArgs<T>): void;
@@ -387,15 +387,15 @@ declare module "node-mysql-wrapper" {
          */
         tables: Table<any>[];
 
-        constructor(connection: string | Mysql.IConnection);
+        constructor(connection: string | Mysql.IConnection | Mysql.IConnectionConfig);
         
         /**
          * Creates the MysqlConnection from the connection url or the real connection object.
-         * @param {string | Mysql.IConnection} connection the connection url or the real connection object.
+         * @param {string | Mysql.IConnection |  Mysql.IConnectionConfig} connection the connection url or the real connection object.
          * @returnType {nothing}
          * @return {nothing}
          */
-        create(connection: string | Mysql.IConnection): void;
+        create(connection: string | Mysql.IConnection | Mysql.IConnectionConfig): void;
         
         /**
          * Attach a real connection.

@@ -12,7 +12,7 @@ var User = (function () {
     return User;
 })();
 db.ready(function () {
-    var usersTable = db.table("users");
+  /*  var usersTable = db.table("users");
     var usersCollection = new wrapper2.ObservableCollection(usersTable);
     usersCollection.onCollectionChanged(function (eventArgs) {
         console.log('collection changed');
@@ -38,7 +38,7 @@ db.ready(function () {
         usersTable.remove(user).then(function () {
             usersCollection.removeItem(user);
         });
-    });
+    });*/
 });
 server.on('uncaughtException', function (err) {
     console.log(err);
