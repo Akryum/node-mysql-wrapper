@@ -334,7 +334,7 @@ declare module "node-mysql-wrapper" {
     }
 
     enum CollectionChangedAction {
-        ADD, REMOVE, RESET//for now I will use only add, remove and reset . replace and move is for future., REPLACE, MOVE
+        INSERT, DELETE, RESET//for now I will use only add, remove and reset . replace and move is for future., REPLACE, MOVE
     }
 
     class CollectionChangedEventArgs<T> {
@@ -348,21 +348,62 @@ declare module "node-mysql-wrapper" {
     }
 
 
-    class ObservableCollection<T> {//T=result type of Table
-        list: (T | (T & ObservableObject))[];
+    class BaseCollection<T> {//T=result type of Table
+        private list: (T | (T & ObservableObject))[];
         listeners: ((eventArgs: CollectionChangedEventArgs<T>) => void)[];
         constructor(table: Table<T>);
         length: number;
+        items: (T | (T & ObservableObject))[];
         indexOf(item: T | string | number): number;
         findItem(itemId: string | number): T;
         getItem(index: number): T;
         getItemObservable(index: number): T & ObservableObject;
         addItem(...items: (T | (T & ObservableObject))[]): (T | (T & ObservableObject));
-        removeItem(...items: (T | (T & ObservableObject))[]): ObservableCollection<T>;
-        forgetItem(...items: (T | (T & ObservableObject))[]): ObservableCollection<T>;
-        reset(): ObservableCollection<T>;
+        removeItem(...items: (T | (T & ObservableObject))[]): BaseCollection<T>;
+        removeItemById(id: number | string): BaseCollection<T>;
+        forgetItem(...items: (T | (T & ObservableObject))[]): BaseCollection<T>;
+        reset(): BaseCollection<T>;
         notifyCollectionChanged(evtArgs: CollectionChangedEventArgs<T>): void;
         onCollectionChanged(callback: (eventArgs: CollectionChangedEventArgs<T>) => void): void;
+    }
+
+    class ObservableCollection<T> { //auti i klasi 9a xrisimopoieite ws Collection me kapoies paralages mesa sto index.ts.
+        local: BaseCollection<T>;
+        private _items: (T & ObservableObject)[];
+
+        constructor(table: Table<T>, fetchAllFromDatabase?: boolean, callbackWhenReady?: Function);
+
+        items: (T & ObservableObject)[];
+
+        onCollectionChanged(callback: (eventArgs: CollectionChangedEventArgs<T>) => void): void;
+
+        startListeningToDatabase(): void;
+
+        find(criteriaRawJsObject?: any, callback?: (_results: T[]) => any): Promise<T[]>;
+
+        findOne(criteriaRawJsObject: any, callback?: (_result: T) => any): Promise<T>;
+
+        findById(id: number | string, callback?: (result: T) => any): Promise<T>;
+
+        findAll(tableRules?: RawRules, callback?: (_results: T[]) => any): Promise<T[]>;
+    
+        /**
+         * .insert() and .update() do the same thing:  .save();
+         */
+        insert(criteriaRawJsObject: any, callback?: (_result: any) => any): Promise<T | any>;
+
+        update(criteriaRawJsObject: any, callback?: (_result: any) => any): Promise<T | any>;
+
+        save(criteriaRawJsObject: any, callback?: (_result: any) => any): Promise<T | any>;
+
+        remove(criteriaOrID: any | number | string, callback?: (_result: DeleteAnswer) => any): Promise<DeleteAnswer>;
+	
+        /**
+         * same thing as .remove();
+         */
+        delete(criteriaOrID: any | number | string, callback?: (_result: DeleteAnswer) => any): Promise<DeleteAnswer>;
+
+
     }
 
     class Connection extends EventEmitter {
@@ -424,7 +465,7 @@ declare module "node-mysql-wrapper" {
          * When finish returns a promise, use it with .then(function(){});
          * @return Promise
          */
-        clearLogs(): Promise<void>;
+        clearBinaryLogs(): Promise<void>;
         
         /**
          * Link the real connection with this MysqlConnection object.
@@ -461,21 +502,21 @@ declare module "node-mysql-wrapper" {
          * Call when must notify the Database events, SAVE(INSERT,UPDATE), REMOVE(DELETE).
          * @param {string} tableWhichCalled the table name which event is coming from.
          * @param {string} queryStr the full parsed query string which used to determinate the type of event to notify.
-         * @param {any[]} parsedResults the parsed results (results after a method parse/edit/export them as objects), these are passing to the watch listener(s).
+         * @param {any[]} rawRows the raw rows results (results before a method parse/edit/export them as objects), these are passing to the watch listener(s).
          * @returnType {nothing}
          * @return {nothing}
          */
-        notice(tableWhichCalled: string, queryStr: string, parsedResults: any[]): void;
+        notice(tableWhichCalled: string, queryStr: string, rawRows: any[]): void;
         
         /**
          * Adds an event listener/watcher on a table for a 'database event'.
          * @param {string} tableName the table name which you want to add the event listener.
          * @param {string or string[]} evtType the event(s) type you want to watch, one of these(string) or an array of them(string[]): ["INSERT", "UPDATE", "REMOVE", "SAVE"].
-         * @param {function} callback Callback which has one parameter(typeof any[]) which filled by the parsedResults (results after query executed and exports to object(s)). 
+         * @param {function} callback Callback which has one parameter(typeof any[]) which filled by the rawRows (results after query executed and before parsed to object(s)). 
          * @returnType {nothing}
          * @return {nothing}
          */
-        watch(tableName: string, evtType: any, callback: (parsedResults: any[]) => void): void;
+        watch(tableName: string, evtType: any, callback: (rawRows: any[]) => void): void;
         
         /**
          * Removes an event listener/watcher from a table for a specific event type.
@@ -485,7 +526,7 @@ declare module "node-mysql-wrapper" {
          * @returnType {nothing}
          * @return {nothing}
          */
-        unwatch(tableName: string, evtType: string, callbackToRemove: (parsedResults: any[]) => void): void;
+        unwatch(tableName: string, evtType: string, callbackToRemove: (rawResults: any[]) => void): void;
         
         /**
          * Executes a database query.
@@ -567,11 +608,11 @@ declare module "node-mysql-wrapper" {
         /**
         * Adds or turn on an event listener/watcher on a table for a 'database event'.
         * @param {string} evtType the event type you want to watch, one of these: ["INSERT", "UPDATE", "REMOVE", "SAVE"].
-        * @param {function} callback Callback which has one parameter(typeof any[]) which filled by the parsedResults (results after query executed and exports to object(s)). 
+        * @param {function} callback Callback which has one parameter(typeof any[]) which filled by the rawResults (results after query executed and before exports to object(s)). 
         * @returnType {nothing}
         * @return {nothing}
         */
-        on(evtType: string, callback: (parsedResults: any[]) => void): void;
+        on(evtType: string, callback: (rawResults: any[]) => void): void;
             
         /**
          * Removes or turn off an event listener/watcher from a table for a specific event type.
@@ -580,7 +621,7 @@ declare module "node-mysql-wrapper" {
          * @returnType {nothing}
          * @return {nothing}
          */
-        off(evtType: string, callbackToRemove: (parsedResults: any[]) => void): void;
+        off(evtType: string, callbackToRemove: (rawResults: any[]) => void): void;
          
         /**
          * Use it when you want to check if extended function is exists here.
@@ -697,6 +738,8 @@ declare module "node-mysql-wrapper" {
 
         buildRules(): SelectQueryRules;
         buildRules(parentRules?: SelectQueryRules): SelectQueryRules;
+
+        Collection<T>(tableName: string, callbackWhenReady?: Function): ObservableCollection<T>;
     }
 
     function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): Database;

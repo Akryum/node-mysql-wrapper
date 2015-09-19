@@ -1,8 +1,8 @@
 var Helper_1 = require("./Helper");
 var ObservableObject_1 = require("./ObservableObject");
 (function (CollectionChangedAction) {
-    CollectionChangedAction[CollectionChangedAction["ADD"] = 0] = "ADD";
-    CollectionChangedAction[CollectionChangedAction["REMOVE"] = 1] = "REMOVE";
+    CollectionChangedAction[CollectionChangedAction["INSERT"] = 0] = "INSERT";
+    CollectionChangedAction[CollectionChangedAction["DELETE"] = 1] = "DELETE";
     CollectionChangedAction[CollectionChangedAction["RESET"] = 2] = "RESET";
 })(exports.CollectionChangedAction || (exports.CollectionChangedAction = {}));
 var CollectionChangedAction = exports.CollectionChangedAction;
@@ -58,7 +58,14 @@ var BaseCollection = (function () {
                 }
             }
             else {
-                if (item[_primaryKey] === _itemIn[_primaryKey]) {
+                var _primarykeyVal = void 0;
+                if (item[ObservableObject_1.default.RESERVED_PROPERTY_NAMES[0]] !== undefined) {
+                    _primarykeyVal = item["_" + _primaryKey];
+                }
+                else {
+                    _primarykeyVal = item[_primaryKey];
+                }
+                if (_primarykeyVal === _itemIn[_primaryKey]) {
                     return i;
                 }
             }
@@ -68,6 +75,9 @@ var BaseCollection = (function () {
     BaseCollection.prototype.findItem = function (itemId) {
         for (var i = 0; i < this.list.length; i++) {
             var _itemIn = this.list[i];
+            if (!_itemIn) {
+                continue;
+            }
             var _primaryKey = Helper_1.default.toObjectProperty(this.table.primaryKey);
             if (itemId === _itemIn[_primaryKey]) {
                 return _itemIn;
@@ -94,7 +104,7 @@ var BaseCollection = (function () {
             items[_i - 0] = arguments[_i];
         }
         var startingIndex = this.list.length === 0 ? 1 : this.list.length;
-        var evtArgs = new CollectionChangedEventArgs(CollectionChangedAction.ADD);
+        var evtArgs = new CollectionChangedEventArgs(CollectionChangedAction.INSERT);
         evtArgs.newStartingIndex = startingIndex;
         var newItemPushed;
         items.forEach(function (item) {
@@ -112,14 +122,37 @@ var BaseCollection = (function () {
         }
         var startingIndex = this.indexOf(items[0]);
         if (startingIndex >= 0) {
-            var evtArgs = new CollectionChangedEventArgs(CollectionChangedAction.REMOVE);
+            var evtArgs = new CollectionChangedEventArgs(CollectionChangedAction.DELETE);
             evtArgs.oldStartingIndex = startingIndex;
             items.forEach(function (item) {
                 var _index = _this.indexOf(item);
                 var itemWhichDeleted = _this.list[_index];
                 evtArgs.oldItems.push(itemWhichDeleted);
                 _this.list.splice(_index, 1);
+                evtArgs.newItems = _this.list;
             });
+            this.notifyCollectionChanged(evtArgs);
+        }
+        return this;
+    };
+    BaseCollection.prototype.removeItemById = function (id) {
+        var _indexToRemove = -1;
+        var _primaryKey = Helper_1.default.toObjectProperty(this.table.primaryKey);
+        this.list.some(function (item, index) {
+            if (item["_" + _primaryKey] === id || item[_primaryKey] === id) {
+                _indexToRemove = index;
+                return true;
+            }
+            else {
+                return false;
+            }
+        });
+        if (_indexToRemove >= 0) {
+            var evtArgs = new CollectionChangedEventArgs(CollectionChangedAction.DELETE);
+            evtArgs.oldStartingIndex = _indexToRemove;
+            evtArgs.oldItems = [this.list[_indexToRemove]];
+            this.list.splice(_indexToRemove, 1);
+            evtArgs.newItems = this.list;
             this.notifyCollectionChanged(evtArgs);
         }
         return this;
@@ -147,6 +180,7 @@ var BaseCollection = (function () {
         evtArgs.oldStartingIndex = startingIndex;
         evtArgs.oldItems = this.list.slice(0);
         this.list = [];
+        evtArgs.newItems = this.list;
         this.notifyCollectionChanged(evtArgs);
         return this;
     };

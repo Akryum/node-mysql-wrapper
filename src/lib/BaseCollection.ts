@@ -3,7 +3,7 @@ import Helper from "./Helper";
 import ObservableObject from"./ObservableObject";
 
 export enum CollectionChangedAction {
-	ADD, REMOVE, RESET//for now I will use only add, remove and reset . replace and move is for future., REPLACE, MOVE
+	INSERT, DELETE, RESET//for now I will use only add, remove and reset . replace and move is for future., REPLACE, MOVE
 }
 
 export class CollectionChangedEventArgs<T> {
@@ -51,8 +51,13 @@ class BaseCollection<T> {//T=result type of Table. BASE MEANS NO AUTO-INSERTS-UP
 					return i;
 				}
 			} else {
-
-				if (item[_primaryKey] === _itemIn[_primaryKey]) {
+				let _primarykeyVal: string | number;
+				if (item[ObservableObject.RESERVED_PROPERTY_NAMES[0]] !== undefined) { //means it is already ObservableObject
+					_primarykeyVal = item["_" + _primaryKey] //adds the_ 
+				} else {
+					_primarykeyVal = item[_primaryKey];
+				}
+				if (_primarykeyVal === _itemIn[_primaryKey]) {
 					return i;
 				}
 			}
@@ -63,7 +68,12 @@ class BaseCollection<T> {//T=result type of Table. BASE MEANS NO AUTO-INSERTS-UP
 
 	findItem(itemId: string | number): (T | (T & ObservableObject)) {
 		for (let i = 0; i < this.list.length; i++) {
+
 			let _itemIn = this.list[i];
+			if (!_itemIn) {
+				continue;
+			}
+
 			let _primaryKey = Helper.toObjectProperty(this.table.primaryKey);
 
 			if (itemId === _itemIn[_primaryKey]) {
@@ -92,7 +102,7 @@ class BaseCollection<T> {//T=result type of Table. BASE MEANS NO AUTO-INSERTS-UP
 	addItem(...items: (T | (T & ObservableObject))[]): (T | (T & ObservableObject)) {
 
 		let startingIndex = this.list.length === 0 ? 1 : this.list.length;
-		let evtArgs: CollectionChangedEventArgs<T> = new CollectionChangedEventArgs<T>(CollectionChangedAction.ADD);
+		let evtArgs: CollectionChangedEventArgs<T> = new CollectionChangedEventArgs<T>(CollectionChangedAction.INSERT);
 		evtArgs.newStartingIndex = startingIndex;
 		let newItemPushed;
 		items.forEach(item=> {
@@ -112,7 +122,7 @@ class BaseCollection<T> {//T=result type of Table. BASE MEANS NO AUTO-INSERTS-UP
 		if (startingIndex >= 0) {
 			//actualy have something to be removed
 		
-			let evtArgs: CollectionChangedEventArgs<T> = new CollectionChangedEventArgs<T>(CollectionChangedAction.REMOVE);
+			let evtArgs: CollectionChangedEventArgs<T> = new CollectionChangedEventArgs<T>(CollectionChangedAction.DELETE);
 			evtArgs.oldStartingIndex = startingIndex;
 			items.forEach(item => {
 				let _index = this.indexOf(item);
@@ -120,12 +130,45 @@ class BaseCollection<T> {//T=result type of Table. BASE MEANS NO AUTO-INSERTS-UP
 
 				evtArgs.oldItems.push(itemWhichDeleted);
 				this.list.splice(_index, 1);
+				evtArgs.newItems = this.list;
 			});
 
 
 			this.notifyCollectionChanged(evtArgs);
 		}
 		return this;
+	}
+
+	removeItemById(id: number | string): BaseCollection<T> {
+
+		let _indexToRemove = -1;
+
+		let _primaryKey = Helper.toObjectProperty(this.table.primaryKey);
+		this.list.some((item, index) => {
+			if (item["_" + _primaryKey] === id || item[_primaryKey] === id) {//adds the_  anagastika... den kseroume an ola ta antikimena einai observable
+				_indexToRemove = index;
+				return true;
+
+			} else {
+				return false;
+			}
+
+		});
+		//	console.log('index to remove: ' + _indexToRemove + 'from ' + this.list.length + ' items.');
+
+		if (_indexToRemove >= 0) {
+
+			let evtArgs: CollectionChangedEventArgs<T> = new CollectionChangedEventArgs<T>(CollectionChangedAction.DELETE);
+			evtArgs.oldStartingIndex = _indexToRemove;
+			evtArgs.oldItems = [this.list[_indexToRemove]];
+
+			this.list.splice(_indexToRemove, 1);
+			evtArgs.newItems = this.list;
+			this.notifyCollectionChanged(evtArgs);
+		}
+
+		return this;
+
 	}
 
 	forgetItem(...items: (T | (T & ObservableObject))[]): BaseCollection<T> {
@@ -147,7 +190,9 @@ class BaseCollection<T> {//T=result type of Table. BASE MEANS NO AUTO-INSERTS-UP
 
 		evtArgs.oldStartingIndex = startingIndex;
 		evtArgs.oldItems = this.list.slice(0); // copy without reference.
+
 		this.list = []; //reset the actual list
+		evtArgs.newItems = this.list;
 		this.notifyCollectionChanged(evtArgs);
 
 		return this;

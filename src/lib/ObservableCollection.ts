@@ -40,7 +40,7 @@ class ObservableCollection<T> { //auti i klasi 9a xrisimopoieite ws Collection m
     }
 
     onCollectionChanged(callback: (eventArgs: CollectionChangedEventArgs<T>) => void): void {
-        this.local.listeners.push(callback);
+        this.local.onCollectionChanged(callback);
     }
 
     startListeningToDatabase(): void {
@@ -74,10 +74,8 @@ class ObservableCollection<T> { //auti i klasi 9a xrisimopoieite ws Collection m
         });
 
         this.table.on("DELETE", (rows: any[]) => {
-            //console.log("DELETE/REMOVE FROM DATABASE. BY OBSERVABLE COLLECTION");
             rows.forEach(row=> {
-                let _primaryKeyValue = row[this.table.primaryKey]; // row is raw row.
-                this.local.removeItem(_primaryKeyValue);
+                this.local.removeItemById(row[this.table.primaryKey]);// row is raw row.
             });
 
         });

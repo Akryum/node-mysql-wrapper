@@ -36,65 +36,67 @@ interface UserInfo {
 }
 
 db.ready(() => {
-    var usersTable = db.table<User>("users");
-/*
-    usersTable.on("INSERT", (rawRows: any[]) => {
-        console.log("INSERT DIRECTLY FROM DATABASE EXECUTED.");
-    });*/
+
+    var usersCollection = db.Collection("users");
+    /* --------------OR-------------------------
+    var usersTable= db.table<User>("users");
     
-    //or var usersDb = db.table("users"); if you don't want intel auto complete from your ide/editor
-    var usersCollection = new mysqlWrapper.ObservableCollection(usersTable); 
-    //the collection can contains 'pure row objects' from a table method results and can contains ObservableObjects. Yes in the same list.
+    var usersCollection = new mysqlWrapper.ObservableCollection(usersTable,true);
+     //second parameter:  true is the default on db.Collection but no from mysqlWrapper.
+     //if second parameter is true then collection will fire the table.findAll(); and cache the results into a list.
+     //All cached objects/items inside the list are observable too ( mysqlWrapper.observable(object)).
+     //means that you can use usersCollection.items[0].onPropertyChanged(args=>{ //args.propertyName and args.oldValue });
+    
+    */
     usersCollection.onCollectionChanged((eventArgs) => {
-
-        console.log('collection changed');
         switch (eventArgs.action) {
-            case mysqlWrapper.CollectionChangedAction.ADD:
-                console.log('User(s) added into. New list lengh: ' + eventArgs.newItems.length);
+            case mysqlWrapper.CollectionChangedAction.INSERT:
+                console.log('User(s) added into. New list length: ' + eventArgs.newItems.length);
                 break;
-            case mysqlWrapper.CollectionChangedAction.REMOVE:
-                console.log(eventArgs.oldItems.length + " User(s) removed from list.");
+            case mysqlWrapper.CollectionChangedAction.DELETE:
+                console.log(eventArgs.oldItems.length + " User(s) removed from list. New list length:" + eventArgs.newItems.length);
                 break;
+
         }
     });
+    
+    //objects which updated from database are auto-update their values (if new new value != old value) here too,
+    //use of onPropertyChanged (if you want to listen for this event on a specific object) bellow...
 
 
-    var _criteria16 = usersTable.criteria.where("userId", 16).joinAs("myComments", "comments", "userId").orderBy("userId", true).limit(1).build();
-
-
-
-    usersTable.findSingle(_criteria16, userRow=> {
-        //this is intersection typed
-        if(userRow===undefined){
-            console.log('This User does not  found');
-            return;
-        }
-        var user = mysqlWrapper.observable(userRow);
-        console.dir(user);
-        usersCollection.addItem(user); //or add simple row object: addItem(userRow)
+    /*
+        Example of single observable object: 
         
-        //to get an item: usersCollection.getItemObservable(0) or .getItem(index)
-        //getItemObservable(index) check if the item on index is observable if yes,it returns it, if not it will make one and return that.
- 
- 
-        user.onPropertyChanged((args) => {
-            console.log(args.propertyName + " Has changed to " + user[args.propertyName] + " from " + args.oldValue);
-        });
-
-
-        /* user.username = "new username for 16..."; //occurs property changed
-  
-          
-         usersTable.save(user).then(() => { // occurs nothing because we changed from here, no directly from database or any other application
+        var _criteria16 = usersTable.criteria.where("userId", 16).joinAs("myComments", "comments", "userId").orderBy("userId", true).limit(1).build();
+    
+    
+    
+        usersTable.findSingle(_criteria16, userRow=> {
+            //this is intersection typed
+            if(userRow===undefined){
+                console.log('This User does not  found');
+                return;
+            }
+            var user = mysqlWrapper.observable(userRow);
+     
+            user.onPropertyChanged((args) => {
+                console.log(args.propertyName + " Has changed to " + user[args.propertyName] + " from " + args.oldValue);
+            });
+    
+    
+             user.username = "new username for 16..."; //occurs property changed
+      
               
-         });
-        
-                 usersTable.remove(user).then(() => {
-                     usersCollection.removeItem(user);//occurs collection changed
-                 });*/
-       
-        // console.dir(user.toJSON("password", "myComments")); //print the object without password and myComments property fields.
-    });
+             usersTable.save(user).then(() => { // occurs nothing because we already changed this property to its newest value, no directly from database or any other application
+                  
+             });
+            
+            usersTable.remove(user).then(() => {
+              usersCollection.removeItem(user);//occurs collection changed - > DELETE action
+            });
+           
+            // console.dir(user.toJSON("password", "myComments")); //print the object without password and myComments property fields.
+        });*/
 
 });
 

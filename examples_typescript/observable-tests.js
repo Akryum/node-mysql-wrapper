@@ -12,31 +12,16 @@ var User = (function () {
     return User;
 })();
 db.ready(function () {
-    var usersTable = db.table("users");
-    var usersCollection = new mysqlWrapper.ObservableCollection(usersTable);
+    var usersCollection = db.Collection("users");
     usersCollection.onCollectionChanged(function (eventArgs) {
-        console.log('collection changed');
         switch (eventArgs.action) {
-            case mysqlWrapper.CollectionChangedAction.ADD:
-                console.log('User(s) added into. New list lengh: ' + eventArgs.newItems.length);
+            case mysqlWrapper.CollectionChangedAction.INSERT:
+                console.log('User(s) added into. New list length: ' + eventArgs.newItems.length);
                 break;
-            case mysqlWrapper.CollectionChangedAction.REMOVE:
-                console.log(eventArgs.oldItems.length + " User(s) removed from list.");
+            case mysqlWrapper.CollectionChangedAction.DELETE:
+                console.log(eventArgs.oldItems.length + " User(s) removed from list. New list length:" + eventArgs.newItems.length);
                 break;
         }
-    });
-    var _criteria16 = usersTable.criteria.where("userId", 16).joinAs("myComments", "comments", "userId").orderBy("userId", true).limit(1).build();
-    usersTable.findSingle(_criteria16, function (userRow) {
-        if (userRow === undefined) {
-            console.log('This User does not  found');
-            return;
-        }
-        var user = mysqlWrapper.observable(userRow);
-        console.dir(user);
-        usersCollection.addItem(user);
-        user.onPropertyChanged(function (args) {
-            console.log(args.propertyName + " Has changed to " + user[args.propertyName] + " from " + args.oldValue);
-        });
     });
 });
 server.on('uncaughtException', function (err) {

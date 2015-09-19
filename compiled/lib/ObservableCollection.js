@@ -33,7 +33,7 @@ var ObservableCollection = (function () {
         configurable: true
     });
     ObservableCollection.prototype.onCollectionChanged = function (callback) {
-        this.local.listeners.push(callback);
+        this.local.onCollectionChanged(callback);
     };
     ObservableCollection.prototype.startListeningToDatabase = function () {
         var _this = this;
@@ -60,8 +60,7 @@ var ObservableCollection = (function () {
         });
         this.table.on("DELETE", function (rows) {
             rows.forEach(function (row) {
-                var _primaryKeyValue = row[_this.table.primaryKey];
-                _this.local.removeItem(_primaryKeyValue);
+                _this.local.removeItemById(row[_this.table.primaryKey]);
             });
         });
     };
