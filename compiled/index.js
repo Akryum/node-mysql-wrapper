@@ -2,7 +2,7 @@ var Connection_1 = require("./lib/Connection");
 var Database_1 = require("./lib/Database");
 var SelectQueryRules_1 = require("./lib/queries/SelectQueryRules");
 var CriteriaBuilder_1 = require("./lib/CriteriaBuilder");
-var ObservableCollection_1 = require("./lib/ObservableCollection");
+var BaseCollection_1 = require("./lib/BaseCollection");
 var Helper_1 = require("./lib/Helper");
 var ObservableObject_1 = require("./lib/ObservableObject");
 if (Function.prototype["name"] === undefined) {
@@ -19,7 +19,7 @@ function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection) {
     }
     var mysqlCon = new Connection_1.default(mysqlUrlOrObjectOrMysqlAlreadyConnection);
     var mysqlDatabase = new Database_1.default(mysqlCon);
-    if (useTables) {
+    if (useTables && useTables !== null) {
         mysqlDatabase.useOnly(useTables);
     }
     return mysqlDatabase;
@@ -32,6 +32,5 @@ exports.observable = observable;
 exports.SelectQueryRules = SelectQueryRules_1.SelectQueryRules;
 exports.CriteriaBuilder = CriteriaBuilder_1.default;
 exports.ObservableObject = ObservableObject_1.default;
-exports.ObservableCollection = ObservableCollection_1.default;
-exports.CollectionChangedAction = ObservableCollection_1.CollectionChangedAction;
+exports.CollectionChangedAction = BaseCollection_1.CollectionChangedAction;
 exports.Helper = Helper_1.default;

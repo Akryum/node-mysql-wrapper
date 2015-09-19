@@ -2,6 +2,8 @@
 import Helper from "./Helper";
 import Table from "./Table";
 import {SelectQueryRules} from "./queries/SelectQueryRules";
+import ObservableObject from "./ObservableObject";
+import ObservableCollection from "./ObservableCollection";
 import * as Promise from 'bluebird';
 import * as Mysql from 'mysql';
 
@@ -113,6 +115,10 @@ class Database {
             newRules.from(parentRules);
         }
         return newRules;
+    }
+
+    Collection<T>(tableName: string, callbackWhenReady?: Function): ObservableCollection<T> {
+        return new ObservableCollection(<Table<T>>this.connection.table(tableName), true, callbackWhenReady);
     }
 
 }

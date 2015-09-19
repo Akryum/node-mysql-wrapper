@@ -1,7 +1,7 @@
 import Helper from "../Helper";
 import Table from "../Table";
 import IQuery from"./IQuery";
-
+import * as Promise from 'bluebird';
 class SaveQuery<T> implements IQuery<T> {
 
     constructor(public _table: Table<T>) {
@@ -30,7 +30,7 @@ class SaveQuery<T> implements IQuery<T> {
                     if (err) {
                         reject(err);
                     }
-                    this._table.connection.notice(this._table.name, _query, obj);
+                    //old this._table.connection.notice(this._table.name, _query, obj);
 
                     resolve(obj);
                     if (callback) {
@@ -52,7 +52,7 @@ class SaveQuery<T> implements IQuery<T> {
                     obj[primaryKeyJsObjectProperty] = result.insertId;
                     primaryKeyValue = result.insertId;
 
-                    this._table.connection.notice(this._table.name, _query, obj);
+                    //old this._table.connection.notice(this._table.name, _query, obj);
                 
                     resolve(obj);
                     if (callback) {

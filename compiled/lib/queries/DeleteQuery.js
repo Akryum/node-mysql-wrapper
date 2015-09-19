@@ -1,3 +1,4 @@
+var Promise = require('bluebird');
 var DeleteQuery = (function () {
     function DeleteQuery(_table) {
         this._table = _table;
@@ -22,7 +23,6 @@ var DeleteQuery = (function () {
                         reject(err);
                     }
                     var _objReturned = { affectedRows: result.affectedRows, table: _this._table.name };
-                    _this._table.connection.notice(_this._table.name, _query, [_objReturned]);
                     resolve(_objReturned);
                     if (callback) {
                         callback(_objReturned);
@@ -36,7 +36,6 @@ var DeleteQuery = (function () {
                         reject(err);
                     }
                     var _objReturned = { affectedRows: result.affectedRows, table: _this._table.name };
-                    _this._table.connection.notice(_this._table.name, _query, [_objReturned]);
                     resolve(_objReturned);
                     if (callback) {
                         callback(_objReturned);

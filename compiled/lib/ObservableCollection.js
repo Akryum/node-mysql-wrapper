@@ -1,155 +1,96 @@
 var Helper_1 = require("./Helper");
+var BaseCollection_1 = require("./BaseCollection");
 var ObservableObject_1 = require("./ObservableObject");
-(function (CollectionChangedAction) {
-    CollectionChangedAction[CollectionChangedAction["ADD"] = 0] = "ADD";
-    CollectionChangedAction[CollectionChangedAction["REMOVE"] = 1] = "REMOVE";
-    CollectionChangedAction[CollectionChangedAction["RESET"] = 2] = "RESET";
-})(exports.CollectionChangedAction || (exports.CollectionChangedAction = {}));
-var CollectionChangedAction = exports.CollectionChangedAction;
-var CollectionChangedEventArgs = (function () {
-    function CollectionChangedEventArgs(action, oldItems, newItems, oldStartingIndex, newStartingIndex) {
-        if (oldItems === void 0) { oldItems = []; }
-        if (newItems === void 0) { newItems = []; }
-        if (oldStartingIndex === void 0) { oldStartingIndex = -1; }
-        if (newStartingIndex === void 0) { newStartingIndex = -1; }
-        this.action = action;
-        this.oldItems = oldItems;
-        this.newItems = newItems;
-        this.oldStartingIndex = oldStartingIndex;
-        this.newStartingIndex = newStartingIndex;
-    }
-    return CollectionChangedEventArgs;
-})();
-exports.CollectionChangedEventArgs = CollectionChangedEventArgs;
 var ObservableCollection = (function () {
-    function ObservableCollection(table) {
+    function ObservableCollection(table, fetchAllFromDatabase, callbackWhenReady) {
+        var _this = this;
         this.table = table;
-        this.list = [];
-        this.listeners = [];
+        this.local = new BaseCollection_1.default(table);
+        if (fetchAllFromDatabase) {
+            this.table.findAll().then(function (resultObjects) {
+                resultObjects.forEach(function (obj) {
+                    var observableObj = new ObservableObject_1.default(obj);
+                    _this.local.items.push(observableObj);
+                });
+                _this.startListeningToDatabase();
+                if (callbackWhenReady) {
+                    callbackWhenReady();
+                }
+            });
+        }
+        else {
+            this.startListeningToDatabase();
+            if (callbackWhenReady) {
+                callbackWhenReady();
+            }
+        }
     }
-    Object.defineProperty(ObservableCollection.prototype, "length", {
+    Object.defineProperty(ObservableCollection.prototype, "items", {
         get: function () {
-            return this.list.length;
+            return this.local.items;
         },
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(ObservableCollection.prototype, "isObservable", {
-        get: function () {
-            return this.listeners.length > 0;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    ObservableCollection.prototype.indexOf = function (item) {
-        for (var i = 0; i < this.list.length; i++) {
-            var _itemIn = this.list[i];
-            var _primaryKey = Helper_1.default.toObjectProperty(this.table.primaryKey);
-            if (Helper_1.default.isString(item) || Helper_1.default.isNumber(item)) {
-                if (item === _itemIn[_primaryKey]) {
-                    return i;
-                }
-            }
-            else {
-                if (item[_primaryKey] === _itemIn[_primaryKey]) {
-                    return i;
-                }
-            }
-        }
-        return -1;
-    };
-    ObservableCollection.prototype.findItem = function (itemId) {
-        for (var i = 0; i < this.list.length; i++) {
-            var _itemIn = this.list[i];
-            var _primaryKey = Helper_1.default.toObjectProperty(this.table.primaryKey);
-            if (itemId === _itemIn[_primaryKey]) {
-                return _itemIn;
-            }
-        }
-        return undefined;
-    };
-    ObservableCollection.prototype.getItem = function (index) {
-        return this.list[index];
-    };
-    ObservableCollection.prototype.getItemObservable = function (index) {
-        var item = this.getItem(index);
-        if (item[ObservableObject_1.default.RESERVED_PROPERTY_NAMES[0]] !== undefined) {
-            return item;
-        }
-        else {
-            return new ObservableObject_1.default(item);
-        }
-    };
-    ObservableCollection.prototype.addItem = function () {
-        var _this = this;
-        var items = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            items[_i - 0] = arguments[_i];
-        }
-        var startingIndex = this.list.length === 0 ? 1 : this.list.length;
-        var evtArgs = new CollectionChangedEventArgs(CollectionChangedAction.ADD);
-        evtArgs.newStartingIndex = startingIndex;
-        var newItemPushed;
-        items.forEach(function (item) {
-            _this.list.push(item);
-        });
-        evtArgs.newItems = this.list;
-        this.notifyCollectionChanged(evtArgs);
-        return newItemPushed;
-    };
-    ObservableCollection.prototype.removeItem = function () {
-        var _this = this;
-        var items = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            items[_i - 0] = arguments[_i];
-        }
-        var startingIndex = this.indexOf(items[0]);
-        if (startingIndex >= 0) {
-            var evtArgs = new CollectionChangedEventArgs(CollectionChangedAction.REMOVE);
-            evtArgs.oldStartingIndex = startingIndex;
-            items.forEach(function (item) {
-                var _index = _this.indexOf(item);
-                var itemWhichDeleted = _this.list[_index];
-                evtArgs.oldItems.push(itemWhichDeleted);
-                _this.list.splice(_index, 1);
-            });
-            this.notifyCollectionChanged(evtArgs);
-        }
-        return this;
-    };
-    ObservableCollection.prototype.forgetItem = function () {
-        var _this = this;
-        var items = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            items[_i - 0] = arguments[_i];
-        }
-        if (items === undefined || items.length === 0) {
-            this.listeners = [];
-            this.list = [];
-        }
-        else {
-            items.forEach(function (item) {
-                _this.list.splice(_this.indexOf(item), 1);
-            });
-        }
-        return this;
-    };
-    ObservableCollection.prototype.reset = function () {
-        var startingIndex = this.list.length - 1;
-        var evtArgs = new CollectionChangedEventArgs(CollectionChangedAction.RESET);
-        evtArgs.oldStartingIndex = startingIndex;
-        evtArgs.oldItems = this.list.slice(0);
-        this.list = [];
-        this.notifyCollectionChanged(evtArgs);
-        return this;
-    };
-    ObservableCollection.prototype.notifyCollectionChanged = function (evtArgs) {
-        this.listeners.forEach(function (listener) {
-            listener(evtArgs);
-        });
-    };
     ObservableCollection.prototype.onCollectionChanged = function (callback) {
-        this.listeners.push(callback);
+        this.local.listeners.push(callback);
+    };
+    ObservableCollection.prototype.startListeningToDatabase = function () {
+        var _this = this;
+        this.table.on("INSERT", function (rows) {
+            rows.forEach(function (row) {
+                var _newPureItem = _this.table.objectFromRow(row);
+                var _newObservableItem = new ObservableObject_1.default(_newPureItem);
+                _this.local.addItem(_newObservableItem);
+            });
+        });
+        this.table.on("UPDATE", function (rows) {
+            rows.forEach(function (row) {
+                var rowUpdated = row["after"];
+                var existingItem = _this.local.findItem(rowUpdated[_this.table.primaryKey]);
+                if (existingItem !== undefined) {
+                    var objRow = _this.table.objectFromRow(rowUpdated);
+                    Helper_1.default.forEachKey(objRow, function (key) {
+                        if (objRow[key] !== existingItem[key]) {
+                            existingItem[key] = objRow[key];
+                        }
+                    });
+                }
+            });
+        });
+        this.table.on("DELETE", function (rows) {
+            rows.forEach(function (row) {
+                var _primaryKeyValue = row[_this.table.primaryKey];
+                _this.local.removeItem(_primaryKeyValue);
+            });
+        });
+    };
+    ObservableCollection.prototype.find = function (criteriaRawJsObject, callback) {
+        return this.table.find(criteriaRawJsObject, callback);
+    };
+    ObservableCollection.prototype.findOne = function (criteriaRawJsObject, callback) {
+        return this.table.findOne(criteriaRawJsObject, callback);
+    };
+    ObservableCollection.prototype.findById = function (id, callback) {
+        return this.table.findById(id, callback);
+    };
+    ObservableCollection.prototype.findAll = function (tableRules, callback) {
+        return this.table.findAll(tableRules, callback);
+    };
+    ObservableCollection.prototype.insert = function (criteriaRawJsObject, callback) {
+        return this.table.save(criteriaRawJsObject, callback);
+    };
+    ObservableCollection.prototype.update = function (criteriaRawJsObject, callback) {
+        return this.table.save(criteriaRawJsObject, callback);
+    };
+    ObservableCollection.prototype.save = function (criteriaRawJsObject, callback) {
+        return this.table.save(criteriaRawJsObject, callback);
+    };
+    ObservableCollection.prototype.remove = function (criteriaOrID, callback) {
+        return this.table.remove(criteriaOrID, callback);
+    };
+    ObservableCollection.prototype.delete = function (criteriaOrID, callback) {
+        return this.remove(criteriaOrID, callback);
     };
     return ObservableCollection;
 })();

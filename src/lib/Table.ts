@@ -69,15 +69,15 @@ class Table<T> {
         return new CriteriaBuilder<T>(this);
     }
 
-    on(evtType: string, callback: (parsedResults: any[]) => void): void {
+    on(evtType: string, callback: (rows: any[]) => void): void {
         this.connection.watch(this.name, evtType, callback);
     }
 
-    off(evtType: string, callbackToRemove: (parsedResults: any[]) => void): void {
+    off(evtType: string, callbackToRemove: (rows: any[]) => void): void {
         this.connection.unwatch(this.name, evtType, callbackToRemove);
     }
 
-    
+
 
     has(extendedFunctionName: string): boolean {
         return this[extendedFunctionName] !== undefined;
@@ -139,8 +139,8 @@ class Table<T> {
 
     }
 
-    getPrimaryKeyValue(jsObject: any): number|string {
-        let returnValue: string|number = 0;
+    getPrimaryKeyValue(jsObject: any): number | string {
+        let returnValue: string | number = 0;
         let primaryKeyObjectProperty = Helper.toObjectProperty(this.primaryKey);
         if (jsObject) {
             if (jsObject.constructor === Array) {
@@ -170,6 +170,7 @@ class Table<T> {
         return this._selectQuery.execute(criteriaRawJsObject, callback);
     }
 
+
     findSingle(criteriaRawJsObject: any, callback?: (_result: T) => any): Promise<T> {
         return new Promise<T>((resolve, reject) => {
             this.find(criteriaRawJsObject).then(results=> {
@@ -182,8 +183,12 @@ class Table<T> {
         });
     }
 
-    findById(id: number|string): Promise<T>; // without callback
-    findById(id: number|string, callback?: (result: T) => any): Promise<T> {
+    findOne(criteriaRawJsObject: any, callback?: (_result: T) => any): Promise<T> {
+        return this.findSingle(criteriaRawJsObject, callback);
+    }
+    
+
+    findById(id: number | string, callback?: (result: T) => any): Promise<T> {
 
         return new Promise<T>((resolve, reject) => {
             let criteria = {};
@@ -199,9 +204,6 @@ class Table<T> {
         });
     }
 
-
-    findAll(): Promise<T[]>; // only criteria and promise
-    findAll(tableRules: RawRules): Promise<T[]> // only rules and promise
     findAll(tableRules?: RawRules, callback?: (_results: T[]) => any): Promise<T[]> {
         let _obj = {};
         if (tableRules !== undefined) {
@@ -210,18 +212,14 @@ class Table<T> {
         return this.find(_obj, callback);
     }
 
-
-    save(criteriaRawJsObject: any): Promise<T | any>; //without callback
     save(criteriaRawJsObject: any, callback?: (_result: any) => any): Promise<T | any> {
         return this._saveQuery.execute(criteriaRawJsObject, callback);
     }
 
-    remove(id: number | string); // ID without callback
-    remove(criteriaRawObject: any): Promise<DeleteAnswer>; // criteria obj without callback
     remove(criteriaOrID: any | number | string, callback?: (_result: DeleteAnswer) => any): Promise<DeleteAnswer> {
         return this._deleteQuery.execute(criteriaOrID, callback);
     }
 
 }
 
-export default  Table;
+export default Table;

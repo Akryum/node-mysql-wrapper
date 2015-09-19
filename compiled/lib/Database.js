@@ -1,5 +1,6 @@
 var Helper_1 = require("./Helper");
 var SelectQueryRules_1 = require("./queries/SelectQueryRules");
+var ObservableCollection_1 = require("./ObservableCollection");
 var Promise = require('bluebird');
 var Database = (function () {
     function Database(connection) {
@@ -92,6 +93,9 @@ var Database = (function () {
             newRules.from(parentRules);
         }
         return newRules;
+    };
+    Database.prototype.Collection = function (tableName, callbackWhenReady) {
+        return new ObservableCollection_1.default(this.connection.table(tableName), true, callbackWhenReady);
     };
     return Database;
 })();

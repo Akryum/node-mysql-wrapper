@@ -13,9 +13,10 @@ var Connection = (function (_super) {
     __extends(Connection, _super);
     function Connection(connection) {
         _super.call(this);
-        this.eventTypes = ["INSERT", "UPDATE", "REMOVE", "SAVE"];
+        this.eventTypes = ["INSERT", "UPDATE", "DELETE"];
         this.tableNamesToUseOnly = [];
         this.tables = [];
+        this.allowBinaryLogs = false;
         this.create(connection);
     }
     Connection.prototype.create = function (connection) {
@@ -54,14 +55,57 @@ var Connection = (function (_super) {
         });
         this.connection.destroy();
     };
-    Connection.prototype.watchDatabaseEvents = function () {
-        this.zongji = new ZongJi(this.connection.config);
-        this.zongji.on('binlog', function (evt) {
-            evt.dump();
+    Connection.prototype.clearBinaryLogs = function () {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.query("RESET MASTER", function (err, noresults) {
+                resolve();
+            });
         });
-        this.zongji.start({
-            includeEvents: ['tablemap', 'writerows', 'updaterows', 'deleterows']
-        });
+    };
+    Connection.prototype.watchBinaryLogs = function (callbackWhenReady) {
+        var _this = this;
+        if (!this.allowBinaryLogs) {
+            console.log("Binary logs are off.\n Please google 'Enable Binary logs in MySQL' , and restart your mysql server and NodeJS server.");
+        }
+        else {
+            if (!this.zongji || this.zongji === undefined) {
+                this.zongji = new ZongJi(this.connection.config);
+                this.clearBinaryLogs().then(function () {
+                    _this.zongji.on('binlog', function (evt) {
+                        //  evt.dump();
+                        //edw 9a ginei to emit , apo this.notice me ta katalila events kai table.
+                        var _evtName = evt.constructor.name;
+                        if (_evtName !== "TableMap") {
+                            if (_evtName === "WriteRows") {
+                                _evtName = "INSERT";
+                            }
+                            else if (_evtName === "UpdateRows") {
+                                _evtName = "UPDATE";
+                            }
+                            else if (_evtName === "DeleteRows") {
+                                _evtName = "DELETE";
+                            }
+                            var _tableName = evt.tableMap[evt.tableId].tableName;
+                            _this.notice(_tableName, _evtName, evt.rows);
+                        }
+                        else {
+                        }
+                    });
+                    _this.zongji.start({
+                        includeEvents: ['tablemap', 'writerows', "updaterows", "deleterows"]
+                    });
+                    if (callbackWhenReady) {
+                        callbackWhenReady();
+                    }
+                });
+            }
+            else {
+                if (callbackWhenReady) {
+                    callbackWhenReady();
+                }
+            }
+        }
     };
     Connection.prototype.link = function (readyCallback) {
         var _this = this;
@@ -72,8 +116,10 @@ var Connection = (function (_super) {
                         console.error('MYSQL: error connecting: ' + err.stack);
                         reject(err.stack);
                     }
-                    _this.fetchDatabaseInfornation().then(function () {
-                        resolve();
+                    _this.fetchDatabaseInformation().then(function () {
+                        _this.fetchBinaryInformation().then(function () {
+                            resolve();
+                        });
                     });
                 });
             if (_this.connection['state'] === 'disconnected' || _this.connection['state'] === 'connecting') {
@@ -102,7 +148,27 @@ var Connection = (function (_super) {
             }
         }
     };
-    Connection.prototype.fetchDatabaseInfornation = function () {
+    Connection.prototype.fetchBinaryInformation = function () {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.connection.query("SELECT * from information_schema.GLOBAL_VARIABLES WHERE VARIABLE_NAME = 'LOG_BIN';", function (err) {
+                var results = [];
+                for (var _i = 1; _i < arguments.length; _i++) {
+                    results[_i - 1] = arguments[_i];
+                }
+                if (err) {
+                    reject(err);
+                }
+                if (results.length > 0 && Array.isArray(results[0])) {
+                    if (results[0][0]["VARIABLE_VALUE"] === 'ON') {
+                        _this.allowBinaryLogs = true;
+                    }
+                }
+                resolve();
+            });
+        });
+    };
+    Connection.prototype.fetchDatabaseInformation = function () {
         //Ta kanw ola edw gia na doulepsei to def.resolve kai na einai etoimo olo to module molis ola ta tables kai ola ta columns dhlwthoun.
         var _this = this;
         return new Promise(function (resolve, reject) {
@@ -154,25 +220,16 @@ var Connection = (function (_super) {
     Connection.prototype.escape = function (val) {
         return this.connection.escape(val);
     };
-    Connection.prototype.notice = function (tableWhichCalled, queryStr, parsedResults) {
-        var evtType;
-        if (queryStr.indexOf(' ') === -1) {
-            evtType = undefined;
-        }
-        else {
-            evtType = queryStr.substr(0, queryStr.indexOf(' ')).toUpperCase();
-        }
+    Connection.prototype.notice = function (tableWhichCalled, evtType, parsedResults) {
         if (evtType !== undefined) {
-            if (evtType === 'INSERT' || evtType === 'UPDATE') {
-                this.emit(tableWhichCalled.toUpperCase() + ".SAVE", parsedResults);
+            evtType = evtType.toUpperCase();
+            if (this.eventTypes.indexOf(evtType) !== -1) {
+                this.emit(tableWhichCalled.toUpperCase() + "." + evtType, parsedResults);
             }
-            else if (evtType === 'DELETE') {
-                this.emit(tableWhichCalled.toUpperCase() + ".REMOVE", parsedResults);
-            }
-            this.emit(tableWhichCalled.toUpperCase() + "." + evtType, parsedResults);
         }
     };
     Connection.prototype.watch = function (tableName, evtType, callback) {
+        this.watchBinaryLogs();
         if (Array.isArray(evtType)) {
             for (var i = 0; i < evtType.length; i++) {
                 var _theEventType = evtType[i].toUpperCase();

@@ -1,6 +1,8 @@
 import Helper from "../Helper";
-import Table from "../Table";
+import 
+Table from "../Table";
 import IQuery from"./IQuery";
+import * as Promise from 'bluebird';
 //den kserw gt dn xreiazete to import * from "bluebird"  edw kai kapou allou mipws epidi kanw import to ./table ?
 
 export type DeleteAnswer = {
@@ -38,7 +40,7 @@ class DeleteQuery<T> implements IQuery<T>{
                     }
                     let _objReturned = { affectedRows: result.affectedRows, table: this._table.name };
 
-                    this._table.connection.notice(this._table.name, _query, [_objReturned]);
+                   //old this._table.connection.notice(this._table.name, _query, [_objReturned]);
 
                     resolve(_objReturned);
                     if (callback) {
@@ -55,7 +57,7 @@ class DeleteQuery<T> implements IQuery<T>{
                     }
                     let _objReturned = { affectedRows: result.affectedRows, table: this._table.name };
 
-                    this._table.connection.notice(this._table.name, _query, [_objReturned]);
+                    //old this._table.connection.notice(this._table.name, _query, [_objReturned]);
                     resolve(_objReturned);
                     if (callback) {
                         callback(_objReturned);

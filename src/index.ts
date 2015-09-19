@@ -2,7 +2,7 @@
 import Database from "./lib/Database";
 import {SelectQueryRules} from "./lib/queries/SelectQueryRules";
 import CriteriaBuilder from "./lib/CriteriaBuilder";
-import {CollectionChangedAction, default as ObservableCollection} from "./lib/ObservableCollection";
+import {CollectionChangedAction} from "./lib/BaseCollection";
 import Helper from "./lib/Helper";
 import ObservableObject from "./lib/ObservableObject";
 import * as Mysql from "mysql";
@@ -22,7 +22,7 @@ export function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection
     let mysqlCon = new Connection(mysqlUrlOrObjectOrMysqlAlreadyConnection);
     let mysqlDatabase = new Database(mysqlCon);
 
-    if (useTables) {
+    if (useTables && useTables !== null) {
         mysqlDatabase.useOnly(useTables);
     }
 
@@ -36,6 +36,5 @@ export function observable<T>(obj: T): T & ObservableObject {
 exports.SelectQueryRules = SelectQueryRules;
 exports.CriteriaBuilder = CriteriaBuilder;
 exports.ObservableObject = ObservableObject;
-exports.ObservableCollection = ObservableCollection;
 exports.CollectionChangedAction = CollectionChangedAction;
 exports.Helper = Helper;

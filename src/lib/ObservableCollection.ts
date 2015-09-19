@@ -1,163 +1,131 @@
-import Table from "./Table";
 import Helper from "./Helper";
-import ObservableObject from"./ObservableObject";
+import Table from "./Table";
+import {default as BaseCollection, CollectionChangedEventArgs} from "./BaseCollection";
+import {RawRules} from "./queries/SelectQueryRules";
+import {DeleteAnswer} from "./queries/DeleteQuery";
+import ObservableObject from "./ObservableObject";
+import * as Promise from "bluebird";
 
-export enum CollectionChangedAction {
-	ADD, REMOVE, RESET//for now I will use only add, remove and reset . replace and move is for future., REPLACE, MOVE
-}
+class ObservableCollection<T> { //auti i klasi 9a xrisimopoieite ws Collection me kapoies paralages mesa sto index.ts.
+    local: BaseCollection<T>;
+    private _items: (T & ObservableObject)[];
 
-export class CollectionChangedEventArgs<T> {
-	action: CollectionChangedAction;
-	oldItems: (T | (T & ObservableObject))[];
-	newItems: (T | (T & ObservableObject))[];
-	oldStartingIndex: number;
-	newStartingIndex: number;
+    constructor(protected table: Table<T>, fetchAllFromDatabase?: boolean, callbackWhenReady?: Function) {
+        this.local = new BaseCollection(table);
 
-	constructor(action: CollectionChangedAction, oldItems: (T | (T & ObservableObject))[] = [], newItems: (T | (T & ObservableObject))[] = [], oldStartingIndex: number = -1, newStartingIndex: number = -1) {
-		this.action = action;
-		this.oldItems = oldItems;
-		this.newItems = newItems;
-		this.oldStartingIndex = oldStartingIndex;
-		this.newStartingIndex = newStartingIndex;
-	}
-}
+        if (fetchAllFromDatabase) {
+            this.table.findAll().then((resultObjects) => {
+                resultObjects.forEach(obj=> {
+                    let observableObj = new ObservableObject(obj);
+                    this.local.items.push(<T & ObservableObject>observableObj);
+                });
 
-class ObservableCollection<T> {//T=result type of Table
- 
-	private list: (T | (T & ObservableObject))[] = [];
-	private listeners: ((eventArgs: CollectionChangedEventArgs<T>) => void)[] = [];
+                this.startListeningToDatabase();
+                if (callbackWhenReady) {
+                    callbackWhenReady();
+                }
 
-	constructor(protected table: Table<T>) { }
+            });
+        } else {
+            this.startListeningToDatabase();
+            if (callbackWhenReady) {
+                callbackWhenReady();
+            }
+        }
 
-	get length(): number {
-		return this.list.length;
-	}
+    }
 
-	get isObservable(): boolean {
-		return this.listeners.length > 0;
-	}
+    get items(): (T & ObservableObject)[] {
+        return <(T & ObservableObject)[]>this.local.items;
+    }
 
-	indexOf(item: T | string | number): number {
-		for (let i = 0; i < this.list.length; i++) {
-			let _itemIn = this.list[i];
-			let _primaryKey = Helper.toObjectProperty(this.table.primaryKey);
+    onCollectionChanged(callback: (eventArgs: CollectionChangedEventArgs<T>) => void): void {
+        this.local.listeners.push(callback);
+    }
 
-			if (Helper.isString(item) || Helper.isNumber(item)) { //this is an ID, not an object. ( this happens on DeleteQuery).
-				if (item === _itemIn[_primaryKey]) {
-					return i;
-				}
-			} else {
-
-				if (item[_primaryKey] === _itemIn[_primaryKey]) {
-					return i;
-				}
-			}
-		}
-
-		return -1;
-	}
-
-	findItem(itemId: string | number): (T | (T & ObservableObject)) {
-		for (let i = 0; i < this.list.length; i++) {
-			let _itemIn = this.list[i];
-			let _primaryKey = Helper.toObjectProperty(this.table.primaryKey);
-
-			if (itemId === _itemIn[_primaryKey]) {
-				return _itemIn;
-			}
-
-		}
-		return undefined;
-	}
-
-
-	getItem(index: number): T {
-		return this.list[index];
-	}
-
-	getItemObservable(index: number): T & ObservableObject {
-		let item = this.getItem(index);
-		if (item[ObservableObject.RESERVED_PROPERTY_NAMES[0]] !== undefined) { //means it is already ObservableObject
-			return <T & ObservableObject>item;
-		} else {
-			return <T & ObservableObject>new ObservableObject(item);
-		}
-	}
-
-	//for pure item
-	addItem(...items: (T | (T & ObservableObject))[]): (T | (T & ObservableObject)) {
-
-		let startingIndex = this.list.length === 0 ? 1 : this.list.length;
-		let evtArgs: CollectionChangedEventArgs<T> = new CollectionChangedEventArgs<T>(CollectionChangedAction.ADD);
-		evtArgs.newStartingIndex = startingIndex;
-		let newItemPushed;
-		items.forEach(item=> {
-			this.list.push(item);
-
-		});
-
-		evtArgs.newItems = this.list; //here it just the whole new list no the new items just added
+    startListeningToDatabase(): void {
 		
-		this.notifyCollectionChanged(evtArgs);
-		return newItemPushed;
-	}
+        // listens to table's direct database events.
+        this.table.on("INSERT", (rows: any[]) => {
+            rows.forEach(row=> {
+                let _newPureItem = this.table.objectFromRow(row);
+                let _newObservableItem = new ObservableObject(_newPureItem);
+                this.local.addItem(<T & ObservableObject>_newObservableItem);
+            });
+        });
+        //edw prepei na perimenw gia to clear query kia meta na valw kai ta alla 
+        this.table.on("UPDATE", (rows: any[]) => {
+            //	console.log("UPDATE FROM DATABASE. BY OBSERVABLE COLLECTION");
+            //rows = [{before: {rows} , after : {rows}}]
+            rows.forEach(row => {
+                let rowUpdated = row["after"];
+                let existingItem = this.local.findItem(rowUpdated[this.table.primaryKey]); //rowUpdated is raw row, so this will work without toObjectProperty.
+                if (existingItem !== undefined) {
+                    let objRow = this.table.objectFromRow(rowUpdated);
+                    Helper.forEachKey(objRow, key=> { //find only changed properties and change them.					
+                        if (objRow[key] !== existingItem[key]) {
+                            existingItem[key] = objRow[key]; //if it is observable will emit the propertyChanged event automatcly from ObservableObect.
+                        }
+
+                    });
+                }
+
+            });
+        });
+
+        this.table.on("DELETE", (rows: any[]) => {
+            //console.log("DELETE/REMOVE FROM DATABASE. BY OBSERVABLE COLLECTION");
+            rows.forEach(row=> {
+                let _primaryKeyValue = row[this.table.primaryKey]; // row is raw row.
+                this.local.removeItem(_primaryKeyValue);
+            });
+
+        });
+    }
+
+
+    find(criteriaRawJsObject?: any, callback?: (_results: T[]) => any): Promise<T[]> {
+        return this.table.find(criteriaRawJsObject, callback);
+    }
+
+    findOne(criteriaRawJsObject: any, callback?: (_result: T) => any): Promise<T> {
+        return this.table.findOne(criteriaRawJsObject, callback);
+    }
+
+    findById(id: number | string, callback?: (result: T) => any): Promise<T> {
+        return this.table.findById(id, callback);
+    }
+
+    findAll(tableRules?: RawRules, callback?: (_results: T[]) => any): Promise<T[]> {
+        return this.table.findAll(tableRules, callback);
+    }
+    
+	/**
+	 * .insert() and .update() do the same thing:  .save();
+	 */
+    insert(criteriaRawJsObject: any, callback?: (_result: any) => any): Promise<T | any> {
+        return this.table.save(criteriaRawJsObject, callback);
+    }
+
+    update(criteriaRawJsObject: any, callback?: (_result: any) => any): Promise<T | any> {
+        return this.table.save(criteriaRawJsObject, callback);
+    }
+
+    save(criteriaRawJsObject: any, callback?: (_result: any) => any): Promise<T | any> {
+        return this.table.save(criteriaRawJsObject, callback);
+    }
+
+    remove(criteriaOrID: any | number | string, callback?: (_result: DeleteAnswer) => any): Promise<DeleteAnswer> {
+        return this.table.remove(criteriaOrID, callback);
+    }
 	
-	//for pure item
-	removeItem(...items: (T | (T & ObservableObject))[]): ObservableCollection<T> {
-		let startingIndex = this.indexOf(items[0]);
-		if (startingIndex >= 0) {
-			//actualy have something to be removed
-		
-			let evtArgs: CollectionChangedEventArgs<T> = new CollectionChangedEventArgs<T>(CollectionChangedAction.REMOVE);
-			evtArgs.oldStartingIndex = startingIndex;
-			items.forEach(item => {
-				let _index = this.indexOf(item);
-				let itemWhichDeleted = this.list[_index];
+	/**
+	 * same thing as .remove();
+	 */
+    delete(criteriaOrID: any | number | string, callback?: (_result: DeleteAnswer) => any): Promise<DeleteAnswer> {
+        return this.remove(criteriaOrID, callback);
+    }
 
-				evtArgs.oldItems.push(itemWhichDeleted);
-				this.list.splice(_index, 1);
-			});
-
-
-			this.notifyCollectionChanged(evtArgs);
-		}
-		return this;
-	}
-
-	forgetItem(...items: (T | (T & ObservableObject))[]): ObservableCollection<T> {
-		if (items === undefined || items.length === 0) {
-			this.listeners = [];
-			this.list = [];
-		} else {
-			items.forEach(item => {
-				this.list.splice(this.indexOf(item), 1);
-			});
-		}
-
-		return this;
-	}
-
-	reset(): ObservableCollection<T> {
-		let startingIndex = this.list.length - 1;
-		let evtArgs: CollectionChangedEventArgs<T> = new CollectionChangedEventArgs<T>(CollectionChangedAction.RESET);
-
-		evtArgs.oldStartingIndex = startingIndex;
-		evtArgs.oldItems = this.list.slice(0); // copy without reference.
-		this.list = []; //reset the actual list
-		this.notifyCollectionChanged(evtArgs);
-
-		return this;
-	}
-
-	notifyCollectionChanged(evtArgs: CollectionChangedEventArgs<T>): void {
-		this.listeners.forEach(listener=> {
-			listener(evtArgs);
-		});
-	}
-
-	onCollectionChanged(callback: (eventArgs: CollectionChangedEventArgs<T>) => void): void {
-		this.listeners.push(callback);
-	}
 
 }
 

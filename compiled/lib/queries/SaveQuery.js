@@ -1,4 +1,5 @@
 var Helper_1 = require("../Helper");
+var Promise = require('bluebird');
 var SaveQuery = (function () {
     function SaveQuery(_table) {
         this._table = _table;
@@ -22,7 +23,6 @@ var SaveQuery = (function () {
                     if (err) {
                         reject(err);
                     }
-                    _this._table.connection.notice(_this._table.name, _query, obj);
                     resolve(obj);
                     if (callback) {
                         callback(obj);
@@ -38,7 +38,6 @@ var SaveQuery = (function () {
                     var primaryKeyJsObjectProperty = Helper_1.default.toObjectProperty(_this._table.primaryKey);
                     obj[primaryKeyJsObjectProperty] = result.insertId;
                     primaryKeyValue = result.insertId;
-                    _this._table.connection.notice(_this._table.name, _query, obj);
                     resolve(obj);
                     if (callback) {
                         callback(obj);

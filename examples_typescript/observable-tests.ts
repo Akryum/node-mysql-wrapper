@@ -37,6 +37,11 @@ interface UserInfo {
 
 db.ready(() => {
     var usersTable = db.table<User>("users");
+/*
+    usersTable.on("INSERT", (rawRows: any[]) => {
+        console.log("INSERT DIRECTLY FROM DATABASE EXECUTED.");
+    });*/
+    
     //or var usersDb = db.table("users"); if you don't want intel auto complete from your ide/editor
     var usersCollection = new mysqlWrapper.ObservableCollection(usersTable); 
     //the collection can contains 'pure row objects' from a table method results and can contains ObservableObjects. Yes in the same list.
@@ -56,31 +61,37 @@ db.ready(() => {
 
     var _criteria16 = usersTable.criteria.where("userId", 16).joinAs("myComments", "comments", "userId").orderBy("userId", true).limit(1).build();
 
+
+
     usersTable.findSingle(_criteria16, userRow=> {
         //this is intersection typed
+        if(userRow===undefined){
+            console.log('This User does not  found');
+            return;
+        }
         var user = mysqlWrapper.observable(userRow);
-
+        console.dir(user);
         usersCollection.addItem(user); //or add simple row object: addItem(userRow)
-       
+        
         //to get an item: usersCollection.getItemObservable(0) or .getItem(index)
         //getItemObservable(index) check if the item on index is observable if yes,it returns it, if not it will make one and return that.
-
-
+ 
+ 
         user.onPropertyChanged((args) => {
             console.log(args.propertyName + " Has changed to " + user[args.propertyName] + " from " + args.oldValue);
         });
 
 
-        user.username = "new username for 16..."; //occurs property changed
-
+        /* user.username = "new username for 16..."; //occurs property changed
+  
+          
+         usersTable.save(user).then(() => { // occurs nothing because we changed from here, no directly from database or any other application
+              
+         });
         
-        usersTable.save(user).then(() => { // occurs nothing
-            
-        });
-
-        usersTable.remove(user).then(() => {
-            usersCollection.removeItem(user);//occurs collection changed
-        });
+                 usersTable.remove(user).then(() => {
+                     usersCollection.removeItem(user);//occurs collection changed
+                 });*/
        
         // console.dir(user.toJSON("password", "myComments")); //print the object without password and myComments property fields.
     });
@@ -89,7 +100,21 @@ db.ready(() => {
 
 server.on('uncaughtException', function(err) {
     console.log(err);
-})
+});
+
+process.on("SIGHUP", () => {
+    db.end((err) => {
+        if (err) {
+            console.dir(err);
+            setTimeout(() => {
+                process.exit();
+            }, 8000);
+        } else {
+            process.exit();
+        }
+
+    });
+});
 
 var httpPort = 1193;//config.get('Server.port') || 1193;
 server.listen(httpPort, function() {

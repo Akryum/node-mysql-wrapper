@@ -9,10 +9,11 @@ var ZongJi: ZongJiInterface = require("zongji"); //THIS IS THE ONLY WAY I CAN DO
 
 class Connection extends EventEmitter {
     connection: Mysql.IConnection;
-    eventTypes = ["INSERT", "UPDATE", "REMOVE", "SAVE"];
+    eventTypes = ["INSERT", "UPDATE", "DELETE"];
     tableNamesToUseOnly = [];
     tables: Table<any>[] = [];
-    zongji: any; //ZongJi
+    allowBinaryLogs: boolean = false;
+    zongji: ZongJiInterface; //ZongJi
 
     constructor(connection: string | Mysql.IConnection | Mysql.IConnectionConfig) {
         super();
@@ -58,16 +59,75 @@ class Connection extends EventEmitter {
         this.connection.destroy();
     }
 
-    watchDatabaseEvents(): void {
+    clearBinaryLogs(): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            this.query("RESET MASTER", (err, noresults) => { //WORKED BUT I TESTED IT WITH GRAND PRIV, I DONT KNOW IF WORKING WITH SMALELR PRIV.
+                resolve();
 
-        this.zongji = new ZongJi(this.connection.config);
-        this.zongji.on('binlog', function(evt) {
-            evt.dump();
+            });
         });
+    }
+    
+    watchBinaryLogs(callbackWhenReady?: Function): void {
+        if (!this.allowBinaryLogs) {
+            console.log("Binary logs are off.\n Please google 'Enable Binary logs in MySQL' , and restart your mysql server and NodeJS server.");
+        } else {
+            if (!this.zongji || this.zongji === undefined) { //ONLY ONE TIME INIT and start.
+                this.zongji = new ZongJi(this.connection.config); //BEFORE clear logs.
+                this.clearBinaryLogs().then(() => { //EVERY TIME clear the previous logs.            
+                    
+                    this.zongji.on('binlog', (evt) => {
+                        //  evt.dump();
+                        //edw 9a ginei to emit , apo this.notice me ta katalila events kai table.
+                    
+                    
+                        //tableMap
+                        //rows
+                        //WriteRows, DeleteRows, UpdateRows
+                    
+               
+                        //console.log(evt.constructor.name + " < cons name");
 
-        this.zongji.start({
-            includeEvents: ['tablemap', 'writerows', 'updaterows', 'deleterows']
-        });
+
+                        let _evtName = evt.constructor.name;
+
+                        if (_evtName !== "TableMap") {
+                            if (_evtName === "WriteRows") {
+                                _evtName = "INSERT";
+                            } else if (_evtName === "UpdateRows") {
+                                _evtName = "UPDATE";
+                            } else if (_evtName === "DeleteRows") {
+                                _evtName = "DELETE";
+                            }
+
+                            let _tableName = evt.tableMap[evt.tableId].tableName;
+                            //console.log("_evtName: " + _evtName + " _tableName: " + _tableName + ", rows: ", evt.rows);
+                            this.notice(_tableName, _evtName, evt.rows);
+                        } else {
+                            //do nothing console.dir(evt);
+                        }
+
+
+                    });
+
+                    this.zongji.start({
+                        includeEvents: ['tablemap', 'writerows', "updaterows", "deleterows"]
+                    });
+                    if (callbackWhenReady) {
+                        callbackWhenReady();
+                    }
+
+                });
+            } else {
+                if (callbackWhenReady) {
+                    callbackWhenReady();
+                }
+            }
+        }
+
+
+
+
     }
 
     link(readyCallback?: () => void): Promise<void> {
@@ -81,12 +141,15 @@ class Connection extends EventEmitter {
                     }
                    
                     //console.log('MYSQL: connected as id ' + self.connection.threadId);
-                    this.fetchDatabaseInfornation().then(() => {
-                        //ONLY FOR MY MACHINE - TESTS this.watchDatabaseEvents();
-                        resolve();
+                    this.fetchDatabaseInformation().then(() => {
+                        this.fetchBinaryInformation().then(() => {
+
+                            resolve();
+                        });
                     });
-
-
+                    //   Promise.all([this.fetchDatabaseInformation, this.fetchBinaryInformation]).then(() => {
+                    //      resolve();
+                    //   });
                 });
 
             // if (this.connection.state === 'authenticated') {
@@ -115,7 +178,28 @@ class Connection extends EventEmitter {
         }
     }
 
-    fetchDatabaseInfornation(): Promise<void> {
+    fetchBinaryInformation(): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            this.connection.query("SELECT * from information_schema.GLOBAL_VARIABLES WHERE VARIABLE_NAME = 'LOG_BIN';", (err: Mysql.IError, ...results: any[]) => {
+                if (err) {
+                    reject(err);
+                }
+                if (results.length > 0 && Array.isArray(results[0])) {
+
+                    if (results[0][0]["VARIABLE_VALUE"] === 'ON') {
+                        //binary logs are enabled.
+                        // this.watchDatabaseEvents();
+                        this.allowBinaryLogs = true;
+                    }
+
+                }
+                resolve();
+
+            });
+        });
+    }
+
+    fetchDatabaseInformation(): Promise<void> {
         //Ta kanw ola edw gia na doulepsei to def.resolve kai na einai etoimo olo to module molis ola ta tables kai ola ta columns dhlwthoun.
 
         return new Promise<void>((resolve, reject) => {
@@ -176,27 +260,27 @@ class Connection extends EventEmitter {
         return this.connection.escape(val);
     }
 
-    notice(tableWhichCalled: string, queryStr: string, parsedResults: any[]): void {
-        let evtType;
-        //get the first word from the query, usualy is INSERT OR UPDATE OR DELETE (which is 'REMOVE').
-        if (queryStr.indexOf(' ') === -1) {
-            evtType = undefined;
-        } else {
-            evtType = queryStr.substr(0, queryStr.indexOf(' ')).toUpperCase();
-        }
+    notice(tableWhichCalled: string, evtType: string, parsedResults: any[]): void {
 
         if (evtType !== undefined) {
-            if (evtType === 'INSERT' || evtType === 'UPDATE') {
-                this.emit(tableWhichCalled.toUpperCase() + ".SAVE", parsedResults);
-            } else if (evtType === 'DELETE') {
-                this.emit(tableWhichCalled.toUpperCase() + ".REMOVE", parsedResults);
+            evtType = evtType.toUpperCase();
+            /* if (evtType === 'INSERT' || evtType === 'UPDATE') {
+                 this.emit(tableWhichCalled.toUpperCase() + ".SAVE", parsedResults);
+             } else if (evtType === 'DELETE') {
+                 this.emit(tableWhichCalled.toUpperCase() + ".REMOVE", parsedResults);
+             }*/
+            if (this.eventTypes.indexOf(evtType) !== -1) {
+                this.emit(tableWhichCalled.toUpperCase() + "." + evtType, parsedResults);
             }
-            this.emit(tableWhichCalled.toUpperCase() + "." + evtType, parsedResults);
+
         }
     }
 
     //evtType:  EventTypes[]  | EventTypes | string,
     watch(tableName: string, evtType: any, callback: (parsedResults: any[]) => void): void {
+
+        this.watchBinaryLogs(); //checks if nongji stopped and starts it.
+    
         if (Array.isArray(evtType)) {
             //if it is array then we catch more than one event with the same callback, this maybe will be 'helpy' to some devs
             for (let i = 0; i < evtType.length; i++) {
@@ -211,6 +295,7 @@ class Connection extends EventEmitter {
                 this.on(tableName.toUpperCase() + "." + evtType, callback);
             }
         }
+
     }
 
     //evtType: EventTypes 
@@ -220,6 +305,8 @@ class Connection extends EventEmitter {
         if (this.eventTypes.indexOf(evtType) !== -1) {
             this.removeListener(tableName.toUpperCase() + "." + evtType, callbackToRemove);
         }
+        
+        ///TODO: edw an dn exoun minei alla events tote na kanw turn off to zonji na min trexei adika(??)
     }
 
     query(queryStr: string, callback: (err: Mysql.IError, results: any) => any, queryArguments?: any[]): void {

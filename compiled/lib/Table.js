@@ -163,6 +163,9 @@ var Table = (function () {
             });
         });
     };
+    Table.prototype.findOne = function (criteriaRawJsObject, callback) {
+        return this.findSingle(criteriaRawJsObject, callback);
+    };
     Table.prototype.findById = function (id, callback) {
         var _this = this;
         return new Promise(function (resolve, reject) {

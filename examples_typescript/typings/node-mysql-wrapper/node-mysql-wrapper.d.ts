@@ -420,6 +420,13 @@ declare module "node-mysql-wrapper" {
         destroy(): void;
         
         /**
+         * Clear all binary logs from the whole database.
+         * When finish returns a promise, use it with .then(function(){});
+         * @return Promise
+         */
+        clearLogs(): Promise<void>;
+        
+        /**
          * Link the real connection with this MysqlConnection object.
          * @param {function} readyCallback when the link operation is done this callback is executed.
          * @returnType {Promise}
@@ -440,7 +447,7 @@ declare module "node-mysql-wrapper" {
          * @returnType {Promise}
          * @return {Promise}
          */
-        fetchDatabaseInfornation(): Promise<void>;
+        fetchDatabaseInformation(): Promise<void>;
         
         /**
          * Escape the query column's value  and return it.

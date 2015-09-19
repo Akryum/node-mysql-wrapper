@@ -34,6 +34,9 @@
   # Very important if you want to receive write, update and delete row events
   binlog_format    = row
  */
+/**
+ *  query to delete all binary logs: RESET MASTER;  
+ */
 
 import * as Mysql from "mysql";
 
@@ -48,7 +51,7 @@ export interface ZongJiInterface {
 	/**
 		 * Start receiving replication events
 		 */
-	start(options?: ZongJiOptionsInterface): void;
+	start(options?: ZongJiOptionsInterface | any): void;
 		
 	/**
 		 * Disconnect from MySQL server, stop receiving events
