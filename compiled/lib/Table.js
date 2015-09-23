@@ -5,6 +5,7 @@ var SelectQuery_1 = require("./queries/SelectQuery");
 var SaveQuery_1 = require("./queries/SaveQuery");
 var DeleteQuery_1 = require("./queries/DeleteQuery");
 var CriteriaBuilder_1 = require("./CriteriaBuilder");
+var MeteorCollection_1 = require("./MeteorCollection");
 var Promise = require('bluebird');
 var Table = (function () {
     function Table(tableName, connection) {
@@ -191,6 +192,9 @@ var Table = (function () {
     };
     Table.prototype.remove = function (criteriaOrID, callback) {
         return this._deleteQuery.execute(criteriaOrID, callback);
+    };
+    Table.prototype.meteorCollection = function (nameOfCollection) {
+        return new MeteorCollection_1.default(this, nameOfCollection);
     };
     return Table;
 })();

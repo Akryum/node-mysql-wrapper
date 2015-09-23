@@ -18,6 +18,7 @@
   "files": [
     "./src/typings/bluebird/bluebird.d.ts",
     "./src/typings/mysql/mysql.d.ts",
+    "./src/typings/my-meteor/my-meteor.d.ts",
     "./src/index.ts",
     "./src/lib/CriteriaBuilder.ts",
     "./src/lib/CriteriaDivider.ts",
@@ -29,6 +30,7 @@
     "./src/lib/ObservableObject.ts",
     "./src/lib/BaseCollection.ts",
     "./src/lib/ObservableCollection.ts",
+    "./src/lib/MeteorCollection.ts",
     "./src/lib/BinaryLogHelper.ts",
     "./src/lib/Connection.ts",
     "./src/lib/Table.ts",

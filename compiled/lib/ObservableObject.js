@@ -62,10 +62,10 @@ var ObservableObject = (function () {
         }
         var rawObject = {};
         Helper_1.default.forEachKey(this, function (_key) {
-            if (ObservableObject.RESERVED_PROPERTY_NAMES.indexOf(_key) == -1) {
-                var key = Helper_1.default.toObjectProperty(_key.substr(1));
+            var key = Helper_1.default.toObjectProperty(_key.substr(1));
+            if (ObservableObject.RESERVED_PROPERTY_NAMES.indexOf(key) == -1) {
                 if (key !== SelectQueryRules_1.TABLE_RULES_PROPERTY && excludeProperties.indexOf(key) == -1) {
-                    rawObject[key] = _this[key];
+                    rawObject[key] = _this[_key];
                 }
             }
         });

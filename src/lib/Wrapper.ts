@@ -2,16 +2,14 @@
 import Helper from "./Helper";
 import Table from "./Table";
 import {SelectQueryRules} from "./queries/SelectQueryRules";
-import ObservableObject from "./ObservableObject";
-import ObservableCollection from "./ObservableCollection";
-import MeteorCollection from "./MeteorCollection";
 import * as Promise from 'bluebird';
 import * as Mysql from 'mysql';
 
-class Database {
+
+
+class Wrapper {
     connection: Connection;
-    readyListenerCallbacks = new Array<Function>();
-    isReady: boolean = false;
+    readyListenerCallbacks = new Array<Function>();            //()=>void
 
     constructor(connection?: Connection) {
         this.setConnection(connection);
@@ -54,13 +52,10 @@ class Database {
 
     }
 
-    ready(callback?: () => void): void {
-        if (callback) {
-            this.readyListenerCallbacks.push(callback);
-        }
+    ready(callback: () => void): void {
+        this.readyListenerCallbacks.push(callback);
 
-
-        if (this.readyListenerCallbacks.length <= 1) { //23-09-2015 - no require to have a callback now, it can runs sync with connect( on index.ts)
+        if (this.readyListenerCallbacks.length === 1) {
             //means the first listener,so  do the link/connect to the connection now. No before.
 
             this.connection.link().then(() => {
@@ -79,7 +74,6 @@ class Database {
     }
 
     noticeReady(): void {
-        this.isReady = true;
         for (let i = 0; i < this.readyListenerCallbacks.length; i++) {
             this.readyListenerCallbacks[i]();
         }
@@ -99,13 +93,11 @@ class Database {
     }
 
     destroy(): void {
-        this.isReady = false;
         this.readyListenerCallbacks = [];
         this.connection.destroy();
     }
 
     end(maybeAcallbackError: (err: any) => void) {
-        this.isReady = false;
         this.readyListenerCallbacks = [];
         this.connection.end(maybeAcallbackError);
     }
@@ -125,14 +117,6 @@ class Database {
         return newRules;
     }
 
-    collection<T>(tableName: string, callbackWhenReady?: Function): ObservableCollection<T> {
-        return new ObservableCollection(<Table<T>>this.connection.table(tableName), true, callbackWhenReady);
-    }
-
-    meteorCollection<T>(tableName: string, nameOfCollection?: string): MeteorCollection<T> {
-        return new MeteorCollection<T>(this.table<T>(tableName), nameOfCollection);
-    }
-
 }
 
-export default Database;
+export default Wrapper;

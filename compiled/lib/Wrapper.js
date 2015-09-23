@@ -95,4 +95,5 @@ var Wrapper = (function () {
     };
     return Wrapper;
 })();
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Wrapper;

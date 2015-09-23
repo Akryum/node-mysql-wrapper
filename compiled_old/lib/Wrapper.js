@@ -1,15 +1,12 @@
 var Helper_1 = require("./Helper");
-var SelectQueryRules_1 = require("./queries/SelectQueryRules");
-var ObservableCollection_1 = require("./ObservableCollection");
-var MeteorCollection_1 = require("./MeteorCollection");
+var SelectQueryRules_1 = require("./SelectQueryRules");
 var Promise = require('bluebird');
-var Database = (function () {
-    function Database(connection) {
+var Wrapper = (function () {
+    function Wrapper(connection) {
         this.readyListenerCallbacks = new Array();
-        this.isReady = false;
         this.setConnection(connection);
     }
-    Database.when = function () {
+    Wrapper.when = function () {
         var _promises = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             _promises[_i - 0] = arguments[_i];
@@ -24,17 +21,17 @@ var Database = (function () {
             }).catch(function (_err) { reject(_err); });
         });
     };
-    Database.prototype.setConnection = function (connection) {
+    Wrapper.prototype.setConnection = function (connection) {
         this.connection = connection;
     };
-    Database.prototype.useOnly = function () {
+    Wrapper.prototype.useOnly = function () {
         var useTables = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             useTables[_i - 0] = arguments[_i];
         }
         this.connection.useOnly(useTables);
     };
-    Database.prototype.has = function (tableName, functionName) {
+    Wrapper.prototype.has = function (tableName, functionName) {
         if (this[tableName] !== undefined) {
             if (functionName) {
                 return this[tableName][functionName] !== undefined;
@@ -45,12 +42,10 @@ var Database = (function () {
         }
         return false;
     };
-    Database.prototype.ready = function (callback) {
+    Wrapper.prototype.ready = function (callback) {
         var _this = this;
-        if (callback) {
-            this.readyListenerCallbacks.push(callback);
-        }
-        if (this.readyListenerCallbacks.length <= 1) {
+        this.readyListenerCallbacks.push(callback);
+        if (this.readyListenerCallbacks.length === 1) {
             this.connection.link().then(function () {
                 [].forEach.call(_this.connection.tables, function (_table) {
                     _this[Helper_1.default.toObjectProperty(_table.name)] = _this[_table.name] = _table;
@@ -59,16 +54,15 @@ var Database = (function () {
             });
         }
     };
-    Database.prototype.table = function (tableName) {
+    Wrapper.prototype.table = function (tableName) {
         return this.connection.table(tableName);
     };
-    Database.prototype.noticeReady = function () {
-        this.isReady = true;
+    Wrapper.prototype.noticeReady = function () {
         for (var i = 0; i < this.readyListenerCallbacks.length; i++) {
             this.readyListenerCallbacks[i]();
         }
     };
-    Database.prototype.removeReadyListener = function (callback) {
+    Wrapper.prototype.removeReadyListener = function (callback) {
         for (var i = 0; i < this.readyListenerCallbacks.length; i++) {
             if (this.readyListenerCallbacks[i] === callback) {
                 this.readyListenerCallbacks.slice(i, 1);
@@ -76,38 +70,30 @@ var Database = (function () {
             }
         }
     };
-    Database.prototype.query = function (queryStr, callback, queryArguments) {
+    Wrapper.prototype.query = function (queryStr, callback, queryArguments) {
         this.connection.query(queryStr, callback, queryArguments);
     };
-    Database.prototype.destroy = function () {
-        this.isReady = false;
+    Wrapper.prototype.destroy = function () {
         this.readyListenerCallbacks = [];
         this.connection.destroy();
     };
-    Database.prototype.end = function (maybeAcallbackError) {
-        this.isReady = false;
+    Wrapper.prototype.end = function (maybeAcallbackError) {
         this.readyListenerCallbacks = [];
         this.connection.end(maybeAcallbackError);
     };
-    Database.prototype.newTableRules = function (tableName) {
+    Wrapper.prototype.newTableRules = function (tableName) {
         var tbRule = new SelectQueryRules_1.SelectQueryRules();
         this.table(tableName).rules = tbRule;
         return tbRule;
     };
-    Database.prototype.buildRules = function (parentRules) {
+    Wrapper.prototype.buildRules = function (parentRules) {
         var newRules = new SelectQueryRules_1.SelectQueryRules();
         if (parentRules) {
             newRules.from(parentRules);
         }
         return newRules;
     };
-    Database.prototype.collection = function (tableName, callbackWhenReady) {
-        return new ObservableCollection_1.default(this.connection.table(tableName), true, callbackWhenReady);
-    };
-    Database.prototype.meteorCollection = function (tableName, nameOfCollection) {
-        return new MeteorCollection_1.default(this.table(tableName), nameOfCollection);
-    };
-    return Database;
+    return Wrapper;
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = Database;
+exports.default = Wrapper;

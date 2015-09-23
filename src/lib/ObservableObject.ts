@@ -74,11 +74,12 @@ class ObservableObject {
 
 		Helper.forEachKey(this, _key=> {
 			//epidi ta exw _ ta real properties tou table:
-			if (ObservableObject.RESERVED_PROPERTY_NAMES.indexOf(_key) == -1) {
+			let key = Helper.toObjectProperty(_key.substr(1));
+			if (ObservableObject.RESERVED_PROPERTY_NAMES.indexOf(key) == -1) {
 
-				let key = Helper.toObjectProperty(_key.substr(1));	// vgazoume to _ gia na mi ginei UserId anti gia userId px.
+				// vgazoume to _ gia na mi ginei UserId anti gia userId px.
 				if (key !== TABLE_RULES_PROPERTY && excludeProperties.indexOf(key) == -1) {
-					rawObject[key] = this[key];
+					rawObject[key] = this[_key];
 				}
 			}
 

@@ -1,6 +1,6 @@
 {
   "name": "node-mysql-wrapper",
-  "version": "2.4.1",
+  "version": "2.4.4",
   "description": "This is a node js module, written in TypeScript (module is compiled to JavaScript), which manages mysql (node-mysql) connection and models in a way that you expected!",
   "main": "./compiled/index.js",
   "scripts": {
@@ -18,7 +18,8 @@
     "gulp-zip": "^3.0.2",
     "streamqueue": "^1.1.1",
     "typescript": "^1.6.0-beta",
-    "yargs": "^3.24.0"
+    "yargs": "^3.24.0",
+	"fibers": "https://github.com/meteor/node-fibers/tarball/d519f0c5971c33d99c902dad346b817e84bab001"
   },
   "repository": {
     "type": "git",

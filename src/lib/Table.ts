@@ -6,7 +6,7 @@ import SelectQuery from "./queries/SelectQuery";
 import SaveQuery from "./queries/SaveQuery";
 import {default as DeleteQuery, DeleteAnswer} from "./queries/DeleteQuery";
 import CriteriaBuilder from "./CriteriaBuilder";
-
+import MeteorCollection from "./MeteorCollection";
 import * as Promise from 'bluebird';
 
 class Table<T> {
@@ -186,7 +186,7 @@ class Table<T> {
     findOne(criteriaRawJsObject: any, callback?: (_result: T) => any): Promise<T> {
         return this.findSingle(criteriaRawJsObject, callback);
     }
-    
+
 
     findById(id: number | string, callback?: (result: T) => any): Promise<T> {
 
@@ -219,6 +219,14 @@ class Table<T> {
     remove(criteriaOrID: any | number | string, callback?: (_result: DeleteAnswer) => any): Promise<DeleteAnswer> {
         return this._deleteQuery.execute(criteriaOrID, callback);
     }
+    
+    //for meteor js
+    
+    meteorCollection(nameOfCollection?: string): MeteorCollection<T> {
+        return new MeteorCollection<T>(this, nameOfCollection);
+    }
+    
+    //end meteor js
 
 }
 
