@@ -23,7 +23,7 @@ if (Meteor.isClient) {
 if (Meteor.isServer) {
   var mysqlWrapper = Meteor["npmRequire"]("node-mysql-wrapper");
 
-  var db: NodeMysqlWrapper.Database = mysqlWrapper.connect("mysql://root:01030502@127.0.0.1/taglub?debug=false&charset=utf8");
+  var db: NodeMysqlWrapper.Database = mysqlWrapper.connect("mysql://kataras:pass@127.0.0.1/taglub?debug=false&charset=utf8");
   console.log('MYSQL IS READY');
 
   var usersTable = db.meteorTable("users");
