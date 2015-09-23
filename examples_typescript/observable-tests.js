@@ -12,6 +12,7 @@ var User = (function () {
     return User;
 })();
 db.ready(function () {
+    console.log('MYSQL IS UP AND RUNNING');
     var usersCollection = db.collection("users");
     usersCollection.onCollectionChanged(function (eventArgs) {
         switch (eventArgs.action) {

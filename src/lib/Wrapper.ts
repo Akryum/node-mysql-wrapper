@@ -5,8 +5,6 @@ import {SelectQueryRules} from "./queries/SelectQueryRules";
 import * as Promise from 'bluebird';
 import * as Mysql from 'mysql';
 
-
-
 class Wrapper {
     connection: Connection;
     readyListenerCallbacks = new Array<Function>();            //()=>void

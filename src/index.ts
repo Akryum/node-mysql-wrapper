@@ -7,12 +7,14 @@ import MeteorCollection from "./lib/MeteorCollection";
 import Helper from "./lib/Helper";
 import ObservableObject from "./lib/ObservableObject";
 import * as Mysql from "mysql";
+
+
 //import * as Future from "fibers/future";
-var Future = require("fibers/future"); //anagastika...
+//var Future = require("fibers/future"); //anagastika...
 //dependecies, but doesn't work yet... [ I fix compiled code but I let the code here for development tomorrow]
 //"fibers": "https://github.com/meteor/node-fibers/tarball/d519f0c5971c33d99c902dad346b817e84bab001"
 
-
+declare var Future;
 if (Function.prototype["name"] === undefined) {
     //works only for function something() {}; no for var something = function(){}
     // Add a custom property to all function values
@@ -29,19 +31,20 @@ console.log(" USE var db = wrapper.wrap('mysqlurl_or_already_opened_connection);
 */
 export function connect(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): Database {
     let future = new Future;
-
     let mysqlCon = new Connection(mysqlUrlOrObjectOrMysqlAlreadyConnection);
     let mysqlDatabase = new Database(mysqlCon);
 
     if (useTables && useTables !== null) {
         mysqlDatabase.useOnly(useTables);
     }
-
-    mysqlDatabase.ready(() => {
+    mysqlDatabase.ready(function() { 
+        //here the db is ready);
         future.return(mysqlDatabase);
     });
+    //I must do it sync code and after return the database object.
+    
 
-    //return mysqlDatabase;
+    // return mysqlDatabase;
     return future.wait();
 }
 

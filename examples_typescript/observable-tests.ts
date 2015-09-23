@@ -6,6 +6,7 @@ var server = http.createServer(app);
 
 
 var db = mysqlWrapper.wrap("mysql://kataras:pass@127.0.0.1/taglub?debug=false&charset=utf8");
+console.log('MYSQL IS UP AND RUNNING');
 
 class User { //or interface
     userId: number;
@@ -35,18 +36,20 @@ interface UserInfo {
     hometown: string;
 }
 
+
+
 db.ready(() => {
 
     var usersCollection = db.collection("users");
     /* --------------OR-------------------------
     var usersTable= db.table<User>("users");
-    
+     
     var usersCollection = new mysqlWrapper.ObservableCollection(usersTable,true);
      //second parameter:  true is the default on db.Collection but no from mysqlWrapper.
      //if second parameter is true then collection will fire the table.findAll(); and cache the results into a list.
      //All cached objects/items inside the list are observable too ( mysqlWrapper.observable(object)).
      //means that you can use usersCollection.items[0].onPropertyChanged(args=>{ //args.propertyName and args.oldValue });
-    
+     
     */
     usersCollection.onCollectionChanged((eventArgs) => {
         switch (eventArgs.action) {
@@ -68,9 +71,9 @@ db.ready(() => {
         Example of single observable object: 
         
         var _criteria16 = usersTable.criteria.where("userId", 16).joinAs("myComments", "comments", "userId").orderBy("userId", true).limit(1).build();
-    
-    
-    
+     
+     
+     
         usersTable.findSingle(_criteria16, userRow=> {
             //this is intersection typed
             if(userRow===undefined){
@@ -82,8 +85,8 @@ db.ready(() => {
             user.onPropertyChanged((args) => {
                 console.log(args.propertyName + " Has changed to " + user[args.propertyName] + " from " + args.oldValue);
             });
-    
-    
+     
+     
              user.username = "new username for 16..."; //occurs property changed
       
               

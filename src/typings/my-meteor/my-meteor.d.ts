@@ -77,3 +77,7 @@ declare module Meteor {
     var isServer: boolean;
     var isClient: boolean;
 }
+
+declare module "wait.for"{
+	
+}

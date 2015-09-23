@@ -6,8 +6,6 @@ var BaseCollection_1 = require("./lib/BaseCollection");
 var MeteorCollection_1 = require("./lib/MeteorCollection");
 var Helper_1 = require("./lib/Helper");
 var ObservableObject_1 = require("./lib/ObservableObject");
-//Doesn't work yet.
-//var Future = require("fibers/future");
 if (Function.prototype["name"] === undefined) {
     Object.defineProperty(Function.prototype, 'name', {
         get: function () {
@@ -15,12 +13,7 @@ if (Function.prototype["name"] === undefined) {
         }
     });
 }
-  /** Same as wrap but it's sync mode - autoconnect to the database without need to use database.ready(callback).
-   *  Do not use it yet. It works only on 32/86 bit, use .wrap instead
-   */
 function connect(mysqlUrlOrObjectOrMysqlAlreadyConnection) {
-	console.log(" WORKS ONLY ON 32/86BIT PROCS, PLEASE DO NOT USE IT YET");
-	console.log(" USE var db = wrapper.wrap('mysqlurl_or_already_opened_connection);\n db.ready(function(){ console.log('your code comes here');});")
     var useTables = [];
     for (var _i = 1; _i < arguments.length; _i++) {
         useTables[_i - 1] = arguments[_i];

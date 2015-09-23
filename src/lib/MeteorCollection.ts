@@ -5,7 +5,6 @@ import {DeleteAnswer} from "./queries/DeleteQuery";
 import ObservableObject from "./ObservableObject";
 import Database from "./Database";
 import * as Promise from "bluebird";
-var Future = require("fibers/future"); //anagastika...
 
 declare module Meteor {
     var isServer: boolean;
@@ -14,9 +13,10 @@ declare module Meteor {
     var bindEnvironment: Function;
 }
 
+declare var Future;
+
 class MeteorCollection<T> {
     private collection: Mongo.Collection<T>;
-    //private table: Table<T>;
 
     constructor(public table: Table<T>, public name?: string) {
         if (!name) {
@@ -87,6 +87,8 @@ class MeteorCollection<T> {
 
             future.return();
         }));
+
+
         return future.wait();
     }
 
@@ -142,7 +144,7 @@ class MeteorCollection<T> {
         reactive?: boolean;
         transform?: Function;
     }): Mongo.Cursor<T> {
-        
+
         return this.collection.find(selector, options);
     };
 
@@ -169,6 +171,7 @@ class MeteorCollection<T> {
             //  return this.collection.insert(doc, callback);
       
             return future.wait();
+
         }
     };
 
@@ -184,6 +187,7 @@ class MeteorCollection<T> {
             return future.wait();
         }
         //   return this.collection.remove(selector, callback);
+        return null;
     };
 
     update(selector: any, modifier: any, options?: {
@@ -201,6 +205,7 @@ class MeteorCollection<T> {
 
             return future.wait();
         }
+     
         
         //return this.collection.update(selector, modifier, options, callback);
     };

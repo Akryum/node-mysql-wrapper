@@ -1,6 +1,4 @@
 var Helper_1 = require("./Helper");
-//Doesn't work yet 
-//var Future = require("fibers/future");
 var MeteorCollection = (function () {
     function MeteorCollection(table, name) {
         this.table = table;
@@ -112,6 +110,7 @@ var MeteorCollection = (function () {
             });
             return future.wait();
         }
+        return null;
     };
     ;
     MeteorCollection.prototype.update = function (selector, modifier, options, callback) {
