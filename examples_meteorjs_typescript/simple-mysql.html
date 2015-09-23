@@ -1,0 +1,19 @@
+<head>
+  <title>NODE-MYSQL-WRAPPER TEST</title>
+</head>
+
+<body>
+  <h1>Welcome to node-mysql-wrapper METEOR!</h1>
+
+  <h2>USERS:</h2> {{>usersList}}
+</body>
+
+<template name="usersList">
+  <p>Length: {{length}}</p>
+  <ul>
+    {{#each users}}
+    <li>UserID: {{userId}}. Username: {{username}}</li>
+    {{/each}}
+  </ul>
+
+</template>

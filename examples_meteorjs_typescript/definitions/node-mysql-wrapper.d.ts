@@ -3,16 +3,27 @@
 // Definitions by: Makis Maropoulos <https://github.com/kataras>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-///<reference path='./../mysql/mysql.d.ts' />
-///<reference path='./../bluebird/bluebird.d.ts' />
-///<reference path="./../my-meteor/my-meteor.d.ts" />
+///<reference path='mysql.d.ts' />
+///<reference path='bluebird.d.ts' />
+///<reference path='meteor.d.ts'/>
 
+declare module Mysql {
+    interface IError {
 
-declare module "node-mysql-wrapper" {
-    import * as Mysql from 'mysql';
-    import * as Promise from 'bluebird';
-    import {EventEmitter} from 'events';
+    }
 
+    interface IConnection {
+
+    }
+
+    interface IConnectionConfig {
+
+    }
+}
+
+declare class EventEmitter { }
+
+declare module NodeMysqlWrapper {
     var EQUAL_TO_PROPERTY_SYMBOL: string;
     var TABLE_RULES_PROPERTY: string;
 
@@ -410,7 +421,7 @@ declare module "node-mysql-wrapper" {
 
     class MeteorCollection<T> {
         private collection: Mongo.Collection<T>;
-        protected table: Table<T>;
+        public table: Table<T>;
 
         constructor(table: Table<T>, name?: string);
 
@@ -756,8 +767,8 @@ declare module "node-mysql-wrapper" {
     }
 
     class MeteorTable<T>{
-        public table: Table<T>;
-        constructor(table: Table<T>);
+        public table:Table<T>;
+        constructor(table:Table<T>);
 
         insert(doc: T, callback?: (_result: T) => void): T;
 

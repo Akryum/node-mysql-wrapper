@@ -1,10 +1,10 @@
 ﻿import Connection from "./Connection";
 import Helper from "./Helper";
 import Table from "./Table";
+import MeteorTable from "./meteor/MeteorTable";
 import {SelectQueryRules} from "./queries/SelectQueryRules";
 import ObservableObject from "./ObservableObject";
 import ObservableCollection from "./ObservableCollection";
-import MeteorCollection from "./MeteorCollection";
 import * as Promise from 'bluebird';
 import * as Mysql from 'mysql';
 
@@ -78,6 +78,23 @@ class Database {
         return this.connection.table<T>(tableName);
     }
 
+    /* den to kanw extends gt prepei na kanw push kai ta meteor collections sto connection 
+    meteorTable<T>(tableName: string): MeteorTable<T> {
+        if (this.table(tableName) !== undefined) {
+            return new MeteorTable<T>(tableName, this.connection);
+        } else {
+            return undefined;
+        }
+    }*/
+
+    meteorTable<T>(tableName: string): MeteorTable<T> {
+        if (this.table(tableName) !== undefined) {
+            return new MeteorTable<T>(this.table<T>(tableName));
+        } else {
+            return undefined;
+        }
+    }
+    
     noticeReady(): void {
         this.isReady = true;
         for (let i = 0; i < this.readyListenerCallbacks.length; i++) {
@@ -127,10 +144,6 @@ class Database {
 
     collection<T>(tableName: string, callbackWhenReady?: Function): ObservableCollection<T> {
         return new ObservableCollection(<Table<T>>this.connection.table(tableName), true, callbackWhenReady);
-    }
-
-    meteorCollection<T>(tableName: string, nameOfCollection?: string): MeteorCollection<T> {
-        return new MeteorCollection<T>(this.table<T>(tableName), nameOfCollection);
     }
 
 }

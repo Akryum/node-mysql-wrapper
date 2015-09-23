@@ -1,7 +1,7 @@
 var Helper_1 = require("./Helper");
+var MeteorTable_1 = require("./meteor/MeteorTable");
 var SelectQueryRules_1 = require("./queries/SelectQueryRules");
 var ObservableCollection_1 = require("./ObservableCollection");
-var MeteorCollection_1 = require("./MeteorCollection");
 var Promise = require('bluebird');
 var Database = (function () {
     function Database(connection) {
@@ -62,6 +62,14 @@ var Database = (function () {
     Database.prototype.table = function (tableName) {
         return this.connection.table(tableName);
     };
+    Database.prototype.meteorTable = function (tableName) {
+        if (this.table(tableName) !== undefined) {
+            return new MeteorTable_1.default(this.table(tableName));
+        }
+        else {
+            return undefined;
+        }
+    };
     Database.prototype.noticeReady = function () {
         this.isReady = true;
         for (var i = 0; i < this.readyListenerCallbacks.length; i++) {
@@ -103,9 +111,6 @@ var Database = (function () {
     };
     Database.prototype.collection = function (tableName, callbackWhenReady) {
         return new ObservableCollection_1.default(this.connection.table(tableName), true, callbackWhenReady);
-    };
-    Database.prototype.meteorCollection = function (tableName, nameOfCollection) {
-        return new MeteorCollection_1.default(this.table(tableName), nameOfCollection);
     };
     return Database;
 })();

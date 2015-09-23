@@ -410,7 +410,7 @@ declare module "node-mysql-wrapper" {
 
     class MeteorCollection<T> {
         private collection: Mongo.Collection<T>;
-        public table: Table<T>;
+        protected table: Table<T>;
 
         constructor(table: Table<T>, name?: string);
 
@@ -460,14 +460,6 @@ declare module "node-mysql-wrapper" {
     
         //ONLY MONGO/METEOR COLLECTION METHODS FINISH.
 
-        insert(doc: T, callback?: (_result: T) => void): T;
-
-        remove(selector: any, callback?: () => DeleteAnswer): DeleteAnswer;
-
-        update(selector: any, modifier: any, options?: {
-            multi?: boolean;
-            upsert?: boolean;
-        }, callback?: (result: T) => any): number;
     }
 
 
@@ -760,9 +752,23 @@ declare module "node-mysql-wrapper" {
         remove(id: number | string): Promise<DeleteAnswer>; // ID without callback
         remove(criteriaRawObject: any): Promise<DeleteAnswer>; // criteria obj without callback
         remove(criteriaOrID: any | number | string, callback?: (_result: DeleteAnswer) => any): Promise<DeleteAnswer>;
-        
-        /**Meteor js feature only: Returns a special collection for synchronization with the client */
-        meteorCollection(nameOfCollection?: string): MeteorCollection<T>
+
+    }
+
+    class MeteorTable<T>{
+        public table: Table<T>;
+        constructor(table: Table<T>);
+
+        insert(doc: T, callback?: (_result: T) => void): T;
+
+        remove(selector: any, callback?: () => DeleteAnswer): DeleteAnswer;
+
+        update(selector: any, modifier: any, options?: {
+            multi?: boolean;
+            upsert?: boolean;
+        }, callback?: (result: T) => any): number;
+
+        collection(nameOfCollection?: string, fillWithCriteria?: any): Mongo.Collection<T>;
     }
 
     class Database {
@@ -809,8 +815,8 @@ declare module "node-mysql-wrapper" {
 
         collection<T>(tableName: string, callbackWhenReady?: Function): ObservableCollection<T>;
 
-        /**Meteor js feature only: Returns a special collection for synchronization with the client */
-        meteorCollection<T>(tableName: string, nameOfCollection?: string): MeteorCollection<T>;
+        /**Meteor js feature only: Returns a table which it's collection can make synchronization with the client */
+        meteorTable<T>(tableName: string): MeteorTable<T>;
     }
 
     function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): Database;

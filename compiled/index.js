@@ -3,7 +3,6 @@ var Database_1 = require("./lib/Database");
 var SelectQueryRules_1 = require("./lib/queries/SelectQueryRules");
 var CriteriaBuilder_1 = require("./lib/CriteriaBuilder");
 var BaseCollection_1 = require("./lib/BaseCollection");
-var MeteorCollection_1 = require("./lib/MeteorCollection");
 var Helper_1 = require("./lib/Helper");
 var ObservableObject_1 = require("./lib/ObservableObject");
 if (Function.prototype["name"] === undefined) {
@@ -17,6 +16,9 @@ function connect(mysqlUrlOrObjectOrMysqlAlreadyConnection) {
     var useTables = [];
     for (var _i = 1; _i < arguments.length; _i++) {
         useTables[_i - 1] = arguments[_i];
+    }
+    if (Meteor) {
+        Future = require("fibers/future");
     }
     var future = new Future;
     var mysqlCon = new Connection_1.default(mysqlUrlOrObjectOrMysqlAlreadyConnection);
@@ -51,5 +53,4 @@ exports.SelectQueryRules = SelectQueryRules_1.SelectQueryRules;
 exports.CriteriaBuilder = CriteriaBuilder_1.default;
 exports.ObservableObject = ObservableObject_1.default;
 exports.CollectionChangedAction = BaseCollection_1.CollectionChangedAction;
-exports.MeteorCollection = MeteorCollection_1.default;
 exports.Helper = Helper_1.default;
