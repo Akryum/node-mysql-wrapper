@@ -1,5 +1,6 @@
 var Helper_1 = require("./Helper");
-var Future = require("fibers/future");
+//Doesn't work yet 
+//var Future = require("fibers/future");
 var MeteorCollection = (function () {
     function MeteorCollection(table, name) {
         this.table = table;

@@ -37,7 +37,7 @@ interface UserInfo {
 
 db.ready(() => {
 
-    var usersCollection = db.Collection("users");
+    var usersCollection = db.collection("users");
     /* --------------OR-------------------------
     var usersTable= db.table<User>("users");
     

@@ -12,7 +12,7 @@ var User = (function () {
     return User;
 })();
 db.ready(function () {
-    var usersCollection = db.Collection("users");
+    var usersCollection = db.collection("users");
     usersCollection.onCollectionChanged(function (eventArgs) {
         switch (eventArgs.action) {
             case mysqlWrapper.CollectionChangedAction.INSERT:

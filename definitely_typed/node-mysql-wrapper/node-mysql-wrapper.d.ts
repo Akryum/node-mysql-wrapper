@@ -815,7 +815,9 @@ declare module "node-mysql-wrapper" {
 
     function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): Database;
     
-    /** Same as wrap but it's sync mode - autoconnect to the database without need to use database.ready(callback). */
+    /** Same as wrap but it's sync mode - autoconnect to the database without need to use database.ready(callback).
+     *  Do not use it yet. It works only on 32/86 bit, use .wrap instead
+     */
     function connect(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): Database;
 
     function observable<T>(obj: T): T & ObservableObject;

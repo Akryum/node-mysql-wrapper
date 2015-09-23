@@ -9,6 +9,9 @@ import ObservableObject from "./lib/ObservableObject";
 import * as Mysql from "mysql";
 //import * as Future from "fibers/future";
 var Future = require("fibers/future"); //anagastika...
+//dependecies, but doesn't work yet... [ I fix compiled code but I let the code here for development tomorrow]
+//"fibers": "https://github.com/meteor/node-fibers/tarball/d519f0c5971c33d99c902dad346b817e84bab001"
+
 
 if (Function.prototype["name"] === undefined) {
     //works only for function something() {}; no for var something = function(){}
@@ -20,7 +23,10 @@ if (Function.prototype["name"] === undefined) {
         }
     });
 }
-
+/*
+console.log(" WORKS ONLY ON 32/86BIT PROCS, PLEASE DO NOT USE IT YET");
+console.log(" USE var db = wrapper.wrap('mysqlurl_or_already_opened_connection);\n db.ready(function(){ console.log('your code comes here');});")
+*/
 export function connect(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): Database {
     let future = new Future;
 
