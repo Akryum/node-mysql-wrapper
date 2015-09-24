@@ -6,6 +6,13 @@ var MeteorTable = (function () {
             Future = require("fibers/future");
         }
     }
+    Object.defineProperty(MeteorTable.prototype, "criteria", {
+        get: function () {
+            return this.table.criteria;
+        },
+        enumerable: true,
+        configurable: true
+    });
     MeteorTable.prototype.insert = function (doc, callback) {
         if (callback) {
             this.table.save(doc, callback);
@@ -31,13 +38,13 @@ var MeteorTable = (function () {
         }
         return null;
     };
-    MeteorTable.prototype.update = function (selector, modifier, options, callback) {
+    MeteorTable.prototype.update = function (selector, callback) {
         if (callback) {
-            this.table.save(modifier, callback);
+            this.table.save(selector, callback);
         }
         else {
             var future = new Future;
-            this.table.save(modifier).then(function (_result) {
+            this.table.save(selector).then(function (_result) {
                 future.return(_result);
             });
             return future.wait();

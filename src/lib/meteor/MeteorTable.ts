@@ -1,6 +1,7 @@
 import Connection from "../Connection";
 import Table from "../Table";
 import {DeleteAnswer} from "../queries/DeleteQuery";
+import CriteriaBuilder from "../CriteriaBuilder";
 import MeteorCollection from "./MeteorCollection";
 
 import * as Promise from 'bluebird';
@@ -15,10 +16,15 @@ declare module Meteor {
 declare var Future;
 
 class MeteorTable<T> {//extends Table<T>{
+    
     constructor(public table: Table<T>) {
         if (Meteor) {
             Future = require("fibers/future");
         }
+    }
+
+    get criteria(): CriteriaBuilder<T> {
+        return this.table.criteria;
     }
 
     insert(doc: T, callback?: (_result: T) => void): T {
@@ -51,16 +57,13 @@ class MeteorTable<T> {//extends Table<T>{
         return null;
     }
 
-    update(selector: any, modifier: any, options?: {
-        multi?: boolean;
-        upsert?: boolean;
-    }, callback?: (result: T) => any): number {
+    update(selector: any, callback?: (result: T) => any): T {
 
         if (callback) { // then async
-            this.table.save(modifier, callback);
+            this.table.save(selector, callback);
         } else { //then sync.
             let future = new Future;
-            this.table.save(modifier).then((_result: T) => {
+            this.table.save(selector).then((_result: T) => {
                 future.return(_result);
             });
 
@@ -76,6 +79,7 @@ class MeteorTable<T> {//extends Table<T>{
         col.fill(fillWithCriteria);
         return col.rawCollection;;
     }
+
 }
 
 export default MeteorTable;

@@ -1,5 +1,6 @@
 var Helper_1 = require("../Helper");
 var SelectQueryRules_1 = require("./SelectQueryRules");
+var CriteriaBuilder_1 = require("../CriteriaBuilder");
 var Promise = require('bluebird');
 exports.EQUAL_TO_PROPERTY_SYMBOL = '=';
 var SelectQuery = (function () {
@@ -46,9 +47,16 @@ var SelectQuery = (function () {
             }
         });
     };
-    SelectQuery.prototype.promise = function (rawCriteria, callback) {
+    SelectQuery.prototype.promise = function (rawCriteriaObject, callback) {
         var _this = this;
         return new Promise(function (resolve, reject) {
+            var rawCriteria;
+            if (rawCriteriaObject instanceof CriteriaBuilder_1.default) {
+                rawCriteria = rawCriteriaObject.build();
+            }
+            else {
+                rawCriteria = rawCriteriaObject;
+            }
             var criteria = _this._table.criteriaDivider.divide(rawCriteria);
             var query = "SELECT " + criteria.selectFromClause(_this._table) + " FROM " + _this._table.name + criteria.whereClause + criteria.queryRules.toString();
             _this._table.connection.query(query, function (error, results) {

@@ -767,17 +767,15 @@ declare module NodeMysqlWrapper {
     }
 
     class MeteorTable<T>{
-        public table:Table<T>;
-        constructor(table:Table<T>);
+        public table: Table<T>;
+        public criteria: CriteriaBuilder<T>;
+        constructor(table: Table<T>);
 
         insert(doc: T, callback?: (_result: T) => void): T;
 
         remove(selector: any, callback?: () => DeleteAnswer): DeleteAnswer;
 
-        update(selector: any, modifier: any, options?: {
-            multi?: boolean;
-            upsert?: boolean;
-        }, callback?: (result: T) => any): number;
+        update(selector: any, callback?: (result: T) => any): T;
 
         collection(nameOfCollection?: string, fillWithCriteria?: any): Mongo.Collection<T>;
     }

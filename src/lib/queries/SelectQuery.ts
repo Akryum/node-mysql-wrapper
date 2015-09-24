@@ -2,6 +2,7 @@ import Helper from "../Helper";
 import Table from "../Table";
 import {SelectQueryRules, TABLE_RULES_PROPERTY} from "./SelectQueryRules";
 import {ICriteriaParts} from "../CriteriaDivider";
+import CriteriaBuilder from "../CriteriaBuilder";
 import IQuery from"./IQuery";
 import ObservableObject from "../ObservableObject";
 import * as Promise from 'bluebird';
@@ -64,9 +65,14 @@ class SelectQuery<T> implements IQuery<T> { // T for Table's result type.
     /**
      * Executes the select and returns the Promise.
      */
-    promise(rawCriteria: any, callback?: (_results: T[]) => any): Promise<T[]> {
+    promise(rawCriteriaObject: any, callback?: (_results: T[]) => any): Promise<T[]> {
         return new Promise<T[]>((resolve, reject) => {
-
+            var rawCriteria: any;
+            if (rawCriteriaObject instanceof CriteriaBuilder) {
+                rawCriteria = rawCriteriaObject.build();
+            } else {
+                rawCriteria = rawCriteriaObject;
+            }
             var criteria = this._table.criteriaDivider.divide(rawCriteria);
             let query = "SELECT " + criteria.selectFromClause(this._table) + " FROM " + this._table.name + criteria.whereClause + criteria.queryRules.toString();
 

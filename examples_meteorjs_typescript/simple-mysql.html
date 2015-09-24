@@ -16,4 +16,28 @@
     {{/each}}
   </ul>
 
+  <p> Create A user </p>
+  <form class="new-user">
+    <input type="text" name="username" placeholder="Username" />
+    <input type="password" name="pass" />
+    <input type="email" name="mail" placeholder="Mail" />
+    <input type="submit" value="CREATE" />
+  </form>
+
+  <p> Update A user, You can also use <b>usersTable.save(obj)</b> for insert or update(if primary key is provided as property
+    inside the passing object.) </p>
+  <form class="update-user">
+    <input type="text" name="userid" placeholder="userId you want to update" />
+    <input type="text" name="username" placeholder="Username" />
+    <input type="password" name="pass" />
+    <input type="email" name="mail" placeholder="Mail" />
+    <input type="submit" value="UPDATE" />
+  </form>
+
+  <p> Delete/Remove A user (by id, although you can with other columns too, but example must be simple :D )  </p>
+  <form class="remove-user">
+    <input type="text" name="userid" placeholder="userId you want to remove " />
+    <input type="submit" value="DELETE" />
+  </form>
+
 </template>

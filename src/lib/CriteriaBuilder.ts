@@ -28,8 +28,6 @@ class CriteriaBuilder<T>{
 	}
 
 	except(...columns: string[]): CriteriaBuilder<T> {
-
-		console.log("\nEXCEPT: ", columns);
 		if (columns !== undefined) {
 			this.createRulesIfNotExists();
 			/* its always array lol where is my mind if (Array.isArray(columns)) { //already array

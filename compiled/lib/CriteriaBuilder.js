@@ -24,7 +24,6 @@ var CriteriaBuilder = (function () {
         for (var _i = 0; _i < arguments.length; _i++) {
             columns[_i - 0] = arguments[_i];
         }
-        console.log("\nEXCEPT: ", columns);
         if (columns !== undefined) {
             this.createRulesIfNotExists();
             this.rawCriteria[SelectQueryRules_1.TABLE_RULES_PROPERTY]["except"] = columns;
