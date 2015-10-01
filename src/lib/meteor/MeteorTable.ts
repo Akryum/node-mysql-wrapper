@@ -24,7 +24,7 @@ class MeteorTable<T> {//extends Table<T>{
     }
 
     get criteria(): CriteriaBuilder<T> {
-        return this.table.criteria;
+        return new CriteriaBuilder<T>(this.table); // to kanw etsi kai oxi this.table.criteria ,gt me to this.table.criteria dn doulevei dn kserw to gt...
     }
 
     insert(doc: T, callback?: (_result: T) => void): T {

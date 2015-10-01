@@ -1,3 +1,4 @@
+var CriteriaBuilder_1 = require("../CriteriaBuilder");
 var MeteorCollection_1 = require("./MeteorCollection");
 var MeteorTable = (function () {
     function MeteorTable(table) {
@@ -8,7 +9,7 @@ var MeteorTable = (function () {
     }
     Object.defineProperty(MeteorTable.prototype, "criteria", {
         get: function () {
-            return this.table.criteria;
+            return new CriteriaBuilder_1.default(this.table);
         },
         enumerable: true,
         configurable: true

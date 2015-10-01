@@ -453,7 +453,7 @@ declare module Blaze {
 		head: Template;
 		find(selector:string):Blaze.Template;
 		findAll(selector:string):Blaze.Template[];
-		$:any; 
+		$:any;
 	}
 	interface Template {
 	}

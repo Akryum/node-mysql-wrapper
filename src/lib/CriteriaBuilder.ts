@@ -1,6 +1,6 @@
 import Table from "./Table";
 import {SelectQueryRules, TABLE_RULES_PROPERTY} from "./queries/SelectQueryRules";
-import SelectQuery from "./queries/SelectQuery";
+import {default as SelectQuery,EQUAL_TO_PROPERTY_SYMBOL,FIND_EQUAL_BY_PROPERTY_SYMBOL} from "./queries/SelectQuery";
 import Helper from "./Helper";
 import * as Promise from 'bluebird';
 
@@ -73,21 +73,30 @@ class CriteriaBuilder<T>{
 		return this;
 	}
 
-	join(realTableName: string, foreignColumnName: string): CriteriaBuilder<T> {
+	join(realTableName: string, foreignColumnName: string,foreignColumnValue?:string | number): CriteriaBuilder<T> {
 		//doesnt workthis.childTables.push(realTableName,realTableName);
 		let _joinedTable = {};
-		_joinedTable[foreignColumnName] = "=";
+		if(!foreignColumnValue){
+			_joinedTable[foreignColumnName] = EQUAL_TO_PROPERTY_SYMBOL;
+		}else{
+			_joinedTable[foreignColumnName] = FIND_EQUAL_BY_PROPERTY_SYMBOL+foreignColumnValue;
+		}
 		this.rawCriteria[realTableName] = _joinedTable;
 		return this;
 	}
 
-	joinAs(tableNameProperty: string, realTableName: string, foreignColumnName: string): CriteriaBuilder<T> {
+	joinAs(tableNameProperty: string, realTableName: string, foreignColumnName: string,foreignColumnValue?:string | number): CriteriaBuilder<T> {
 		//this.childTables.push(tableNameProperty,realTableName);
 		//den ginete edw mexri na kanw kai to 'as' sta criteria mesa sto selectquery, to opoio 9a kanw twra.	this.rawCriteria[]
 		//this.createRulesIfNotExists();
 		
 		let _joinedTable = {};
-		_joinedTable[foreignColumnName] = "=";
+		if(!foreignColumnValue){
+			_joinedTable[foreignColumnName] = EQUAL_TO_PROPERTY_SYMBOL; 
+		}else{
+			_joinedTable[foreignColumnName] = FIND_EQUAL_BY_PROPERTY_SYMBOL+foreignColumnValue;//&thisPropertyName
+		}
+		
 		_joinedTable[TABLE_RULES_PROPERTY] = { table: realTableName };
 
 		this.rawCriteria[tableNameProperty] = _joinedTable;

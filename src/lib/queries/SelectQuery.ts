@@ -8,7 +8,7 @@ import ObservableObject from "../ObservableObject";
 import * as Promise from 'bluebird';
 
 export var EQUAL_TO_PROPERTY_SYMBOL = '=';
-
+export var FIND_EQUAL_BY_PROPERTY_SYMBOL = '&';
 class SelectQuery<T> implements IQuery<T> { // T for Table's result type.
 
     constructor(public _table: Table<T>) {
@@ -27,7 +27,12 @@ class SelectQuery<T> implements IQuery<T> { // T for Table's result type.
                     let criteriaJsObject = Helper.copyObject(criteria.rawCriteriaObject[tablePropertyName]);
                     Helper.forEachKey(criteriaJsObject, (propertyName) => {
                         if (criteriaJsObject[propertyName] === EQUAL_TO_PROPERTY_SYMBOL) {
+                            //sindese to X property me to antistixo X property tou reslt
                             criteriaJsObject[propertyName] = result[Helper.toRowProperty(propertyName)];
+                        }else if(criteriaJsObject[propertyName] instanceof String &&  (<String>criteriaJsObject[propertyName]).charAt(0) === FIND_EQUAL_BY_PROPERTY_SYMBOL ){
+                           //sindese to X property me to antistixo &Y property tou result 
+                           criteriaJsObject[propertyName] = result[Helper.toRowProperty((<String>criteriaJsObject[propertyName]).substring(1))];
+                           
                         }
                     });
                     let tableFindPromise = table.find(criteriaJsObject);

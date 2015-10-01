@@ -250,9 +250,9 @@ declare module "node-mysql-wrapper" {
 
         limit(start: number, end?: number): CriteriaBuilder<T>;
 
-        join(realTableName: string, foreignColumnName: string): CriteriaBuilder<T>;
+        join(realTableName: string, foreignColumnName: string,foreignColumnValue?:string | number): CriteriaBuilder<T>;
 
-        joinAs(tableNameProperty: string, realTableName: string, foreignColumnName: string): CriteriaBuilder<T>;
+        joinAs(tableNameProperty: string, realTableName: string, foreignColumnName: string,foreignColumnValue?:string | number): CriteriaBuilder<T>;
 
         at(tableNameProperty: string): CriteriaBuilder<T>;
 

@@ -3,6 +3,7 @@ var SelectQueryRules_1 = require("./SelectQueryRules");
 var CriteriaBuilder_1 = require("../CriteriaBuilder");
 var Promise = require('bluebird');
 exports.EQUAL_TO_PROPERTY_SYMBOL = '=';
+exports.FIND_EQUAL_BY_PROPERTY_SYMBOL = '&';
 var SelectQuery = (function () {
     function SelectQuery(_table) {
         this._table = _table;
@@ -20,6 +21,9 @@ var SelectQuery = (function () {
                     Helper_1.default.forEachKey(criteriaJsObject, function (propertyName) {
                         if (criteriaJsObject[propertyName] === exports.EQUAL_TO_PROPERTY_SYMBOL) {
                             criteriaJsObject[propertyName] = result[Helper_1.default.toRowProperty(propertyName)];
+                        }
+                        else if (criteriaJsObject[propertyName] instanceof String && criteriaJsObject[propertyName].charAt(0) === exports.FIND_EQUAL_BY_PROPERTY_SYMBOL) {
+                            criteriaJsObject[propertyName] = result[Helper_1.default.toRowProperty(criteriaJsObject[propertyName].substring(1))];
                         }
                     });
                     var tableFindPromise = table.find(criteriaJsObject);
