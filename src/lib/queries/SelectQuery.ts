@@ -8,7 +8,6 @@ import ObservableObject from "../ObservableObject";
 import * as Promise from 'bluebird';
 
 export var EQUAL_TO_PROPERTY_SYMBOL = '=';
-export var FIND_EQUAL_BY_PROPERTY_SYMBOL = '&';
 class SelectQuery<T> implements IQuery<T> { // T for Table's result type.
 
     constructor(public _table: Table<T>) {
@@ -25,14 +24,20 @@ class SelectQuery<T> implements IQuery<T> { // T for Table's result type.
                     let table = this._table.connection.table(_tableProperty.tableName);
                     let tablePropertyName = Helper.toObjectProperty(_tableProperty.propertyName);
                     let criteriaJsObject = Helper.copyObject(criteria.rawCriteriaObject[tablePropertyName]);
+
                     Helper.forEachKey(criteriaJsObject, (propertyName) => {
-                        if (criteriaJsObject[propertyName] === EQUAL_TO_PROPERTY_SYMBOL) {
-                            //sindese to X property me to antistixo X property tou reslt
-                            criteriaJsObject[propertyName] = result[Helper.toRowProperty(propertyName)];
-                        }else if(criteriaJsObject[propertyName] instanceof String &&  (<String>criteriaJsObject[propertyName]).charAt(0) === FIND_EQUAL_BY_PROPERTY_SYMBOL ){
-                           //sindese to X property me to antistixo &Y property tou result 
-                           criteriaJsObject[propertyName] = result[Helper.toRowProperty((<String>criteriaJsObject[propertyName]).substring(1))];
-                           
+                        if (Helper.isString(criteriaJsObject[propertyName])) {
+                            let propValueToCheck: string = criteriaJsObject[propertyName];
+                            let indexOfEquality = propValueToCheck.indexOf(EQUAL_TO_PROPERTY_SYMBOL);
+                            if (indexOfEquality === 0) {
+                                if (propValueToCheck.length === 1) {
+                                    //sindese to X property me to antistixo X property tou reslut
+                                    criteriaJsObject[propertyName] = result[Helper.toRowProperty(propertyName)];
+                                } else {
+                                    //sindese to X property me to Y property tou result
+                                    criteriaJsObject[propertyName] = result[Helper.toRowProperty(propValueToCheck.substring(1))];
+                                }
+                            }
                         }
                     });
                     let tableFindPromise = table.find(criteriaJsObject);
@@ -78,7 +83,9 @@ class SelectQuery<T> implements IQuery<T> { // T for Table's result type.
             } else {
                 rawCriteria = rawCriteriaObject;
             }
+
             var criteria = this._table.criteriaDivider.divide(rawCriteria);
+
             let query = "SELECT " + criteria.selectFromClause(this._table) + " FROM " + this._table.name + criteria.whereClause + criteria.queryRules.toString();
 
             this._table.connection.query(query, (error, results: any[]) => {

@@ -3,7 +3,6 @@ var SelectQueryRules_1 = require("./SelectQueryRules");
 var CriteriaBuilder_1 = require("../CriteriaBuilder");
 var Promise = require('bluebird');
 exports.EQUAL_TO_PROPERTY_SYMBOL = '=';
-exports.FIND_EQUAL_BY_PROPERTY_SYMBOL = '&';
 var SelectQuery = (function () {
     function SelectQuery(_table) {
         this._table = _table;
@@ -19,11 +18,17 @@ var SelectQuery = (function () {
                     var tablePropertyName = Helper_1.default.toObjectProperty(_tableProperty.propertyName);
                     var criteriaJsObject = Helper_1.default.copyObject(criteria.rawCriteriaObject[tablePropertyName]);
                     Helper_1.default.forEachKey(criteriaJsObject, function (propertyName) {
-                        if (criteriaJsObject[propertyName] === exports.EQUAL_TO_PROPERTY_SYMBOL) {
-                            criteriaJsObject[propertyName] = result[Helper_1.default.toRowProperty(propertyName)];
-                        }
-                        else if (criteriaJsObject[propertyName] instanceof String && criteriaJsObject[propertyName].charAt(0) === exports.FIND_EQUAL_BY_PROPERTY_SYMBOL) {
-                            criteriaJsObject[propertyName] = result[Helper_1.default.toRowProperty(criteriaJsObject[propertyName].substring(1))];
+                        if (Helper_1.default.isString(criteriaJsObject[propertyName])) {
+                            var propValueToCheck = criteriaJsObject[propertyName];
+                            var indexOfEquality = propValueToCheck.indexOf(exports.EQUAL_TO_PROPERTY_SYMBOL);
+                            if (indexOfEquality === 0) {
+                                if (propValueToCheck.length === 1) {
+                                    criteriaJsObject[propertyName] = result[Helper_1.default.toRowProperty(propertyName)];
+                                }
+                                else {
+                                    criteriaJsObject[propertyName] = result[Helper_1.default.toRowProperty(propValueToCheck.substring(1))];
+                                }
+                            }
                         }
                     });
                     var tableFindPromise = table.find(criteriaJsObject);

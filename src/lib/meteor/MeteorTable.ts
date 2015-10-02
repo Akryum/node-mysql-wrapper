@@ -77,7 +77,7 @@ class MeteorTable<T> {//extends Table<T>{
     collection(nameOfCollection?: string, fillWithCriteria: any = {}): Mongo.Collection<T> {
         let col = new MeteorCollection<T>(this.table, nameOfCollection); //edw pernei to Table, swsta
         col.fill(fillWithCriteria);
-        return col.rawCollection;;
+        return col.rawCollection;
     }
 
 }

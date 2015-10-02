@@ -53,7 +53,7 @@ var CriteriaDivider = (function () {
         }
         Helper_1.default.forEachKey(rawCriteriaObject, function (objectKey) {
             var colName = Helper_1.default.toRowProperty(objectKey);
-            if ((_this._table.columns.indexOf(colName) !== -1 && _criteria.queryRules.exceptColumns.indexOf(colName) !== -1) || _this._table.primaryKey === colName) {
+            if ((_this._table.columns.indexOf(colName) !== -1 && _criteria.queryRules.exceptColumns.indexOf(colName) === -1) || _this._table.primaryKey === colName) {
                 colsToSearch.push(colName + " = " + _this._table.connection.escape(rawCriteriaObject[objectKey]));
             }
             else {
@@ -74,6 +74,7 @@ var CriteriaDivider = (function () {
                 }
             }
         });
+        _criteria.rawCriteriaObject = rawCriteriaObject;
         if (colsToSearch.length > 0) {
             _criteria.whereClause = " WHERE " + colsToSearch.join(" AND ");
         }

@@ -15,7 +15,7 @@ export interface ICriteriaParts {
 }
 
 export class CriteriaParts implements ICriteriaParts {
-    constructor(public rawCriteriaObject: any={}, public tables: TableToSearchPart[]=[], public noDatabaseProperties: string[]=[], public whereClause: string="", public queryRules?: SelectQueryRules) {
+    constructor(public rawCriteriaObject: any = {}, public tables: TableToSearchPart[] = [], public noDatabaseProperties: string[] = [], public whereClause: string = "", public queryRules?: SelectQueryRules) {
 
     }
 
@@ -61,7 +61,7 @@ export class CriteriaDivider<T> {
 
     divide(rawCriteriaObject: any): CriteriaParts {
         let _criteria: CriteriaParts = new CriteriaParts();
-        
+
         let colsToSearch: string[] = [];
         let exceptColumns: string[] = [];
 
@@ -70,14 +70,15 @@ export class CriteriaDivider<T> {
         } else {
             _criteria.queryRules = new SelectQueryRules().from(this._table.rules);
         }
-
+      
         Helper.forEachKey(rawCriteriaObject, (objectKey) => {
-
+            
             let colName = Helper.toRowProperty(objectKey);
-             
+          
             //auto edw MONO,apla dn afinei na boun sta .where columns pou exoun ginei except gia na min uparksoun mysql query errors.
-            if ((this._table.columns.indexOf(colName) !== -1 && _criteria.queryRules.exceptColumns.indexOf(colName) !== -1) || this._table.primaryKey === colName) {
-                colsToSearch.push(colName + " = " + this._table.connection.escape(rawCriteriaObject[objectKey]));
+            if ((this._table.columns.indexOf(colName) !== -1 && _criteria.queryRules.exceptColumns.indexOf(colName) === -1) || this._table.primaryKey === colName) {
+               colsToSearch.push(colName + " = " + this._table.connection.escape(rawCriteriaObject[objectKey]));
+
             } else {
                 if (this._table.connection.table(colName) !== undefined) {
                     _criteria.tables.push({ tableName: colName, propertyName: colName });
@@ -96,15 +97,17 @@ export class CriteriaDivider<T> {
                 if (realTableName !== undefined) {
                     _criteria.tables.push({ tableName: Helper.toRowProperty(realTableName), propertyName: key });
                     //maybe I need to remove this key from noDbProperties in the future
-
+                    //_criteria.noDatabaseProperties.splice(_criteria.noDatabaseProperties.indexOf(key));
+                
                 }
             }
+                
         });
-
+        _criteria.rawCriteriaObject = rawCriteriaObject;
         if (colsToSearch.length > 0) {
             _criteria.whereClause = " WHERE " + colsToSearch.join(" AND ");
         }
-
+        
         return _criteria;
     }
 }

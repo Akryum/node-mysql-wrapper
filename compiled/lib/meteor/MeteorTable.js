@@ -56,7 +56,6 @@ var MeteorTable = (function () {
         var col = new MeteorCollection_1.default(this.table, nameOfCollection);
         col.fill(fillWithCriteria);
         return col.rawCollection;
-        ;
     };
     return MeteorTable;
 })();

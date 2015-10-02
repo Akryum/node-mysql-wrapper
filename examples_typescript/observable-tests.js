@@ -4,6 +4,7 @@ var mysqlWrapper = require("node-mysql-wrapper");
 var app = express();
 var server = http.createServer(app);
 var db = mysqlWrapper.wrap("mysql://kataras:pass@127.0.0.1/taglub?debug=false&charset=utf8");
+console.log('MYSQL IS UP AND RUNNING');
 var User = (function () {
     function User() {
         this.comments = [];
@@ -12,7 +13,6 @@ var User = (function () {
     return User;
 })();
 db.ready(function () {
-    console.log('MYSQL IS UP AND RUNNING');
     var usersCollection = db.collection("users");
     usersCollection.onCollectionChanged(function (eventArgs) {
         switch (eventArgs.action) {

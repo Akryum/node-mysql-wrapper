@@ -55,28 +55,15 @@ var CriteriaBuilder = (function () {
         }
         return this;
     };
-    CriteriaBuilder.prototype.join = function (realTableName, foreignColumnName, foreignColumnValue) {
+    CriteriaBuilder.prototype.join = function (realTableName, foreignColumnName, thisColumnName) {
         var _joinedTable = {};
-        if (!foreignColumnValue) {
-            _joinedTable[foreignColumnName] = SelectQuery_1.EQUAL_TO_PROPERTY_SYMBOL;
-        }
-        else {
-            _joinedTable[foreignColumnName] = SelectQuery_1.FIND_EQUAL_BY_PROPERTY_SYMBOL + foreignColumnValue;
-        }
+        _joinedTable[foreignColumnName] = SelectQuery_1.EQUAL_TO_PROPERTY_SYMBOL + (thisColumnName ? thisColumnName : '');
         this.rawCriteria[realTableName] = _joinedTable;
         return this;
     };
-    CriteriaBuilder.prototype.joinAs = function (tableNameProperty, realTableName, foreignColumnName, foreignColumnValue) {
-        //this.childTables.push(tableNameProperty,realTableName);
-        //den ginete edw mexri na kanw kai to 'as' sta criteria mesa sto selectquery, to opoio 9a kanw twra.	this.rawCriteria[]
-        //this.createRulesIfNotExists();
+    CriteriaBuilder.prototype.joinAs = function (tableNameProperty, realTableName, foreignColumnName, thisColumnName) {
         var _joinedTable = {};
-        if (!foreignColumnValue) {
-            _joinedTable[foreignColumnName] = SelectQuery_1.EQUAL_TO_PROPERTY_SYMBOL;
-        }
-        else {
-            _joinedTable[foreignColumnName] = SelectQuery_1.FIND_EQUAL_BY_PROPERTY_SYMBOL + foreignColumnValue;
-        }
+        _joinedTable[foreignColumnName] = SelectQuery_1.EQUAL_TO_PROPERTY_SYMBOL + (thisColumnName ? thisColumnName : '');
         _joinedTable[SelectQueryRules_1.TABLE_RULES_PROPERTY] = { table: realTableName };
         this.rawCriteria[tableNameProperty] = _joinedTable;
         return this;

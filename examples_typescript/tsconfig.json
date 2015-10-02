@@ -15,15 +15,15 @@
 		"declaration": false
 	},
 	"files": [
+		"./relationship-tests.ts",
 		"./observable-tests.ts",
+		"./typings/node-mysql-wrapper/node-mysql-wrapper.d.ts",
 		"./typings/node/node.d.ts",
-		"./typings/express/express.d.ts",
-		"./typings/node-mysql-wrapper/node-mysql-wrapper.d.ts"
+		"./typings/express/express.d.ts"
 	],
 	"exclude": [
 		"node_modules",
-		".vscode"
+		".vscode",
+		"typings"
 	]
-
-	
 }
