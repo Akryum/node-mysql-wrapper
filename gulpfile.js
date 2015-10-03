@@ -19,7 +19,8 @@ gulp.task("src", function () {
 		.pipe(gulp.dest("./compiled/"))
 		.pipe(gulp.dest("./examples_javascript/node_modules/node-mysql-wrapper/compiled/"))
 		.pipe(gulp.dest("./examples_typescript/node_modules/node-mysql-wrapper/compiled/"))
-		.pipe(gulp.dest("./examples_meteorjs_typescript/packages/npm-container/.npm/package/node_modules/node-mysql-wrapper/compiled/"));
+		.pipe(gulp.dest("./examples_meteorjs_typescript/packages/npm-container/.npm/package/node_modules/node-mysql-wrapper/compiled/"))
+		.pipe(gulp.dest("../Meteor_Projects/taglub/packages/npm-container/.npm/package/node_modules/node-mysql-wrapper/compiled/"));
 });
 
 gulp.task("typings", function () {

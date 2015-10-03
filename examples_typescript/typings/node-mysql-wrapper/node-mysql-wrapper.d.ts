@@ -250,9 +250,9 @@ declare module "node-mysql-wrapper" {
 
         limit(start: number, end?: number): CriteriaBuilder<T>;
 
-        join(realTableName: string, foreignColumnName: string,thisColumnName?:string): CriteriaBuilder<T>;
+        join(realTableName: string, foreignColumnName: string, thisColumnName?: string): CriteriaBuilder<T>;
 
-        joinAs(tableNameProperty: string, realTableName: string, foreignColumnName: string,thisColumnName?:string): CriteriaBuilder<T>;
+        joinAs(tableNameProperty: string, realTableName: string, foreignColumnName: string, thisColumnName?: string): CriteriaBuilder<T>;
 
         at(tableNameProperty: string): CriteriaBuilder<T>;
 
@@ -752,22 +752,75 @@ declare module "node-mysql-wrapper" {
         remove(id: number | string): Promise<DeleteAnswer>; // ID without callback
         remove(criteriaRawObject: any): Promise<DeleteAnswer>; // criteria obj without callback
         remove(criteriaOrID: any | number | string, callback?: (_result: DeleteAnswer) => any): Promise<DeleteAnswer>;
+        
+        /** Only for Meteor JS
+         * Returns a sync to client, the server  and the actual/real database internal or external actions.
+         */
+        meteorCollection(collectionName: string, fillWithCriteria?: any): MeteorMysqlCollection<T>;
 
     }
 
-    class MeteorTable<T>{
-        public table: Table<T>;
-        criteria: CriteriaBuilder<T>;
+    class MeteorMysqlCollection<T> {
 
-        constructor(table: Table<T>);
+        constructor(table?: Table<T>, name?: string);
 
-        insert(doc: T, callback?: (_result: T) => void): T;
+        rawCollection(): any;
 
-        remove(selector: any, callback?: () => DeleteAnswer): DeleteAnswer;
+        rawDatabase(): any;
 
-        update(selector: any, callback?: (result: T) => any): T;
+        _ensureIndex(indexName: string, options?: { [key: string]: any }): void;
 
-        collection(nameOfCollection?: string, fillWithCriteria?: any): Mongo.Collection<T>;
+        allow(options: {
+            insert?: (userId: string, doc: T) => boolean;
+            update?: (userId: string, doc: T, fieldNames: string[], modifier: any) => boolean;
+            remove?: (userId: string, doc: T) => boolean;
+            fetch?: string[];
+            transform?: Function;
+        }): boolean;
+
+        deny(options: {
+            insert?: (userId: string, doc: T) => boolean;
+            update?: (userId: string, doc: T, fieldNames: string[], modifier: any) => boolean;
+            remove?: (userId: string, doc: T) => boolean;
+            fetch?: string[];
+            transform?: Function;
+        }): boolean;
+
+
+        fill(criteriaRawJsObject: any): MeteorMysqlCollection<T>;
+
+        fillAll(): MeteorMysqlCollection<T>;
+
+        fillOne(criteriaRawJsObject: any): MeteorMysqlCollection<T>;
+
+        find(selector?: any, options?: {
+            sort?: any;
+            skip?: number;
+            limit?: number;
+            fields?: any;
+            reactive?: boolean;
+            transform?: Function;
+        }): Mongo.Cursor<T>;
+
+
+        findOne(selector?: any, options?: {
+            sort?: any;
+            skip?: number;
+            fields?: any;
+            reactive?: boolean;
+            transform?: Function;
+        }): T;
+
+        insert(doc: T, callback?: Function): string;
+
+        remove(selector: any, callback?: Function): void;
+
+        update(selector: any, modifier?: any, options?: {
+            multi?: boolean;
+            upsert?: boolean;
+        }, callback?: Function): number;
+
+
     }
 
     class Database {
@@ -810,12 +863,17 @@ declare module "node-mysql-wrapper" {
         newTableRules(tableName: string): SelectQueryRules;
 
         buildRules(): SelectQueryRules;
+
         buildRules(parentRules?: SelectQueryRules): SelectQueryRules;
+
+        criteriaFor<T>(tableName: string): CriteriaBuilder<T>;
 
         collection<T>(tableName: string, callbackWhenReady?: Function): ObservableCollection<T>;
 
-        /**Meteor js feature only: Returns a table which it's collection can make synchronization with the client */
-        meteorTable<T>(tableName: string): MeteorTable<T>;
+        /**Meteor js feature only: Returns a  collection which can sync with the client, the ui and the real external database actions */
+        meteorCollection<T>(tableOrTableName: string | Table<T>, collectionName: string, fillWithCriteria?: any): MeteorMysqlCollection<T>;
+
+
     }
 
     function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): Database;

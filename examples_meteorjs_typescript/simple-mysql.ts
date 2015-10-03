@@ -1,6 +1,6 @@
 /// <reference path="definitions/all-definitions.d.ts" />
 declare var Deps;
-declare var Users: Mongo.Collection<any>;
+declare var Users: NodeMysqlWrapper.MeteorMysqlCollection<any> | Mongo.Collection<any>;
 
 if (Meteor.isClient) {
 
@@ -64,23 +64,21 @@ if (Meteor.isServer) {
 
   var db: NodeMysqlWrapper.Database = mysqlWrapper.connect("mysql://kataras:pass@127.0.0.1/taglub?debug=false&charset=utf8");
   console.log('MySQL is Up and Running!');
-
-  var usersTable = db.meteorTable("users");
-  //var criteria = usersTable.criteria.where("yearsOld", 22).build(); //this is the criteria and you pass it as second parameter in usersTable.meteorCollection, default is ' {} means select *all '
-  //var criteria = usersTable.criteria.exclude("password").build(); //or do it on 'like mongo collection at the publish method'
-  Users = usersTable.collection("usersCollection");//or "usersCollection",criteria) //Returns the 'mongo' collection, which you can find,count and all that except insert,remove,update (which you do from usersTable)
+  //var usersTable = db.table("users");
+  var criteria = db.criteriaFor("users").limit(10).except("password").build();
+  Users = db.meteorCollection<any>("users", "usersCollection", criteria); //or just storiesTable.meteorCollection("storiesCollection");
 
   console.log(Users.find().count() + " rows found! ");
   Meteor.publish("allUsers", function() {
-    //or you can ajust here the except 'password' column from select query.
-    return Users.find({}, { fields: { password: 0 } });
+    //or you can ajust here the except 'password' column from select query..find({}, { fields: { password: 0 } });
+    return Users.find();
   });
 
 
   Meteor.methods({
     'createUser': (username, mail, pass) => {
-
-      usersTable.insert({ username: username, mail: mail, password: pass });
+      Users.insert({ username: username, mail: mail, password: pass });
+      // usersTable.insert({ username: username, mail: mail, password: pass });
 
     },
     'updateUser': (userid, username, mail, pass) => {
@@ -97,11 +95,13 @@ if (Meteor.isServer) {
         obj.mail = mail;
       }
 
-      usersTable.update(obj);
+      // usersTable.update(obj);
+      Users.update(obj);
 
     },
     'removeUser': (userid) => {
-      usersTable.remove(userid);
+      // usersTable.remove(userid);
+      Users.remove(userid);
     }
   });
   
