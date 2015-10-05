@@ -11,3 +11,4 @@ node-mysql-wrapper.sln
 /bin/*.dll
 zip_releases
 website
+.npm
