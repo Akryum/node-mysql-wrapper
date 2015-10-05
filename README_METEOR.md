@@ -1,4 +1,5 @@
 # nodets:mysql 
+## Brings real and easy support to Mongo.Collection for Mysql databases.
 #### [node-mysql-wrapper for nodejs](https://github.com/nodets/node-mysql-wrapper/blob/master/README.md)
  
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/nodets/node-mysql-wrapper?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
