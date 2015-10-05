@@ -1,6 +1,6 @@
 /// <reference path="definitions/all-definitions.d.ts" />
 declare var Deps;
-declare var Users: NodeMysqlWrapper.MeteorMysqlCollection<any> | Mongo.Collection<any>;
+declare var Users: Mysql.MeteorMysqlCollection<any> | Mongo.Collection<any>;
 
 if (Meteor.isClient) {
 
@@ -60,9 +60,9 @@ if (Meteor.isClient) {
 
 
 if (Meteor.isServer) {
-  var mysqlWrapper = Meteor["npmRequire"]("node-mysql-wrapper");
 
-  var db: NodeMysqlWrapper.Database = mysqlWrapper.connect("mysql://kataras:pass@127.0.0.1/taglub?debug=false&charset=utf8");
+
+  var db: Mysql.Database = Mysql.connect("mysql://kataras:pass@127.0.0.1/taglub?debug=false&charset=utf8");
   console.log('MySQL is Up and Running!');
   //var usersTable = db.table("users");
   var criteria = db.criteriaFor("users").limit(10).except("password").build();
