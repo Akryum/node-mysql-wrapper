@@ -1,9 +1,9 @@
 //This is for Meteor JS Platform.
 Package.describe({
   name: 'nodets:mysql',
-  version: '0.0.6',
+  version: '0.0.7',
   // Brief, one-line summary of the package.
-  summary: 'This is a mysql wrapper which brings support for mysql collections, in a way that you are expecting!',
+  summary: 'This is a meteor package which brings real and easy support to Mongo.Collection for Mysql databases.',
   // URL to the Git repository containing the source code for this package.
   git: 'https://github.com/nodets/node-mysql-wrapper',
   documentation: 'README_METEOR.md'
