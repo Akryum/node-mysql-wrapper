@@ -71,26 +71,28 @@ export class CriteriaDivider<T> {
         } else {
             _criteria.queryRules = new SelectQueryRules().from(this._table.rules);
         }
-      
+
         Helper.forEachKey(rawCriteriaObject, (objectKey) => {
-            
+
             let colName = Helper.toRowProperty(objectKey);
-          
             //auto edw MONO,apla dn afinei na boun sta .where columns pou exoun ginei except gia na min uparksoun mysql query errors.
-            if ((this._table.columns.indexOf(colName) !== -1 && _criteria.queryRules.exceptColumns.indexOf(colName) === -1) || this._table.primaryKey === colName) {
-               let _valToPut = rawCriteriaObject[objectKey];
-             
-                if(Helper.isString(_valToPut)) { 
+            if ((this._table.columns.indexOf(colName) !== -1 && _criteria.queryRules.exceptColumns.indexOf(colName) === -1) || this._table.primaryKey === colName || colName.split(" ")[0] === "or") { //to objectKey gt auto 9a einai kefalaio
+                let _valToPut = rawCriteriaObject[objectKey];
+
+                if (Helper.isString(_valToPut)) {
+
+
+
                     let _splitedVal = _valToPut.split(" ");
-                    if(COMPARISON_SYMBOLS.indexOf(_splitedVal[0])){//checks the  >,<,>=,<=
-                            colsToSearch.push(colName + _splitedVal[0] + this._table.connection.escape(_valToPut.substring(_splitedVal[0].length)));
+                    if (COMPARISON_SYMBOLS.indexOf(_splitedVal[0])) {//checks the  >,<,>=,<=,=,<>
+                        colsToSearch.push(colName + _splitedVal[0] + this._table.connection.escape(_valToPut.substring(_splitedVal[0].length + 1)));
                     }
-                 
-                }else{ //is eq by default
+
+                } else { //is eq by default but no builded with the criteria builder.
                     colsToSearch.push(colName + " = " + this._table.connection.escape(rawCriteriaObject[objectKey]));
                 }
-                  
-
+  
+                //   colsToSearch.push(colName  + this._table.connection.escape(rawCriteriaObject[objectKey]));
             } else {
                 if (this._table.connection.table(colName) !== undefined) {
                     _criteria.tables.push({ tableName: colName, propertyName: colName });
@@ -113,13 +115,27 @@ export class CriteriaDivider<T> {
                 
                 }
             }
-                
+
         });
         _criteria.rawCriteriaObject = rawCriteriaObject;
         if (colsToSearch.length > 0) {
-            _criteria.whereClause = " WHERE " + colsToSearch.join(" AND ");
+            //edw epidi exw kai OR dn borw na to kanw opws prin:   _criteria.whereClause = " WHERE " + colsToSearch.join(" AND ");
+            
+            _criteria.whereClause = " WHERE ";
+            for (let i = 0; i < colsToSearch.length; i++) {
+                let _colToSearch = colsToSearch[i];
+                let orIndex = _colToSearch.indexOf("or ");
+                if (orIndex === 0) { // na mhn einai kai opou nane ..
+                    _criteria.whereClause += " " + _colToSearch + " ";
+                } else {
+                    _criteria.whereClause += (i >= 1 && i < colsToSearch.length ? " AND " + _colToSearch + " " : _colToSearch);
+                }
+
+            }
+
+
         }
-        
+
         return _criteria;
     }
 }

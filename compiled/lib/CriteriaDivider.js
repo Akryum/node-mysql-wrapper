@@ -54,12 +54,12 @@ var CriteriaDivider = (function () {
         }
         Helper_1.default.forEachKey(rawCriteriaObject, function (objectKey) {
             var colName = Helper_1.default.toRowProperty(objectKey);
-            if ((_this._table.columns.indexOf(colName) !== -1 && _criteria.queryRules.exceptColumns.indexOf(colName) === -1) || _this._table.primaryKey === colName) {
+            if ((_this._table.columns.indexOf(colName) !== -1 && _criteria.queryRules.exceptColumns.indexOf(colName) === -1) || _this._table.primaryKey === colName || colName.split(" ")[0] === "or") {
                 var _valToPut = rawCriteriaObject[objectKey];
                 if (Helper_1.default.isString(_valToPut)) {
                     var _splitedVal = _valToPut.split(" ");
                     if (WhereBuilder_1.COMPARISON_SYMBOLS.indexOf(_splitedVal[0])) {
-                        colsToSearch.push(colName + _splitedVal[0] + _this._table.connection.escape(_valToPut.substring(_splitedVal[0].length)));
+                        colsToSearch.push(colName + _splitedVal[0] + _this._table.connection.escape(_valToPut.substring(_splitedVal[0].length + 1)));
                     }
                 }
                 else {
@@ -86,7 +86,17 @@ var CriteriaDivider = (function () {
         });
         _criteria.rawCriteriaObject = rawCriteriaObject;
         if (colsToSearch.length > 0) {
-            _criteria.whereClause = " WHERE " + colsToSearch.join(" AND ");
+            _criteria.whereClause = " WHERE ";
+            for (var i = 0; i < colsToSearch.length; i++) {
+                var _colToSearch = colsToSearch[i];
+                var orIndex = _colToSearch.indexOf("or ");
+                if (orIndex === 0) {
+                    _criteria.whereClause += " " + _colToSearch + " ";
+                }
+                else {
+                    _criteria.whereClause += (i >= 1 && i < colsToSearch.length ? " AND " + _colToSearch + " " : _colToSearch);
+                }
+            }
         }
         return _criteria;
     };

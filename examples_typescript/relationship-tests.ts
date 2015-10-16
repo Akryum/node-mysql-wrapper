@@ -31,7 +31,7 @@ var finishTestsMsg = ("----------------- ALL TESTS HAVE BEEN FINISHED-----------
 db.ready(() => {
     test1();
     setTimeout(test2, 2000);
-
+    setTimeout(test3, 4000);
 
 });
 
@@ -58,10 +58,28 @@ function test2() {
         _results.forEach(_result=> {
             console.log('Story #' + _result.storyId + ' Title: ' + _result.title + ' Author: #' + _result.author.userId + ' ' + _result.author.username + '\n');
         });
-        console.log(finishTestsMsg);
+        console.log(waitForMsg);
+
     });
 
+}
 
+function test3() {
+    console.log("#3---------------FIND USERS AND THEIR STORIES -----------------");
+    var usersTable = db.table<User>("users");
+    var criteria = usersTable.criteria.where("userId").eq(16).or().eq(18).joinAs("myStories", "stories", "authorId", "userId").build();
+    console.dir(criteria);
+    usersTable.find(criteria).then(_results=> {
+        _results.forEach(_result=> {
+
+            console.log(_result.username + " 's stories:");
+            _result.myStories.forEach(story=> {
+                console.log("Author ID: " + story.authorId + " Title: " + story.title + "\n");
+            });
+
+        });
+        console.log(finishTestsMsg);
+    });
 }
 
 server.on('uncaughtException', function(err) {

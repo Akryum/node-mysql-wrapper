@@ -87,7 +87,6 @@ class SelectQuery<T> implements IQuery<T> { // T for Table's result type.
             var criteria = this._table.criteriaDivider.divide(rawCriteria);
 
             let query = "SELECT " + criteria.selectFromClause(this._table) + " FROM " + this._table.name + criteria.whereClause + criteria.queryRules.toString();
-
             this._table.connection.query(query, (error, results: any[]) => {
                 if (error || !results) {
                     reject(error + ' Error. On find');

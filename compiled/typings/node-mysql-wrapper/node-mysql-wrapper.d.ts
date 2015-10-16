@@ -280,6 +280,8 @@ declare module "node-mysql-wrapper" {
         exclude(...columns: string[]): CriteriaBuilder<T>;
 
         where(key: string): WhereBuilder<T>;
+        
+        or(key?:string):WhereBuilder<T>;
 
         private createRulesIfNotExists(): void;
 

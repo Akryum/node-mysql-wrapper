@@ -13,7 +13,26 @@ var CriteriaBuilder = (function () {
         }
     }
     CriteriaBuilder.prototype.where = function (key) {
-        return new WhereBuilder_1.default(this, key);
+        this.lastWhereBuilderUsed = new WhereBuilder_1.default(this, key);
+        return this.lastWhereBuilderUsed;
+    };
+    CriteriaBuilder.prototype.or = function (key) {
+        if (key === undefined && this.lastWhereBuilderUsed === undefined) {
+            console.error('CriteriaBuilder or: PLEASE SPECIFY KEY');
+            return;
+        }
+        if (key !== undefined && key.indexOf("or ") >= 0) {
+        }
+        else if (key === undefined && this.lastWhereBuilderUsed.key.indexOf("or ") >= 0) {
+            key = this.lastWhereBuilderUsed.key;
+        }
+        else if (key === undefined) {
+            key = "or " + this.lastWhereBuilderUsed.key;
+        }
+        else {
+            key = "or " + key;
+        }
+        return this.where(key);
     };
     CriteriaBuilder.prototype.createRulesIfNotExists = function () {
         if (!Helper_1.default.hasRules(this.rawCriteria)) {

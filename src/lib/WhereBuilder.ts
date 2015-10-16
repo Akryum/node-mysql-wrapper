@@ -1,10 +1,10 @@
 import CriteriaBuilder from "./CriteriaBuilder";
 
-export var COMPARISON_SYMBOLS = ["=","<>",">","<",">=","<="];
+export var COMPARISON_SYMBOLS = ["= ","<> ","> ","< ",">= ","<= "];
 
 class WhereBuilder<T>{
 	
-	constructor(public parentCriteriaBuilder:CriteriaBuilder<T>,private key:string){
+	constructor(public parentCriteriaBuilder:CriteriaBuilder<T>,public key:string){
 		
 	}
 	

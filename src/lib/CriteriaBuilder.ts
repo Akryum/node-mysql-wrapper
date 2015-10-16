@@ -1,12 +1,13 @@
 import Table from "./Table";
 import {SelectQueryRules, TABLE_RULES_PROPERTY} from "./queries/SelectQueryRules";
-import {default as SelectQuery,EQUAL_TO_PROPERTY_SYMBOL} from "./queries/SelectQuery";
+import {default as SelectQuery, EQUAL_TO_PROPERTY_SYMBOL} from "./queries/SelectQuery";
 import Helper from "./Helper";
 import WhereBuilder from "./WhereBuilder";
 import * as Promise from 'bluebird';
 
 class CriteriaBuilder<T>{
 
+	private lastWhereBuilderUsed: WhereBuilder<T>;
 	public rawCriteria: any = {};
 
 	constructor(primaryTable: Table<T>); //to arxiko apo to Table.ts 9a benei
@@ -20,7 +21,28 @@ class CriteriaBuilder<T>{
 	where(key: string): WhereBuilder<T> {
 		//this.rawCriteria[key] = value;
 		//return this;
-		return new WhereBuilder(this,key);
+		this.lastWhereBuilderUsed = new WhereBuilder(this, key);
+		return this.lastWhereBuilderUsed;
+	}
+
+	or(key?: string): WhereBuilder<T> {
+		if (key === undefined && this.lastWhereBuilderUsed === undefined) {
+			console.error('CriteriaBuilder or: PLEASE SPECIFY KEY');
+			return;
+		}
+		if (key !== undefined && key.indexOf("or ") >= 0) {
+
+		} else if (key === undefined && this.lastWhereBuilderUsed.key.indexOf("or ") >= 0) {
+			key = this.lastWhereBuilderUsed.key;
+		} else if (key === undefined) {
+			key = "or " + this.lastWhereBuilderUsed.key;
+
+		} else {
+			key = "or " + key;
+		}
+		//den afeinw keno gt afinei to divider meta.
+		return this.where(key);
+
 	}
 
 	private createRulesIfNotExists() {
@@ -75,20 +97,20 @@ class CriteriaBuilder<T>{
 		return this;
 	}
 
-	join(realTableName: string, foreignColumnName: string,thisColumnName?:string ): CriteriaBuilder<T> {
+	join(realTableName: string, foreignColumnName: string, thisColumnName?: string): CriteriaBuilder<T> {
 		let _joinedTable = {};
-		
-		_joinedTable[foreignColumnName]  = EQUAL_TO_PROPERTY_SYMBOL + (thisColumnName ? thisColumnName : '');
+
+		_joinedTable[foreignColumnName] = EQUAL_TO_PROPERTY_SYMBOL + (thisColumnName ? thisColumnName : '');
 
 		this.rawCriteria[realTableName] = _joinedTable;
 		return this;
 	}
 
-	joinAs(tableNameProperty: string, realTableName: string, foreignColumnName: string,thisColumnName?:string): CriteriaBuilder<T> {
+	joinAs(tableNameProperty: string, realTableName: string, foreignColumnName: string, thisColumnName?: string): CriteriaBuilder<T> {
 
 		let _joinedTable = {};
-	   _joinedTable[foreignColumnName]  = EQUAL_TO_PROPERTY_SYMBOL + (thisColumnName ? thisColumnName : '')
-		
+		_joinedTable[foreignColumnName] = EQUAL_TO_PROPERTY_SYMBOL + (thisColumnName ? thisColumnName : '')
+
 		_joinedTable[TABLE_RULES_PROPERTY] = { table: realTableName };
 
 		this.rawCriteria[tableNameProperty] = _joinedTable;
@@ -128,7 +150,7 @@ class CriteriaBuilder<T>{
 		return new CriteriaBuilder(table);
 	}
 
-	
+
 }
 
 export default CriteriaBuilder;

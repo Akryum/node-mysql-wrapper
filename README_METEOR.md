@@ -182,7 +182,7 @@ var storiesFromAuthor1 = Stories.find({authorId:1}); //Array
 
 
 var criteria = db.criteriaFor("users")
-.where("yearsOld",22)
+.where("yearsOld").gt(18)
 .exclude("password","createdDate") //or .except(...columns). Removes that column(s) from the select query. 
 .joinAs("info","userInfos","userId").at("info").limit(1) 
 //with.at('tableOrPropertyName') we are going and passing criterias inside the info property

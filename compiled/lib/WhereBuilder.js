@@ -1,4 +1,4 @@
-exports.COMPARISON_SYMBOLS = ["=", "<>", ">", "<", ">=", "<="];
+exports.COMPARISON_SYMBOLS = ["= ", "<> ", "> ", "< ", ">= ", "<= "];
 var WhereBuilder = (function () {
     function WhereBuilder(parentCriteriaBuilder, key) {
         this.parentCriteriaBuilder = parentCriteriaBuilder;

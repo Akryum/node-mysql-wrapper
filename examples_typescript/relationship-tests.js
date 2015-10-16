@@ -20,6 +20,7 @@ var finishTestsMsg = ("----------------- ALL TESTS HAVE BEEN FINISHED-----------
 db.ready(function () {
     test1();
     setTimeout(test2, 2000);
+    setTimeout(test3, 4000);
 });
 function test1() {
     console.log("#1-------------- FIND A USER AND HIS/HER STORIES ------------");
@@ -40,6 +41,21 @@ function test2() {
     storiesTable.find(storyCriteria).then(function (_results) {
         _results.forEach(function (_result) {
             console.log('Story #' + _result.storyId + ' Title: ' + _result.title + ' Author: #' + _result.author.userId + ' ' + _result.author.username + '\n');
+        });
+        console.log(waitForMsg);
+    });
+}
+function test3() {
+    console.log("#3---------------FIND USERS AND THEIR STORIES -----------------");
+    var usersTable = db.table("users");
+    var criteria = usersTable.criteria.where("userId").eq(16).or().eq(18).joinAs("myStories", "stories", "authorId", "userId").build();
+    console.dir(criteria);
+    usersTable.find(criteria).then(function (_results) {
+        _results.forEach(function (_result) {
+            console.log(_result.username + " 's stories:");
+            _result.myStories.forEach(function (story) {
+                console.log("Author ID: " + story.authorId + " Title: " + story.title + "\n");
+            });
         });
         console.log(finishTestsMsg);
     });
