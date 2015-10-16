@@ -70,7 +70,7 @@ db.ready(() => {
     /*
         Example of single observable object: 
         
-        var _criteria16 = usersTable.criteria.where("userId", 16).joinAs("myComments", "comments", "userId").orderBy("userId", true).limit(1).build();
+        var _criteria16 = usersTable.criteria.where("userId").eq(16).joinAs("myComments", "comments", "userId").orderBy("userId", true).limit(1).build();
      
      
      

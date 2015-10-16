@@ -1,5 +1,6 @@
 var Helper_1 = require("./Helper");
 var SelectQueryRules_1 = require("./queries/SelectQueryRules");
+var WhereBuilder_1 = require("./WhereBuilder");
 var CriteriaParts = (function () {
     function CriteriaParts(rawCriteriaObject, tables, noDatabaseProperties, whereClause, queryRules) {
         if (rawCriteriaObject === void 0) { rawCriteriaObject = {}; }
@@ -54,7 +55,16 @@ var CriteriaDivider = (function () {
         Helper_1.default.forEachKey(rawCriteriaObject, function (objectKey) {
             var colName = Helper_1.default.toRowProperty(objectKey);
             if ((_this._table.columns.indexOf(colName) !== -1 && _criteria.queryRules.exceptColumns.indexOf(colName) === -1) || _this._table.primaryKey === colName) {
-                colsToSearch.push(colName + " = " + _this._table.connection.escape(rawCriteriaObject[objectKey]));
+                var _valToPut = rawCriteriaObject[objectKey];
+                if (Helper_1.default.isString(_valToPut)) {
+                    var _splitedVal = _valToPut.split(" ");
+                    if (WhereBuilder_1.COMPARISON_SYMBOLS.indexOf(_splitedVal[0])) {
+                        colsToSearch.push(colName + _splitedVal[0] + _this._table.connection.escape(_valToPut.substring(_splitedVal[0].length)));
+                    }
+                }
+                else {
+                    colsToSearch.push(colName + " = " + _this._table.connection.escape(rawCriteriaObject[objectKey]));
+                }
             }
             else {
                 if (_this._table.connection.table(colName) !== undefined) {

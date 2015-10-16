@@ -1,6 +1,7 @@
 var SelectQueryRules_1 = require("./queries/SelectQueryRules");
 var SelectQuery_1 = require("./queries/SelectQuery");
 var Helper_1 = require("./Helper");
+var WhereBuilder_1 = require("./WhereBuilder");
 var CriteriaBuilder = (function () {
     function CriteriaBuilder(primaryTable, tablePropertyName, parentBuilder) {
         this.primaryTable = primaryTable;
@@ -11,9 +12,8 @@ var CriteriaBuilder = (function () {
             this.rawCriteria = parentBuilder.rawCriteria[tablePropertyName];
         }
     }
-    CriteriaBuilder.prototype.where = function (key, value) {
-        this.rawCriteria[key] = value;
-        return this;
+    CriteriaBuilder.prototype.where = function (key) {
+        return new WhereBuilder_1.default(this, key);
     };
     CriteriaBuilder.prototype.createRulesIfNotExists = function () {
         if (!Helper_1.default.hasRules(this.rawCriteria)) {

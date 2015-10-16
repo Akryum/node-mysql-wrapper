@@ -2,11 +2,12 @@ import Table from "./Table";
 import {SelectQueryRules, TABLE_RULES_PROPERTY} from "./queries/SelectQueryRules";
 import {default as SelectQuery,EQUAL_TO_PROPERTY_SYMBOL} from "./queries/SelectQuery";
 import Helper from "./Helper";
+import WhereBuilder from "./WhereBuilder";
 import * as Promise from 'bluebird';
 
 class CriteriaBuilder<T>{
 
-	private rawCriteria: any = {};
+	public rawCriteria: any = {};
 
 	constructor(primaryTable: Table<T>); //to arxiko apo to Table.ts 9a benei
 	constructor(primaryTable: Table<T>, tableName: string, parentBuilder: CriteriaBuilder<any>);// auta 9a benoun apo to parent select query.
@@ -16,9 +17,10 @@ class CriteriaBuilder<T>{
 		}
 	}
 
-	where(key: string, value: any): CriteriaBuilder<T> {
-		this.rawCriteria[key] = value;
-		return this;
+	where(key: string): WhereBuilder<T> {
+		//this.rawCriteria[key] = value;
+		//return this;
+		return new WhereBuilder(this,key);
 	}
 
 	private createRulesIfNotExists() {

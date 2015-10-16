@@ -68,7 +68,7 @@ db.ready(function () {
     //if no rules setted to find method  it's uses the table's rules ( if exists)
     var _criteriaFromBuilder = usersDb.criteria
         .except("password") // or .exclude(...columns). the only column you cannot except/exclude is the primary key (because it is used at where clause), be careful.
-        .where("userId", 24)
+        .where("userId").eq(24)
         .joinAs("info", "userInfos", "userId") //auto 9a borousa na to kanw na min xreiazete kan to 2o parameter kai na pernei to primary key name tou parent table.
         .at("info")
         .limit(1) //because we make it limit 1 it will return this result as object not as array.
@@ -80,7 +80,7 @@ db.ready(function () {
     /* console.dir(_criteriaFromBuilder);
      prints this object: ( of course you can create your own in order to pass it on .find table methods )
     {
-        userId:23,
+        userId:24,
         
         myComments:{
             userId: '=',

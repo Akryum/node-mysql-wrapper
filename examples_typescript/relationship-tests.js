@@ -24,7 +24,7 @@ db.ready(function () {
 function test1() {
     console.log("#1-------------- FIND A USER AND HIS/HER STORIES ------------");
     var usersTable = db.table("users");
-    var criteria = usersTable.criteria.where("userId", 16).joinAs("myStories", "stories", "authorId", "userId").build();
+    var criteria = usersTable.criteria.where("userId").eq(16).joinAs("myStories", "stories", "authorId", "userId").build();
     usersTable.findSingle(criteria).then(function (_result) {
         console.log(_result.username + " 's stories:");
         _result.myStories.forEach(function (story) {

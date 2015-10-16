@@ -1,6 +1,7 @@
 ﻿import Table from "./Table";
 import Helper from "./Helper";
 import {SelectQueryRules, TABLE_RULES_PROPERTY} from "./queries/SelectQueryRules";
+import {COMPARISON_SYMBOLS} from "./WhereBuilder";
 
 export type TableToSearchPart = { tableName: string, propertyName: string };
 
@@ -77,7 +78,18 @@ export class CriteriaDivider<T> {
           
             //auto edw MONO,apla dn afinei na boun sta .where columns pou exoun ginei except gia na min uparksoun mysql query errors.
             if ((this._table.columns.indexOf(colName) !== -1 && _criteria.queryRules.exceptColumns.indexOf(colName) === -1) || this._table.primaryKey === colName) {
-               colsToSearch.push(colName + " = " + this._table.connection.escape(rawCriteriaObject[objectKey]));
+               let _valToPut = rawCriteriaObject[objectKey];
+             
+                if(Helper.isString(_valToPut)) { 
+                    let _splitedVal = _valToPut.split(" ");
+                    if(COMPARISON_SYMBOLS.indexOf(_splitedVal[0])){//checks the  >,<,>=,<=
+                            colsToSearch.push(colName + _splitedVal[0] + this._table.connection.escape(_valToPut.substring(_splitedVal[0].length)));
+                    }
+                 
+                }else{ //is eq by default
+                    colsToSearch.push(colName + " = " + this._table.connection.escape(rawCriteriaObject[objectKey]));
+                }
+                  
 
             } else {
                 if (this._table.connection.table(colName) !== undefined) {

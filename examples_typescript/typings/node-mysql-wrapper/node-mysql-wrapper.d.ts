@@ -225,6 +225,43 @@ declare module "node-mysql-wrapper" {
         static fromRawObject(obj: RawRules): SelectQueryRules;
     }
 
+    class WhereBuilder<T>{
+	   parentCriteriaBuilder:CriteriaBuilder<T>;
+    
+	   constructor(parentCriteriaBuilder:CriteriaBuilder<T>, key:string);
+	
+	   /**
+    	 * Equals
+    	 */
+	   eq(val:any):CriteriaBuilder<T>;
+	
+	   /**
+    	 * Is Not Equal to
+    	 */
+	   ne(val:any):CriteriaBuilder<T>;
+	
+	   /**
+    	 * Greater Than
+    	 */
+	   gt(val:any):CriteriaBuilder<T>;
+	
+	   /**
+    	 * Less Than
+    	 */
+	   lt(val:any):CriteriaBuilder<T>;
+	
+	   /**
+	    * Is greater than or equal to
+	    */
+	   ge(val:any):CriteriaBuilder<T>;
+	
+	   /**
+	    * Is less than or equal to
+	    */
+	   le(val:any):CriteriaBuilder<T>;
+		
+    }
+
     class CriteriaBuilder<T>{
 
         private rawCriteria: any;
@@ -242,7 +279,7 @@ declare module "node-mysql-wrapper" {
 	    */
         exclude(...columns: string[]): CriteriaBuilder<T>;
 
-        where(key: string, value: any): CriteriaBuilder<T>;
+        where(key: string): WhereBuilder<T>;
 
         private createRulesIfNotExists(): void;
 
