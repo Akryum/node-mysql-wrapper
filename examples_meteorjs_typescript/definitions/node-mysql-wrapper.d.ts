@@ -519,7 +519,7 @@ declare module Mysql {
         /**
          * The real database connection socket.
          */
-        connection: Mysql.IConnection;
+        connection: NodeMysql.IConnection;
         
         /**
          * Collection of the supported event types for the tables.
@@ -536,23 +536,23 @@ declare module Mysql {
          */
         tables: Table<any>[];
 
-        constructor(connection: string | Mysql.IConnection | Mysql.IConnectionConfig);
+        constructor(connection: string | NodeMysql.IConnection | NodeMysql.IConnectionConfig);
         
         /**
          * Creates the MysqlConnection from the connection url or the real connection object.
-         * @param {string | Mysql.IConnection |  Mysql.IConnectionConfig} connection the connection url or the real connection object.
+         * @param {string | NodeMysql.IConnection |  NodeMysql.IConnectionConfig} connection the connection url or the real connection object.
          * @returnType {nothing}
          * @return {nothing}
          */
-        create(connection: string | Mysql.IConnection | Mysql.IConnectionConfig): void;
+        create(connection: string | NodeMysql.IConnection | NodeMysql.IConnectionConfig): void;
         
         /**
          * Attach a real connection.
-         * @param {Mysql.IConnection} connection the real connection object.
+         * @param {NodeMysql.IConnection} connection the real connection object.
          * @returnType {nothing}
          * @return {nothing} 
          */
-        attach(connection: Mysql.IConnection): void;
+        attach(connection: NodeMysql.IConnection): void;
         
         /**
          * Close the entire real connection and remove all event's listeners (if exist).
@@ -644,7 +644,7 @@ declare module Mysql {
          * @returnType {nothing}
          * @return {nothing} 
          */
-        query(queryStr: string, callback: (err: Mysql.IError, results: any) => any, queryArguments?: any[]): void;
+        query(queryStr: string, callback: (err: NodeMysql.IError, results: any) => any, queryArguments?: any[]): void;
         
         /**
          * Returns a MysqlTable object from the database factory. (Note: this method doesn't create anything, just finds and returns the correct table, you don't have to create anything at all. Tables are fetched by the library itself.)
@@ -895,7 +895,7 @@ declare module Mysql {
         table<T>(tableName: string): Table<T>;
         noticeReady(): void;
         removeReadyListener(callback: () => void): void;
-        query(queryStr: string, callback: (err: Mysql.IError, results: any) => any, queryArguments?: any[]): void;
+        query(queryStr: string, callback: (err: NodeMysql.IError, results: any) => any, queryArguments?: any[]): void;
         
         /**
         * Close the entire real connection and remove all event's listeners (if exist).
@@ -927,12 +927,12 @@ declare module Mysql {
 
     }
 
-    function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): Database;
+    function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection: NodeMysql.IConnection | string, ...useTables: any[]): Database;
     
     /** Same as wrap but it's sync mode - autoconnect to the database without need to use database.ready(callback).
      *  Do not use it yet. It works only on 32/86 bit, use .wrap instead
      */
-    function connect(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): Database;
+    function connect(mysqlUrlOrObjectOrMysqlAlreadyConnection: NodeMysql.IConnection | string, ...useTables: any[]): Database;
 
     function observable<T>(obj: T): T & ObservableObject;
 }

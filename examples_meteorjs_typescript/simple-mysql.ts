@@ -27,12 +27,14 @@ if (Meteor.isClient) {
       var username = data.username.value;
       var mail = data.mail.value;
       var pass = data.pass.value;
+      var yearsOld = data.yearsOld.value;
 
-      Meteor.call("createUser", username, mail, pass);
+      Meteor.call("createUser", username, mail, pass,yearsOld);
       //clean up text fields
       data.username.value = '';
       data.mail.value = '';
       data.pass.value = '';
+      data.yearsOld.value='';
 
     },
     'submit .update-user': (event) => {
@@ -65,7 +67,7 @@ if (Meteor.isServer) {
   var db: Mysql.Database = Mysql.connect("mysql://kataras:pass@127.0.0.1/taglub?debug=false&charset=utf8");
   console.log('MySQL is Up and Running!');
   //var usersTable = db.table("users");
-  var criteria = db.criteriaFor("users").limit(10).except("password").build();
+  var criteria = db.criteriaFor("users").where("yearsOld").gt(18).limit(10).except("password").build();
   Users = db.meteorCollection<any>("users", "usersCollection", criteria); //or just storiesTable.meteorCollection("storiesCollection");
 
   console.log(Users.find().count() + " rows found! ");
@@ -76,8 +78,8 @@ if (Meteor.isServer) {
 
 
   Meteor.methods({
-    'createUser': (username, mail, pass) => {
-      Users.insert({ username: username, mail: mail, password: pass });
+    'createUser': (username, mail, pass,yearsOld) => {
+      Users.insert({ username: username, mail: mail, password: pass,yearsOld:yearsOld });
       // usersTable.insert({ username: username, mail: mail, password: pass });
 
     },

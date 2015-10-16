@@ -89,7 +89,7 @@ export class CriteriaDivider<T> {
                     }
 
                 } else { //is eq by default but no builded with the criteria builder.
-                    colsToSearch.push(colName + " = " + this._table.connection.escape(rawCriteriaObject[objectKey]));
+                    colsToSearch.push(colName + "= " + this._table.connection.escape(rawCriteriaObject[objectKey]));
                 }
   
                 //   colsToSearch.push(colName  + this._table.connection.escape(rawCriteriaObject[objectKey]));

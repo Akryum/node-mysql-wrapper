@@ -17,8 +17,23 @@ var MeteorMysqlCollection = (function () {
         var _this = this;
         this.table.on("INSERT", Meteor.bindEnvironment(function (rows) {
             rows.forEach(function (row) {
-                var _newPureItem = _this.proccessJoinedTableInsert(_this.table.objectFromRow(row));
-                _this.collection.insert(_newPureItem);
+                var objRow = _this.table.objectFromRow(row);
+                var canInsert = true;
+                Helper_1.default.forEachKey(_this.criteriaRawJsObject, function (key) {
+                    if (!canInsert) {
+                        return;
+                    }
+                    if (objRow[key] !== undefined) {
+                        var ifEvalStatementStr = (" " + objRow[key] + _this.criteriaRawJsObject[key] + " ");
+                        if (!eval(ifEvalStatementStr)) {
+                            canInsert = false;
+                        }
+                    }
+                });
+                if (canInsert) {
+                    var _newPureItem = _this.proccessJoinedTableInsert(objRow);
+                    _this.collection.insert(_newPureItem);
+                }
             });
         }));
         this.table.on("UPDATE", Meteor.bindEnvironment(function (rows) {

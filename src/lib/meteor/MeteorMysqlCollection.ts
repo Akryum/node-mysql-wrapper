@@ -38,8 +38,27 @@ class MeteorMysqlCollection<T> {
         // listens to table's direct database events.
         this.table.on("INSERT", Meteor.bindEnvironment((rows: any[]) => {
             rows.forEach(row=> {
-                let _newPureItem = this.proccessJoinedTableInsert(this.table.objectFromRow(row)); //edw pernei to object, me ta joins ktlp
-                this.collection.insert(_newPureItem);
+                let objRow = this.table.objectFromRow(row);
+                let canInsert = true;
+                //prin to eisagw stin lista prepei na elenksw an anoikei stin lista, vasi tou criteria pou egine fill h collection.
+                Helper.forEachKey(this.criteriaRawJsObject, key=> {
+                    if(!canInsert){
+                        return;
+                    }
+                    if (objRow[key] !== undefined) {
+                        let ifEvalStatementStr = (" " + objRow[key] + this.criteriaRawJsObject[key] + " ");//Eg. key: yearsOld, this.criteriaRawJsObject[key]: ' >=16'
+                        
+                        if (!eval(ifEvalStatementStr)) {
+                            canInsert = false;
+                        }
+                    }
+
+                });
+                if (canInsert) {
+                    let _newPureItem = this.proccessJoinedTableInsert(objRow); //edw pernei to object, me ta joins ktlp
+                    this.collection.insert(_newPureItem);
+                }
+
             });
         }));
 
