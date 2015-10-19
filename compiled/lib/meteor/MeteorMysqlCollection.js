@@ -176,11 +176,10 @@ var MeteorMysqlCollection = (function (_super) {
                                 });
                             }
                             else {
-                                _this.collection.update(objToFind, {
-                                    $set: {
-                                        parentPropName: objRow
-                                    }
-                                });
+                                var toSetObj = {};
+                                toSetObj["$set"] = {};
+                                toSetObj["$set"][parentPropName] = objRow;
+                                _this.collection.update(objToFind, toSetObj);
                             }
                         }
                     });

@@ -270,7 +270,7 @@ class MeteorMysqlCollection<T> extends EventEmitter {
 								let toSetObj = {};
                                 toSetObj["$set"] = {};
                                 toSetObj["$set"][parentPropName] = objRow;
-                                this.collection.update(objToFind, tosetObj);
+                                this.collection.update(objToFind, toSetObj);
                             }
 
 
