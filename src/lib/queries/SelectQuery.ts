@@ -7,7 +7,7 @@ import IQuery from"./IQuery";
 import ObservableObject from "../ObservableObject";
 import * as Promise from 'bluebird';
 
-export var EQUAL_TO_PROPERTY_SYMBOL = '=';
+export var EQUAL_TO_PROPERTY_SYMBOL = '= ';
 class SelectQuery<T> implements IQuery<T> { // T for Table's result type.
 
     constructor(public _table: Table<T>) {
@@ -30,12 +30,13 @@ class SelectQuery<T> implements IQuery<T> { // T for Table's result type.
                             let propValueToCheck: string = criteriaJsObject[propertyName];
                             let indexOfEquality = propValueToCheck.indexOf(EQUAL_TO_PROPERTY_SYMBOL);
                             if (indexOfEquality === 0) {
-                                if (propValueToCheck.length === 1) {
+
+                                if (propValueToCheck.length === EQUAL_TO_PROPERTY_SYMBOL.length) { //an einai mono =
                                     //sindese to X property me to antistixo X property tou reslut
                                     criteriaJsObject[propertyName] = result[Helper.toRowProperty(propertyName)];
-                                } else {
+                                } else { //an einai = userId
                                     //sindese to X property me to Y property tou result
-                                    criteriaJsObject[propertyName] = result[Helper.toRowProperty(propValueToCheck.substring(1))];
+                                    criteriaJsObject[propertyName] = result[Helper.toRowProperty(propValueToCheck.substring(EQUAL_TO_PROPERTY_SYMBOL.length))];
                                 }
                             }
                         }

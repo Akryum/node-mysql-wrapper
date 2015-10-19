@@ -2,6 +2,7 @@ import Helper from "../Helper";
 
 export var TABLE_RULES_PROPERTY = "tableRules";
 
+
 export type RawRules = {
 	table: string, //AUTO UPOLOGIZETE APO TO CRITERIA BUILDER, DEN BENEI STO .TOSTRING, TO VAZW EDW GIA ENAN MONO LOGO, GIA NA BORW NA KANW TO SELECTQUERYBUILDER. 
 	except: string[], //except columns.

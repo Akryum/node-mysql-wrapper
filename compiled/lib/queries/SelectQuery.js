@@ -2,7 +2,7 @@ var Helper_1 = require("../Helper");
 var SelectQueryRules_1 = require("./SelectQueryRules");
 var CriteriaBuilder_1 = require("../CriteriaBuilder");
 var Promise = require('bluebird');
-exports.EQUAL_TO_PROPERTY_SYMBOL = '=';
+exports.EQUAL_TO_PROPERTY_SYMBOL = '= ';
 var SelectQuery = (function () {
     function SelectQuery(_table) {
         this._table = _table;
@@ -22,11 +22,11 @@ var SelectQuery = (function () {
                             var propValueToCheck = criteriaJsObject[propertyName];
                             var indexOfEquality = propValueToCheck.indexOf(exports.EQUAL_TO_PROPERTY_SYMBOL);
                             if (indexOfEquality === 0) {
-                                if (propValueToCheck.length === 1) {
+                                if (propValueToCheck.length === exports.EQUAL_TO_PROPERTY_SYMBOL.length) {
                                     criteriaJsObject[propertyName] = result[Helper_1.default.toRowProperty(propertyName)];
                                 }
                                 else {
-                                    criteriaJsObject[propertyName] = result[Helper_1.default.toRowProperty(propValueToCheck.substring(1))];
+                                    criteriaJsObject[propertyName] = result[Helper_1.default.toRowProperty(propValueToCheck.substring(exports.EQUAL_TO_PROPERTY_SYMBOL.length))];
                                 }
                             }
                         }

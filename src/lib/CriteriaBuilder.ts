@@ -101,7 +101,9 @@ class CriteriaBuilder<T>{
 		let _joinedTable = {};
 
 		_joinedTable[foreignColumnName] = EQUAL_TO_PROPERTY_SYMBOL + (thisColumnName ? thisColumnName : '');
-
+		
+		_joinedTable[TABLE_RULES_PROPERTY] = { table: realTableName }; //auto to evala gia na borw na pernw me sigouria to real table name eite einai joined eite oxi. 17-10-2015.
+		
 		this.rawCriteria[realTableName] = _joinedTable;
 		return this;
 	}
@@ -109,7 +111,7 @@ class CriteriaBuilder<T>{
 	joinAs(tableNameProperty: string, realTableName: string, foreignColumnName: string, thisColumnName?: string): CriteriaBuilder<T> {
 
 		let _joinedTable = {};
-		_joinedTable[foreignColumnName] = EQUAL_TO_PROPERTY_SYMBOL + (thisColumnName ? thisColumnName : '')
+		_joinedTable[foreignColumnName] = EQUAL_TO_PROPERTY_SYMBOL + (thisColumnName ? thisColumnName : '');
 
 		_joinedTable[TABLE_RULES_PROPERTY] = { table: realTableName };
 

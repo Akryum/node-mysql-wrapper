@@ -70,7 +70,7 @@ class Connection extends EventEmitter {
     
     watchBinaryLogs(callbackWhenReady?: Function): void {
         if (!this.allowBinaryLogs) {
-            console.log("Binary logs are off.\n Please google 'Enable Binary logs in MySQL' , and restart your mysql server and NodeJS server.");
+            console.log("Binary logs are off.\n Please google 'Enable Binary logs in MySQL' , and restart your mysql server and NodeJS/Meteor server.");
         } else {
             if (!this.zongji || this.zongji === undefined) { //ONLY ONE TIME INIT and start.
                 this.zongji = new ZongJi(this.connection.config); //BEFORE clear logs.

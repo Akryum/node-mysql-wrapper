@@ -1,11 +1,19 @@
 ﻿import {TABLE_RULES_PROPERTY} from "./queries/SelectQueryRules";
-
+import {EQUAL_TO_PROPERTY_SYMBOL} from "./queries/SelectQuery";
 export interface Map<T> {
     [index: string]: T;
 }
 
 class Helper {
     constructor() { }
+
+    private static escapeRegExp(string):string {
+        return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+    }
+
+    public static replaceAll(string, find, replace):string {
+        return string.replace(new RegExp(Helper.escapeRegExp(find), 'g'), replace);
+    }
 
     static copyObject<T>(object: T): T {
         let objectCopy = <T>{};
@@ -69,6 +77,32 @@ class Helper {
     static hasRules(obj: any): boolean {
         return obj !== undefined && obj[TABLE_RULES_PROPERTY] !== undefined;
     }
+
+    /*
+    ///TODO: kapoia stigmh
+        static getTablesFrom(obj: any): TABLE_PROPERTY_INTERFACE[] {//[{tableName:string,propertyName:string}]{
+            let tables: TABLE_PROPERTY_INTERFACE[] = [];
+    
+            if (Helper.hasRules(obj)) {
+                Helper.forEachKey(obj, key=> {
+                    let prop = obj[key];
+                    let foreignKey;
+                    let thisKey;
+                    //an uparxei to thisKey 9a einai se morfi =thisKey
+                    //an oxi tote einai se morfi = sketo.
+                    
+                    //to foreign key einai to perito property...den uparxei standar tropos gia na to vrw.
+             ///TODO:     prop[TABLE_RULES_PROPERTY] ? or key?  if(key.indexOf(EQUAL_TO_PROPERTY_SYMBOL) && key.length)
+                    let realTableName = prop[TABLE_RULES_PROPERTY]["table"];
+                    if (realTableName !== undefined) {
+                        tables.push({ tableName: Helper.toRowProperty(realTableName), propertyName: key, thisKey:thisKey,foreignKey:foreignKey });
+                    }
+                });
+    
+            }
+            return tables;
+        }
+        */
 
     static extendTypes<T, U>(first: T, second: U): T & U {
         let result = <T & U>{};

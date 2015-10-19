@@ -2,6 +2,12 @@ var SelectQueryRules_1 = require("./queries/SelectQueryRules");
 var Helper = (function () {
     function Helper() {
     }
+    Helper.escapeRegExp = function (string) {
+        return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+    };
+    Helper.replaceAll = function (string, find, replace) {
+        return string.replace(new RegExp(Helper.escapeRegExp(find), 'g'), replace);
+    };
     Helper.copyObject = function (object) {
         var objectCopy = {};
         for (var key in object) {

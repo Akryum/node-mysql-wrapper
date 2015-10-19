@@ -37,6 +37,7 @@
     "./src/lib/Connection.ts",
     "./src/lib/Table.ts",
     "./src/lib/Helper.ts",
+    "./src/lib/ConditionalConverter.ts",
     "./src/lib/Database.ts",
     "./src/lib/Wrapper.ts"
   ],

@@ -217,7 +217,7 @@ class Table<T> {
     }
 
     remove(criteriaOrID: any | number | string, callback?: (_result: DeleteAnswer) => any): Promise<DeleteAnswer> {
-        return this._deleteQuery.execute(criteriaOrID, callback);
+       return this._deleteQuery.execute(criteriaOrID, callback);
     }
 
     /*only for meteor js*/

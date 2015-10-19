@@ -63,7 +63,7 @@ var CriteriaDivider = (function () {
                     }
                 }
                 else {
-                    colsToSearch.push(colName + " = " + _this._table.connection.escape(rawCriteriaObject[objectKey]));
+                    colsToSearch.push(colName + "= " + _this._table.connection.escape(rawCriteriaObject[objectKey]));
                 }
             }
             else {

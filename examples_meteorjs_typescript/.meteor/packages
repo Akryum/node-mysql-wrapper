@@ -21,3 +21,4 @@ ejson
 spacebars
 check
 nodets:mysql
+reactive-var

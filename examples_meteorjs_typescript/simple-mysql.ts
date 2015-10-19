@@ -6,17 +6,40 @@ if (Meteor.isClient) {
 
   Users = new Mongo.Collection<any>("usersCollection");
 
-  Meteor.subscribe("allUsers");
+  /*
+    Template["usersList"].onRendered(function(){
+  	var self = this;
+	Template["usersList"]["usersList"] = new ReactiveVar([]);
+	var subs  = Meteor.subscribe("allUsers");
+
+    this.autorun(function() {
+    if(!self.subscriptionsReady())
+      return;
+    	Template["usersList"]["usersList"].set(Users.find().fetch().reverse());
+  });
+  });*/
+  
 
   Template["usersList"].helpers({
-    users: function() {
-      return Users.find().fetch().reverse();
-    }
+   users:function(){
+   Tracker.autorun(function(){
+    Meteor.subscribe("allUsers");
+   
+   });
+   
+    return Users.find().fetch().reverse();
+	},
+	
+	takeMyStories : function(userId){
+		return Users.find({userId : userId}).fetch()[0].myStories;
+	}
     ,
     length: function() {
       return Users.find().count();
     }
   });
+  
+
 
   /* The whole Code/collection is synchronized between server-client and database. No need work to do by your own, node-mysql-wrapper does the most of your work!*/
   Template["usersList"].events({
@@ -67,9 +90,14 @@ if (Meteor.isServer) {
   var db: Mysql.Database = Mysql.connect("mysql://kataras:pass@127.0.0.1/taglub?debug=false&charset=utf8");
   console.log('MySQL is Up and Running!');
   //var usersTable = db.table("users");
-  var criteria = db.criteriaFor("users").where("yearsOld").gt(18).limit(10).except("password").build();
-  Users = db.meteorCollection<any>("users", "usersCollection", criteria); //or just storiesTable.meteorCollection("storiesCollection");
+  var criteria = db.criteriaFor("users")
+  .where("yearsOld").gt(18)
+  .limit(10)
+  .except("password")
+  .joinAs("myStories","stories","authorId","userId")
 
+  .build();
+  Users = db.meteorCollection<any>("users", "usersCollection", criteria); 
   console.log(Users.find().count() + " rows found! ");
   Meteor.publish("allUsers", function() {
     //or you can ajust here the except 'password' column from select query..find({}, { fields: { password: 0 } });

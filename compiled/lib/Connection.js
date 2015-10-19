@@ -66,7 +66,7 @@ var Connection = (function (_super) {
     Connection.prototype.watchBinaryLogs = function (callbackWhenReady) {
         var _this = this;
         if (!this.allowBinaryLogs) {
-            console.log("Binary logs are off.\n Please google 'Enable Binary logs in MySQL' , and restart your mysql server and NodeJS server.");
+            console.log("Binary logs are off.\n Please google 'Enable Binary logs in MySQL' , and restart your mysql server and NodeJS/Meteor server.");
         }
         else {
             if (!this.zongji || this.zongji === undefined) {

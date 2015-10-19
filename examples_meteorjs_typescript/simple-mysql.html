@@ -13,6 +13,15 @@
   <ul>
     {{#each users}}
     <li>UserID: {{userId}}. Username: {{username}}</li>
+	
+	<li> <ul> <h4>Stories</h4>
+	{{#each takeMyStories userId}}
+		<li><b>Title:</b> 
+		{{title}}
+		</li>
+	{{/each}}
+	</ul>
+	</li>
     {{/each}}
   </ul>
 

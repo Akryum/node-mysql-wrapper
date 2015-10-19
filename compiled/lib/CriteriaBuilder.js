@@ -77,6 +77,7 @@ var CriteriaBuilder = (function () {
     CriteriaBuilder.prototype.join = function (realTableName, foreignColumnName, thisColumnName) {
         var _joinedTable = {};
         _joinedTable[foreignColumnName] = SelectQuery_1.EQUAL_TO_PROPERTY_SYMBOL + (thisColumnName ? thisColumnName : '');
+        _joinedTable[SelectQueryRules_1.TABLE_RULES_PROPERTY] = { table: realTableName };
         this.rawCriteria[realTableName] = _joinedTable;
         return this;
     };

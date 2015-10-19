@@ -1,6 +1,5 @@
 import Helper from "../Helper";
-import 
-Table from "../Table";
+import Table from "../Table";
 import IQuery from"./IQuery";
 import * as Promise from 'bluebird';
 //den kserw gt dn xreiazete to import * from "bluebird"  edw kai kapou allou mipws epidi kanw import to ./table ?
@@ -16,7 +15,7 @@ class DeleteQuery<T> implements IQuery<T>{
 
     }
 
-    execute(criteriaOrID: any | number | string, callback?: (_result: DeleteAnswer) => any): Promise<DeleteAnswer> {
+    execute(criteriaOrID: any | number | string, callback?: (_result: DeleteAnswer) => any): Promise<DeleteAnswer > {
         return new Promise<DeleteAnswer>((resolve, reject) => {
             let primaryKeyValue = this._table.getPrimaryKeyValue(criteriaOrID);
 
