@@ -226,40 +226,45 @@ declare module "node-mysql-wrapper" {
     }
 
     class WhereBuilder<T>{
-	   parentCriteriaBuilder:CriteriaBuilder<T>;
-    
-	   constructor(parentCriteriaBuilder:CriteriaBuilder<T>, key:string);
+        parentCriteriaBuilder: CriteriaBuilder<T>;
+
+        constructor(parentCriteriaBuilder: CriteriaBuilder<T>, key: string);
 	
-	   /**
-    	 * Equals
-    	 */
-	   eq(val:any):CriteriaBuilder<T>;
+        /**
+          * Equals
+          */
+        eq(val: any): CriteriaBuilder<T>;
 	
-	   /**
-    	 * Is Not Equal to
-    	 */
-	   ne(val:any):CriteriaBuilder<T>;
+        /**
+          * Is Not Equal to
+          */
+        ne(val: any): CriteriaBuilder<T>;
 	
-	   /**
-    	 * Greater Than
-    	 */
-	   gt(val:any):CriteriaBuilder<T>;
+        /**
+          * Greater Than
+          */
+        gt(val: any): CriteriaBuilder<T>;
 	
-	   /**
-    	 * Less Than
-    	 */
-	   lt(val:any):CriteriaBuilder<T>;
+        /**
+          * Less Than
+          */
+        lt(val: any): CriteriaBuilder<T>;
 	
-	   /**
-	    * Is greater than or equal to
-	    */
-	   ge(val:any):CriteriaBuilder<T>;
+        /**
+         * Is greater than or equal to
+         */
+        ge(val: any): CriteriaBuilder<T>;
 	
-	   /**
-	    * Is less than or equal to
-	    */
-	   le(val:any):CriteriaBuilder<T>;
-		
+        /**
+         * Is less than or equal to
+         */
+        le(val: any): CriteriaBuilder<T>;
+       
+        /**
+        * IN ()  ( same as many OR operators with the same key)
+        */
+        in(values: any[]): CriteriaBuilder<T>;
+
     }
 
     class CriteriaBuilder<T>{
@@ -280,8 +285,8 @@ declare module "node-mysql-wrapper" {
         exclude(...columns: string[]): CriteriaBuilder<T>;
 
         where(key: string): WhereBuilder<T>;
-        
-        or(key?:string):WhereBuilder<T>;
+
+        or(key?: string): WhereBuilder<T>;
 
         private createRulesIfNotExists(): void;
 

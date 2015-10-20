@@ -271,6 +271,11 @@ declare module Mysql {
 	    * Is less than or equal to
 	    */
 	   le(val:any):CriteriaBuilder<T>;
+       
+        /**
+        * IN ()  ( same as many OR operators with the same key)
+        */
+        in(values: any[]): CriteriaBuilder<T>;
 		
     }
 

@@ -58,8 +58,13 @@ var CriteriaDivider = (function () {
                 var _valToPut = rawCriteriaObject[objectKey];
                 if (Helper_1.default.isString(_valToPut)) {
                     var _splitedVal = _valToPut.split(" ");
-                    if (WhereBuilder_1.COMPARISON_SYMBOLS.indexOf(_splitedVal[0])) {
-                        colsToSearch.push(colName + _splitedVal[0] + _this._table.connection.escape(_valToPut.substring(_splitedVal[0].length + 1)));
+                    if (_splitedVal[0] === "IN(") {
+                        colsToSearch.push(colName + " " + _valToPut);
+                    }
+                    else {
+                        if (WhereBuilder_1.COMPARISON_SYMBOLS.indexOf(_splitedVal[0])) {
+                            colsToSearch.push(colName + _splitedVal[0] + _this._table.connection.escape(_valToPut.substring(_splitedVal[0].length + 1)));
+                        }
                     }
                 }
                 else {

@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var Helper_1 = require("../Helper");
-var ConditionalConverter_1 = require("../ConditionalConverter");
+var MeteorHelper_1 = require("./MeteorHelper");
 var SelectQueryRules_1 = require("../queries/SelectQueryRules");
 var events_1 = require('events');
 var MeteorMysqlCollection = (function (_super) {
@@ -28,7 +28,7 @@ var MeteorMysqlCollection = (function (_super) {
         this.table.on("INSERT", Meteor.bindEnvironment(function (rows) {
             rows.forEach(function (row) {
                 var objRow = _this.table.objectFromRow(row);
-                var canInsert = _this.objectCanInsert(objRow, _this.criteriaRawJsObject);
+                var canInsert = MeteorHelper_1.default.canInsert(objRow, _this.criteriaRawJsObject);
                 if (canInsert) {
                     var _newPureItem = _this.proccessJoinedTableInsert(objRow);
                     _this.collection.insert(_newPureItem);
@@ -101,90 +101,22 @@ var MeteorMysqlCollection = (function (_super) {
     MeteorMysqlCollection.prototype.deny = function (options) {
         return this.collection.deny(options);
     };
-    MeteorMysqlCollection.prototype.objectCanInsert = function (objRow, rawCriteria, joinedRow) {
-        var _this = this;
-        var canInsert = true;
-        Helper_1.default.forEachKey(rawCriteria, function (key) {
-            if (!canInsert) {
-                return;
-            }
-            if (objRow[key] !== undefined) {
-                try {
-                    var _symbolCombarison = ConditionalConverter_1.default.toJS(rawCriteria[key].split(" ")[0]);
-                    var valComparison = rawCriteria[key].split(" ")[1];
-                    var ifEvalStatementStr = objRow[key] + _symbolCombarison + valComparison;
-                    ifEvalStatementStr = ConditionalConverter_1.default.toJSConditional(ifEvalStatementStr);
-                    if (_this.debug) {
-                        console.log('IF EVAL: ' + ifEvalStatementStr);
-                    }
-                    if (!eval(ifEvalStatementStr)) {
-                        canInsert = false;
-                    }
-                }
-                catch (ex) {
-                }
-            }
-        });
-        return canInsert;
-    };
     MeteorMysqlCollection.prototype.listenToJoinedTables = function () {
         var _this = this;
-        var criteria = this.table.criteriaDivider.divide(this.criteriaRawJsObject);
-        criteria.tables.forEach(function (_tb) {
-            var joinedTableObj = _this.table.connection.table(_tb.tableName);
-            var joinedTableCriteria = joinedTableObj.criteriaDivider.divide(criteria.rawCriteriaObject[_tb.propertyName]);
-            joinedTableObj.on("INSERT", Meteor.bindEnvironment(function (rows) {
-                rows.forEach(function (row) {
-                    var objRow = joinedTableObj.objectFromRow(row);
-                    _this._collection.find().fetch().forEach(function (_objInlist) {
-                        var joinedCriteria = {};
-                        Helper_1.default.forEachKey(joinedTableCriteria.rawCriteriaObject, function (key) {
-                            try {
-                                var valWithoutComparison = joinedTableCriteria.rawCriteriaObject[key].split(" ")[1];
-                                var valComparisonSymbol = joinedTableCriteria.rawCriteriaObject[key].split(" ")[0];
-                                if (_this.debug) {
-                                    console.log('KEY: ' + key + ' SYMBOL: ' + valComparisonSymbol + ' VAL: ' + valWithoutComparison);
-                                }
-                                if (_objInlist[valWithoutComparison] !== undefined) {
-                                    joinedCriteria[key] = valComparisonSymbol + " " + _objInlist[valWithoutComparison];
-                                }
-                            }
-                            catch (ex) {
-                            }
-                        });
-                        var canInsert = _this.objectCanInsert(objRow, joinedCriteria);
-                        if (canInsert) {
-                            if (_this.debug) {
-                                console.log('CAN INSERT ON: ', _objInlist);
-                            }
-                            var parentPropName = _tb.propertyName;
-                            var primkey = Helper_1.default.toObjectProperty(_this.table.primaryKey);
-                            var objToFind = {};
-                            objToFind[primkey] = _objInlist[primkey];
-                            if (_objInlist[parentPropName] instanceof Array) {
-                                _objInlist[parentPropName].push(objRow);
-                                var toPushArrayObj = {};
-                                toPushArrayObj["$push"] = {};
-                                toPushArrayObj["$push"][parentPropName] = objRow;
-                                var updateResult = _this.collection.update(objToFind, toPushArrayObj, { multi: true, upsert: false }, function (err, res) {
-                                    if (_this.debug) {
-                                        if (err) {
-                                            console.log('ERROR ON UPDATE: ' + err);
-                                        }
-                                        console.log("------------------------RESULT(1=success,0=faled): " + res + " PUSHED TO ARRAY, NEW ARRAY LENGTH: " + _objInlist[parentPropName]["length"]);
-                                    }
-                                });
-                            }
-                            else {
-                                var toSetObj = {};
-                                toSetObj["$set"] = {};
-                                toSetObj["$set"][parentPropName] = objRow;
-                                _this.collection.update(objToFind, toSetObj);
-                            }
-                        }
-                    });
+        MeteorHelper_1.default.listenToTableInsert(this.table, this.collection.find().fetch(), this.criteriaRawJsObject, function (parentPropName, objRow, selector, isArray) {
+            if (isArray) {
+                var toPushArrayObj = {};
+                toPushArrayObj["$push"] = {};
+                toPushArrayObj["$push"][parentPropName] = objRow;
+                var updateResult = _this.collection.update(selector, toPushArrayObj, { multi: false, upsert: false }, function (err, res) {
                 });
-            }));
+            }
+            else {
+                var toSetObj = {};
+                toSetObj["$set"] = {};
+                toSetObj["$set"][parentPropName] = objRow;
+                _this.collection.update(selector, toSetObj);
+            }
         });
     };
     MeteorMysqlCollection.prototype.fill = function (criteriaRawJsObject) {

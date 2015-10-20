@@ -76,7 +76,8 @@ export class CriteriaDivider<T> {
 
             let colName = Helper.toRowProperty(objectKey);
             //auto edw MONO,apla dn afinei na boun sta .where columns pou exoun ginei except gia na min uparksoun mysql query errors.
-            if ((this._table.columns.indexOf(colName) !== -1 && _criteria.queryRules.exceptColumns.indexOf(colName) === -1) || this._table.primaryKey === colName || colName.split(" ")[0] === "or") { //to objectKey gt auto 9a einai kefalaio
+            if ((this._table.columns.indexOf(colName) !== -1 && _criteria.queryRules.exceptColumns.indexOf(colName) === -1) || this._table.primaryKey === colName || colName.split(" ")[0] === "or") {
+               //|| (Helper.isString(rawCriteriaObject[colName]) && rawCriteriaObject[colName].split(" ")[0] ==="IN(" ) ) {
                 let _valToPut = rawCriteriaObject[objectKey];
 
                 if (Helper.isString(_valToPut)) {
@@ -84,9 +85,14 @@ export class CriteriaDivider<T> {
 
 
                     let _splitedVal = _valToPut.split(" ");
-                    if (COMPARISON_SYMBOLS.indexOf(_splitedVal[0])) {//checks the  >,<,>=,<=,=,<>
-                        colsToSearch.push(colName + _splitedVal[0] + this._table.connection.escape(_valToPut.substring(_splitedVal[0].length + 1)));
+                    if (_splitedVal[0] === "IN(") {
+                        colsToSearch.push(colName +" "+ _valToPut);
+                    } else {
+                        if (COMPARISON_SYMBOLS.indexOf(_splitedVal[0])) {//checks the  >,<,>=,<=,=,<>
+                            colsToSearch.push(colName + _splitedVal[0] + this._table.connection.escape(_valToPut.substring(_splitedVal[0].length + 1)));
+                        }
                     }
+
 
                 } else { //is eq by default but no builded with the criteria builder.
                     colsToSearch.push(colName + "= " + this._table.connection.escape(rawCriteriaObject[objectKey]));

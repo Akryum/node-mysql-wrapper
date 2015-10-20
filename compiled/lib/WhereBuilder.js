@@ -28,6 +28,10 @@ var WhereBuilder = (function () {
         this.parentCriteriaBuilder.rawCriteria[this.key] = "<= " + val;
         return this.parentCriteriaBuilder;
     };
+    WhereBuilder.prototype.in = function (values) {
+        this.parentCriteriaBuilder.rawCriteria[this.key] = "IN( " + values.join(", ") + ") ";
+        return this.parentCriteriaBuilder;
+    };
     return WhereBuilder;
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
