@@ -3,6 +3,7 @@ import MeteorHelper from "./MeteorHelper";
 import ConditionalConverter from "../ConditionalConverter";
 import Table from "../Table"; //den to kanw apto MeteorTable.
 import {TABLE_RULES_PROPERTY} from "../queries/SelectQueryRules";
+import {TableToSearchPart} from "../CriteriaDivider";
 import {EventEmitter} from 'events';
 import * as Promise from "bluebird";
 
@@ -83,50 +84,7 @@ class MeteorMysqlCollection<T> extends EventEmitter {
     }
 
 
-    private proccessJoinedTableInsert(objRow: any): any {
-        let future = new Future;
-        let newCriteriaForOneObject: any = {};
 
-        //  var BreakException = {};
-        if (this.criteriaRawJsObject !== undefined) {
-            // try {
-            //vazoume  to Id gia na vrei ta joined se auto to single object.
-            let primaryKeyOfObjValue = objRow[Helper.toObjectProperty(this.table.primaryKey)];
-            newCriteriaForOneObject[Helper.toObjectProperty(this.table.primaryKey)] = primaryKeyOfObjValue;
-
-            Helper.forEachKey(this.criteriaRawJsObject, key=> {
-                if (objRow[key] === undefined) { //an sto  object row pou ir9e apto db event den uparxei auto to property  
-                    let joinedTable = this.criteriaRawJsObject[key];
-                    if (Helper.hasRules(joinedTable) && joinedTable[TABLE_RULES_PROPERTY]["table"] !== undefined) { //kai auto to key exei table rules, ara einai property joined table.
-                        //AT LEAST ONE JOINED TABLE, THEN WE WILL MAKE A FIND FROM TABLE TO FETCH ALL POSSIBLE JOINED TABLES, MAKE OBJROW = TO THE RESULT.
-
-                        newCriteriaForOneObject[key] = joinedTable; //Eg: author = { userId: '=authorId',
-                        // tableRules: { table: 'users', limit: 1, limitStart: 1, limitEnd: 1 } }
-
-
-                    }
-                }
-
-            });
-
-            this.table.findSingle(newCriteriaForOneObject).then((_result) => {
-                future.return(_result);
-            });
-            /*  } catch (e) {
-             if (e !== BreakException) { throw e;} //an dn einai error gia break to loop tote emfanise to aliws upo9etoume oti vrike estw ena joined table.
-
-             let primaryKeyOfObj = objRow[Helper.toRowProperty(this.table.primaryKey)];
-
-             }*/
-
-        } else {
-            future.return(objRow);
-
-        }
-
-
-        return future.wait();
-    }
 
     rawCollection(): any {/** TODO: add return value **/
         return this.collection.rawCollection();
@@ -164,122 +122,116 @@ class MeteorMysqlCollection<T> extends EventEmitter {
         return this.collection.deny(options);
     }
 
+    private proccessJoinedTableInsert(objRow: any): any {
+        let future = new Future;
+        let newCriteriaForOneObject: any = {};
+
+        //  var BreakException = {};
+        if (this.criteriaRawJsObject !== undefined) {
+            // try {
+            //vazoume  to Id gia na vrei ta joined se auto to single object.
+            let primaryKeyOfObjValue = objRow[Helper.toObjectProperty(this.table.primaryKey)];
+            newCriteriaForOneObject[Helper.toObjectProperty(this.table.primaryKey)] = primaryKeyOfObjValue;
+
+            Helper.forEachKey(this.criteriaRawJsObject, key=> {
+                if (objRow[key] === undefined) { //an sto  object row pou ir9e apto db event den uparxei auto to property  
+                    let joinedTable = this.criteriaRawJsObject[key];
+                    if (Helper.hasRules(joinedTable) && joinedTable[TABLE_RULES_PROPERTY]["table"] !== undefined) { //kai auto to key exei table rules, ara einai property joined table.
+                        //AT LEAST ONE JOINED TABLE, THEN WE WILL MAKE A FIND FROM TABLE TO FETCH ALL POSSIBLE JOINED TABLES, MAKE OBJROW = TO THE RESULT.
+
+                        newCriteriaForOneObject[key] = joinedTable; //Eg: author = { userId: '= authorId',
+                        // tableRules: { table: 'users', limit: 1, limitStart: 1, limitEnd: 1 } }
 
 
+                    }
+                }
+
+            });
+
+            this.table.findSingle(newCriteriaForOneObject).then((_result) => {
+                future.return(_result);
+            });
+            /*  } catch (e) {
+             if (e !== BreakException) { throw e;} //an dn einai error gia break to loop tote emfanise to aliws upo9etoume oti vrike estw ena joined table.
+
+             let primaryKeyOfObj = objRow[Helper.toRowProperty(this.table.primaryKey)];
+
+             }*/
+
+        } else {
+            future.return(objRow);
+
+        }
+
+
+        return future.wait();
+    }
 
     private listenToJoinedTables(): void {
 
-        MeteorHelper.listenToTableInsert(this.table, this.collection.find().fetch(), this.criteriaRawJsObject, (parentPropName, objRow, selector, isArray) => {
+        MeteorHelper.listenToTable(this.table, this.collection.find().fetch(), this.criteriaRawJsObject, (event, tablePart: TableToSearchPart, objRow, selector, isArray) => {
 
-            if (isArray) {
-                //array push
-                let toPushArrayObj = {};
-                toPushArrayObj["$push"] = {};
-                toPushArrayObj["$push"][parentPropName] = objRow;
-                let updateResult = this.collection.update(selector, toPushArrayObj, { multi: false, upsert: false }, (err, res) => {
-                });
-            } else {
-                //obj set
-                let toSetObj = {};
-                toSetObj["$set"] = {};
-                toSetObj["$set"][parentPropName] = objRow;
-                this.collection.update(selector, toSetObj);
+
+            if (event === "INSERT") {
+                if (isArray) {
+                    //array push
+                    let toPushArrayObj = {};
+                    toPushArrayObj["$push"] = {};
+                    toPushArrayObj["$push"][tablePart.propertyName] = objRow;
+                    let updateResult = this.collection.update(selector, toPushArrayObj, { multi: false, upsert: false }, (err, res) => {
+                    });
+                } else {
+                    //obj set
+                    let toSetObj = {};
+                    toSetObj["$set"] = {};
+                    toSetObj["$set"][tablePart.propertyName] = objRow;
+                    this.collection.update(selector, toSetObj);
+                }
+            } else if (event === "DELETE" || event === "UPDATE") {
+
+                let toRemoveOrSetObj: any = {};
+
+                if (event === "DELETE") {
+                    toRemoveOrSetObj["$pull"] = {};
+                    toRemoveOrSetObj["$pull"]["" + tablePart.propertyName + ""] = selector;
+                } else {
+                    //UPDATE
+                    toRemoveOrSetObj["$set"] = {};
+                    toRemoveOrSetObj["$set"]["" + tablePart.propertyName + ".$"] = objRow;
+
+                }
+             
+                
+                //edw gia na vrw to {userId:18} apto authorId: '= userId' tou tableRules px.    
+                    
+                /*    let joinedCriteria = this.criteriaRawJsObject[tablePart.propertyName];
+                    let selectorForParent = {};
+                    Helper.forEachKey(joinedCriteria, _key=> {
+                        if (joinedCriteria[_key] === "= " + Helper.toObjectProperty(this.table.primaryKey)) { //authorId: '= userId'
+                            selectorForParent[Helper.toObjectProperty(this.table.primaryKey)] = objRow[_key]; //{userId:18}
+                            
+                            if (event === "UPDATE") {
+                                //UPDATE
+           
+                               
+                                //     secondSelector = tablePart.propertyName + "." + _key + ": " + objRow[_key];// myStories.authorId : 18
+                                selectorForParent = {};
+                             //   selectorForParent[tablePart.propertyName + "." + _key] = objRow[_key]; // myStories.authorId : 18 alla isws dn xreiazete auto 
+                          
+                            }
+                        }
+                    });*/
+                //to allaksa se auto p einai : myStories.storyId:2 den xreiazete na vrw to myStories.authorId:18 kai meta na to kanw delete i update, efoson kserw to id to pernw me tin mia sto parentSelector
+                let selectorForParent = {};
+                let joinedTable = this.table.connection.table(tablePart.tableName);
+                selectorForParent[tablePart.propertyName + "." + Helper.toObjectProperty(joinedTable.primaryKey)] = objRow[Helper.toObjectProperty(joinedTable.primaryKey)];
+
+                let res = this.collection.update(selectorForParent, toRemoveOrSetObj, { multi: false, upsert: true });
             }
 
         });
-        
-        
-        
 
     }
-   
-    /* private listenToJoinedTablesOld(): void {
- 
-         let criteria = this.table.criteriaDivider.divide(this.criteriaRawJsObject);
-         criteria.tables.forEach(_tb=> {
-             let joinedTableObj = this.table.connection.table(_tb.tableName);
-             //edw pernw ta criteria gia to joined table.
-             let joinedTableCriteria = joinedTableObj.criteriaDivider.divide(criteria.rawCriteriaObject[_tb.propertyName]);
-             joinedTableObj.on("INSERT", Meteor.bindEnvironment((rows: any[]) => {
-                 rows.forEach(row=> {
-                     let objRow = joinedTableObj.objectFromRow(row);
-                     //let rawCriteria = joinedTableCriteria.rawCriteriaObject;
- 
-                     // let canInsert = this.objectCanInsert(objRow, joinedTableCriteria.rawCriteriaObject);
-                     //edw vgazei sfalma logika gt to eval einai: 18= userId (an dn uparxei .at(joined).where), ara:
-                     this._collection.find().fetch().forEach(_objInlist=> {
-                         let joinedCriteria = {};
-                         Helper.forEachKey(joinedTableCriteria.rawCriteriaObject, key=> {
-                             try {
-                                 let valWithoutComparison = joinedTableCriteria.rawCriteriaObject[key].split(" ")[1]; //0 = comparison:= ,1: userId
-                                 let valComparisonSymbol = joinedTableCriteria.rawCriteriaObject[key].split(" ")[0];
-                                 if (this.debug) {
-                                     console.log('KEY: ' + key + ' SYMBOL: ' + valComparisonSymbol + ' VAL: ' + valWithoutComparison);//+'VAL from obj in list: '+ _objInlist[valWithoutComparison]);
-                                     //outputs: KEY: authorId SYMBOL: = VAL: userId     
-                                 }
- 
- 
-                                 if (_objInlist[valWithoutComparison] !== undefined) {
-                                     joinedCriteria[key] = valComparisonSymbol + " " + _objInlist[valWithoutComparison];
-                                 }
-                             } catch (ex) {
-                                 //edw ginete catch an to key einai object kai den exei to split method, dld einai eite to table rules eite alla joined tables mesa se auto to joined tables, auto sto mellon 9a to diaxiristw.
-                             }
-                         });
-                         let canInsert = MeteorHelper.canInsert(objRow, joinedCriteria);
-                         if (canInsert) {
-                             if (this.debug) {
-                                 console.log('CAN INSERT ON: ', _objInlist);
-                             }
-                             let parentPropName = _tb.propertyName;
- 
-                             let primkey = Helper.toObjectProperty(this.table.primaryKey);
-                             let objToFind = {};
-                             objToFind[primkey] = _objInlist[primkey];
-                             if (_objInlist[parentPropName] instanceof Array) {
-                                 _objInlist[parentPropName].push(objRow);
-                                 //           let   keyOnParentObj = _objInlist[parentPropName].slice();
-                                 //        keyOnParentObj.push(objRow);
- 
-                           
-                                 let toPushArrayObj = {};
-                                 toPushArrayObj["$push"] = {};
-                                 toPushArrayObj["$push"][parentPropName] = objRow;
-                                 let updateResult = this.collection.update(objToFind, toPushArrayObj, { multi: true, upsert: false }, (err, res) => {
-                                     if (this.debug) {
-                                         if (err) {
-                                             console.log('ERROR ON UPDATE: ' + err);
-                                         }
- 
-                                         console.log("------------------------RESULT(1=success,0=faled): " + res + " PUSHED TO ARRAY, NEW ARRAY LENGTH: " + _objInlist[parentPropName]["length"]); //this.collection.find(objToFind).fetch()[0][_tb.propertyName]["length"]);
-                                     }
-                                 });
- 
- 
-                             } else {
-                                 let toSetObj = {};
-                                 toSetObj["$set"] = {};
-                                 toSetObj["$set"][parentPropName] = objRow;
-                                 this.collection.update(objToFind, toSetObj);
-                             }
- 
- 
-                             ///TODO:
-                             //edw psaxnw se pio object mesa sto collection anoikei to inserted row.
-                             //this._collection.find().fetch({});
-                             //elenxw an einai array tote kantw push, an einai object apla valtw ( borei na min einai panta array px users me user_profiles)
-                             //if(val instanceof Array){}else{}
-                         }
-                     });
- 
- 
-                 });
- 
- 
-             }));
-         });
-         ///TODO: 
-     }*/
 
     fill(criteriaRawJsObject: any = {}): MeteorMysqlCollection<T> {
         let future = new Future;

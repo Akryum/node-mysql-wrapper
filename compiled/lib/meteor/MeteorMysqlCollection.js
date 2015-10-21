@@ -55,6 +55,28 @@ var MeteorMysqlCollection = (function (_super) {
             });
         }));
     };
+    MeteorMysqlCollection.prototype.rawCollection = function () {
+        return this.collection.rawCollection();
+    };
+    MeteorMysqlCollection.prototype.rawDatabase = function () {
+        return this.collection.rawDatabase();
+    };
+    Object.defineProperty(MeteorMysqlCollection.prototype, "_collection", {
+        get: function () {
+            return this.collection;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    MeteorMysqlCollection.prototype._ensureIndex = function (indexName, options) {
+        return this.collection._ensureIndex(indexName, options);
+    };
+    MeteorMysqlCollection.prototype.allow = function (options) {
+        return this.collection.allow(options);
+    };
+    MeteorMysqlCollection.prototype.deny = function (options) {
+        return this.collection.deny(options);
+    };
     MeteorMysqlCollection.prototype.proccessJoinedTableInsert = function (objRow) {
         var _this = this;
         var future = new Future;
@@ -79,43 +101,38 @@ var MeteorMysqlCollection = (function (_super) {
         }
         return future.wait();
     };
-    MeteorMysqlCollection.prototype.rawCollection = function () {
-        return this.collection.rawCollection();
-    };
-    MeteorMysqlCollection.prototype.rawDatabase = function () {
-        return this.collection.rawDatabase();
-    };
-    Object.defineProperty(MeteorMysqlCollection.prototype, "_collection", {
-        get: function () {
-            return this.collection;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    MeteorMysqlCollection.prototype._ensureIndex = function (indexName, options) {
-        return this.collection._ensureIndex(indexName, options);
-    };
-    MeteorMysqlCollection.prototype.allow = function (options) {
-        return this.collection.allow(options);
-    };
-    MeteorMysqlCollection.prototype.deny = function (options) {
-        return this.collection.deny(options);
-    };
     MeteorMysqlCollection.prototype.listenToJoinedTables = function () {
         var _this = this;
-        MeteorHelper_1.default.listenToTableInsert(this.table, this.collection.find().fetch(), this.criteriaRawJsObject, function (parentPropName, objRow, selector, isArray) {
-            if (isArray) {
-                var toPushArrayObj = {};
-                toPushArrayObj["$push"] = {};
-                toPushArrayObj["$push"][parentPropName] = objRow;
-                var updateResult = _this.collection.update(selector, toPushArrayObj, { multi: false, upsert: false }, function (err, res) {
-                });
+        MeteorHelper_1.default.listenToTable(this.table, this.collection.find().fetch(), this.criteriaRawJsObject, function (event, tablePart, objRow, selector, isArray) {
+            if (event === "INSERT") {
+                if (isArray) {
+                    var toPushArrayObj = {};
+                    toPushArrayObj["$push"] = {};
+                    toPushArrayObj["$push"][tablePart.propertyName] = objRow;
+                    var updateResult = _this.collection.update(selector, toPushArrayObj, { multi: false, upsert: false }, function (err, res) {
+                    });
+                }
+                else {
+                    var toSetObj = {};
+                    toSetObj["$set"] = {};
+                    toSetObj["$set"][tablePart.propertyName] = objRow;
+                    _this.collection.update(selector, toSetObj);
+                }
             }
-            else {
-                var toSetObj = {};
-                toSetObj["$set"] = {};
-                toSetObj["$set"][parentPropName] = objRow;
-                _this.collection.update(selector, toSetObj);
+            else if (event === "DELETE" || event === "UPDATE") {
+                var toRemoveOrSetObj = {};
+                if (event === "DELETE") {
+                    toRemoveOrSetObj["$pull"] = {};
+                    toRemoveOrSetObj["$pull"]["" + tablePart.propertyName + ""] = selector;
+                }
+                else {
+                    toRemoveOrSetObj["$set"] = {};
+                    toRemoveOrSetObj["$set"]["" + tablePart.propertyName + ".$"] = objRow;
+                }
+                var selectorForParent = {};
+                var joinedTable = _this.table.connection.table(tablePart.tableName);
+                selectorForParent[tablePart.propertyName + "." + Helper_1.default.toObjectProperty(joinedTable.primaryKey)] = objRow[Helper_1.default.toObjectProperty(joinedTable.primaryKey)];
+                var res = _this.collection.update(selectorForParent, toRemoveOrSetObj, { multi: false, upsert: true });
             }
         });
     };

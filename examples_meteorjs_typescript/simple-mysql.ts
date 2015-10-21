@@ -1,14 +1,35 @@
 /// <reference path="definitions/all-definitions.d.ts" />
-declare var Deps;
+declare var ReactiveMethod; //simple:reactive-method
 declare var Users, Comments: Mysql.MeteorMysqlCollection<any> | Mongo.Collection<any>;
 
+
+
+/*Meteor.methods({
+  getStoryComments: function(storyId) {
+    return Comments.find({ storyId: storyId }).fetch();
+  }
+
+});*/
 if (Meteor.isClient) {
 
   Users = new Mongo.Collection<any>("usersCollection");
   Comments = new Mongo.Collection<any>("commentsCollection");
 
-  Meteor.subscribe("allUsers");
-  Meteor.subscribe("storyComments");
+  Meteor.subscribe("allUsers", function() {
+
+    var storiesIDs = [];
+    //find stories ids
+    Users.find().fetch().forEach(_user=> {
+      _user.myStories.forEach(_story=> {
+        storiesIDs.push(_story.storyId);
+      });
+    });
+    Meteor.subscribe("storiesComments", storiesIDs);
+  });
+
+
+  
+  
   /*
     Template["usersList"].onRendered(function(){
   	var self = this;
@@ -39,7 +60,19 @@ if (Meteor.isClient) {
     },
 
     takeStoryComments: function(storyId) {
+       
+      /*THIS IS NOT REACTIVE COLLECTION.  var _comments = new ReactiveVar<any>([]);
+        Meteor.call('getStoryComments',storyId, function(err, data) {
+          if(err){
+            console.log('errr: '+err);
+          }
+          console.log(data);
+          _comments.set(data);
+        });
+        return _comments.get();*/
+      //return ReactiveMethod.call('getStoryComments',storyId);
       return Comments.find({ storyId: storyId }).fetch();
+
     },
     length: function() {
       return Users.find().count();
@@ -102,24 +135,21 @@ if (Meteor.isServer) {
     .limit(10)
     .except("password")
     .joinAs("myStories", "stories", "authorId", "userId")
-  //  .at("myStories").joinAs("storiesComments", "comments", "storyId", "storyId")
+   // .at("myStories").joinAs("storiesComments", "comments", "storyId", "storyId")
     .build();
   Users = db.meteorCollection<any>("users", "usersCollection", criteria);
   console.log(Users.find().count() + " rows found! ");
   var storiesIDs = [];// Users.find().fetch().map(st=> st.myStories.map(_story=> _story.storyId);
   
   
-  //find stories ids
-  Users.find().fetch().forEach(_user=> {
-    _user.myStories.forEach(_story=> {
-      storiesIDs.push(_story.storyId);
-    });
-  });
-  //GET & PUBLISH ONLY THE COMMENTS OF THE VISIBLE STORIES.
 
-  var storiesCommentsCriteria = db.criteriaFor("comments").where("storyId").in(storiesIDs).build();
+  /*//GET ONLY THE COMMENTS OF THE VISIBLE STORIES FROM DATABASE.
+ var storiesCommentsCriteria = db.criteriaFor("comments").where("storyId").in(storiesIDs).build();
+ Comments = db.meteorCollection<any>("comments", "commentsCollection", storiesCommentsCriteria);
+ */
   
-  Comments = db.meteorCollection<any>("comments", "commentsCollection", storiesCommentsCriteria);
+  //GET all comments
+  Comments = db.meteorCollection("comments", "commentsCollection");
 
   Meteor.publish("allUsers", function() {
     //or you can ajust here the except 'password' column from select query..find({}, { fields: { password: 0 } });
@@ -127,8 +157,8 @@ if (Meteor.isServer) {
   });
 
 
-  Meteor.publish("storyComments", function(storId) {
-    return Comments.find();
+  Meteor.publish("storiesComments", function(storyIds: any[]) {
+    return Comments.find({ storyId: { $in: storyIds } });
   });
 
 

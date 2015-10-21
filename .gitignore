@@ -12,3 +12,5 @@ node-mysql-wrapper.sln
 zip_releases
 website
 .npm
+.idea
+.versions

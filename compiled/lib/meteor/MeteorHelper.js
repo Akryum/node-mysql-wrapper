@@ -37,7 +37,7 @@ var MeteorHelper = (function () {
         });
         return canInsert;
     };
-    MeteorHelper.listenToTableInsert = function (table, collectionArray, criteriaRawJsObject, action) {
+    MeteorHelper.listenToTable = function (table, collectionArray, criteriaRawJsObject, action) {
         var criteria = table.criteriaDivider.divide(criteriaRawJsObject);
         criteria.tables.forEach(function (_tb) {
             var joinedTableObj = table.connection.table(_tb.tableName);
@@ -66,13 +66,30 @@ var MeteorHelper = (function () {
                             objToFind[primkey] = _objInlist[primkey];
                             if (_objInlist[parentPropName] instanceof Array) {
                                 _objInlist[parentPropName].push(objRow);
-                                action(parentPropName, objRow, objToFind, true);
+                                action("INSERT", _tb, objRow, objToFind, true);
                             }
                             else {
-                                action(parentPropName, objRow, objToFind, false);
+                                action("INSERT", _tb, objRow, objToFind, false);
                             }
                         }
                     });
+                });
+            }));
+            joinedTableObj.on("DELETE", Meteor.bindEnvironment(function (rows) {
+                rows.forEach(function (row) {
+                    var objRow = joinedTableObj.objectFromRow(row);
+                    var toBeRemovedCriteria = {};
+                    toBeRemovedCriteria[Helper_1.default.toObjectProperty(joinedTableObj.primaryKey)] = row[joinedTableObj.primaryKey];
+                    action("DELETE", _tb, objRow, toBeRemovedCriteria, false);
+                });
+            }));
+            joinedTableObj.on("UPDATE", Meteor.bindEnvironment(function (rows) {
+                rows.forEach(function (row) {
+                    var rowUpdated = row["after"];
+                    var objRow = joinedTableObj.objectFromRow(rowUpdated);
+                    var toBeUpdatedCriteria = {};
+                    toBeUpdatedCriteria[Helper_1.default.toObjectProperty(joinedTableObj.primaryKey)] = row[joinedTableObj.primaryKey];
+                    action("UPDATE", _tb, objRow, toBeUpdatedCriteria, false);
                 });
             }));
         });

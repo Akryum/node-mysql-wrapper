@@ -1,5 +1,6 @@
 import Helper from "../Helper";
 import Table from "../Table";
+import {TableToSearchPart} from "../CriteriaDivider";
 import ConditionalConverter from "../ConditionalConverter";
 
 declare module Meteor {
@@ -60,7 +61,9 @@ class MeteorHelper {
      * collectionArray: The collection which is checking if can...
      * action:action when can...
      */
-    static listenToTableInsert(table: Table<any>, collectionArray: Array<any>, criteriaRawJsObject: any, action: (parentPropertyName: string, objRow: any, selector: any, isArray: boolean) => void): void {
+    static listenToTable(table: Table<any>, collectionArray: Array<any>, criteriaRawJsObject: any,
+        action: (evt: string, tablePart: TableToSearchPart, objRow: any, selector: any, isArray: boolean) => void): void {
+
         let criteria = table.criteriaDivider.divide(criteriaRawJsObject);
 
         criteria.tables.forEach(_tb=> {
@@ -71,11 +74,6 @@ class MeteorHelper {
             joinedTableObj.on("INSERT", Meteor.bindEnvironment((rows: any[]) => {
                 rows.forEach(row=> {
                     let objRow = joinedTableObj.objectFromRow(row);
-                    //let rawCriteria = joinedTableCriteria.rawCriteriaObject;
-
-                    // let canInsert = this.objectCanInsert(objRow, joinedTableCriteria.rawCriteriaObject);
-                    //edw vgazei sfalma logika gt to eval einai: 18= userId (an dn uparxei .at(joined).where), ara:
-                    //  this._collection.find().fetch().forEach(_objInlist=> {
                     collectionArray.forEach(_objInlist=> {
                         let joinedCriteria = {};
                         Helper.forEachKey(joinedTableCriteria.rawCriteriaObject, key=> {
@@ -99,44 +97,41 @@ class MeteorHelper {
                             objToFind[primkey] = _objInlist[primkey];
                             if (_objInlist[parentPropName] instanceof Array) {
                                 _objInlist[parentPropName].push(objRow);
-                                /*
-                                let toPushArrayObj = {};
-                                toPushArrayObj["$push"] = {};
-                                toPushArrayObj["$push"][parentPropName] = objRow;
-                                let updateResult = this.collection.update(objToFind, toPushArrayObj, { multi: true, upsert: false }, (err, res) => {
-                                    if (this.debug) {
-                                        if (err) {
-                                            console.log('ERROR ON UPDATE: ' + err);
-                                        }
-
-                                        console.log("------------------------RESULT(1=success,0=faled): " + res + " PUSHED TO ARRAY, NEW ARRAY LENGTH: " + _objInlist[parentPropName]["length"]); //this.collection.find(objToFind).fetch()[0][_tb.propertyName]["length"]);
-                                    }
-                                });*/
-                                action(parentPropName, objRow, objToFind, true);
-
+                                action("INSERT", _tb, objRow, objToFind, true);
 
                             } else {
-                                /* let toSetObj = {};
-                                 toSetObj["$set"] = {};
-                                 toSetObj["$set"][parentPropName] = objRow;
-                                 this.collection.update(objToFind, toSetObj);*/
-                                action(parentPropName, objRow, objToFind, false);
+                                action("INSERT", _tb, objRow, objToFind, false);
                             }
-
-
-                            ///TODO:
-                            //edw psaxnw se pio object mesa sto collection anoikei to inserted row.
-                            //this._collection.find().fetch({});
-                            //elenxw an einai array tote kantw push, an einai object apla valtw ( borei na min einai panta array px users me user_profiles)
-                            //if(val instanceof Array){}else{}
                         }
                     });
+                });
+            }));
 
+            joinedTableObj.on("DELETE", Meteor.bindEnvironment((rows: any[]) => {
+                rows.forEach(row=> {
+                    let objRow = joinedTableObj.objectFromRow(row);
+                    let toBeRemovedCriteria = {};
+                    toBeRemovedCriteria[Helper.toObjectProperty(joinedTableObj.primaryKey)] = row[joinedTableObj.primaryKey];
+                    //vasika malakies isws kanw, isws einai h  idia akrivws diadikasia me to insert adi gia $push 9a kanw $pull.
+                 
+                    // selector[table.primaryKey]
+                    action("DELETE", _tb, objRow, toBeRemovedCriteria, false);
 
                 });
-
-
             }));
+
+            joinedTableObj.on("UPDATE", Meteor.bindEnvironment((rows: any[]) => {
+
+                rows.forEach(row => {
+                    let rowUpdated = row["after"];
+                    let objRow = joinedTableObj.objectFromRow(rowUpdated);
+                    let toBeUpdatedCriteria = {};
+                    toBeUpdatedCriteria[Helper.toObjectProperty(joinedTableObj.primaryKey)] = row[joinedTableObj.primaryKey];
+                    action("UPDATE", _tb, objRow, toBeUpdatedCriteria, false);
+
+                });
+            }));
+
         });
     }
 }

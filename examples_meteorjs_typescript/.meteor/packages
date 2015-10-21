@@ -22,3 +22,4 @@ spacebars
 check
 nodets:mysql
 reactive-var
+simple:reactive-method
