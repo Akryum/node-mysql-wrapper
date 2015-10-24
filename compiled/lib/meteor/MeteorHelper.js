@@ -80,7 +80,12 @@ var MeteorHelper = (function () {
                     var objRow = joinedTableObj.objectFromRow(row);
                     var toBeRemovedCriteria = {};
                     toBeRemovedCriteria[Helper_1.default.toObjectProperty(joinedTableObj.primaryKey)] = row[joinedTableObj.primaryKey];
-                    action("DELETE", _tb, objRow, toBeRemovedCriteria, false);
+                    var isArray = false;
+                    if (joinedTableCriteria === undefined || joinedTableCriteria.queryRules === undefined ||
+                        (joinedTableCriteria.queryRules !== undefined && ((joinedTableCriteria.queryRules.limitEnd - joinedTableCriteria.queryRules.limitStart) !== 1))) {
+                        isArray = true;
+                    }
+                    action("DELETE", _tb, objRow, toBeRemovedCriteria, isArray);
                 });
             }));
             joinedTableObj.on("UPDATE", Meteor.bindEnvironment(function (rows) {
@@ -89,7 +94,12 @@ var MeteorHelper = (function () {
                     var objRow = joinedTableObj.objectFromRow(rowUpdated);
                     var toBeUpdatedCriteria = {};
                     toBeUpdatedCriteria[Helper_1.default.toObjectProperty(joinedTableObj.primaryKey)] = row[joinedTableObj.primaryKey];
-                    action("UPDATE", _tb, objRow, toBeUpdatedCriteria, false);
+                    var isArray = false;
+                    if (joinedTableCriteria === undefined || joinedTableCriteria.queryRules === undefined ||
+                        (joinedTableCriteria.queryRules !== undefined && ((joinedTableCriteria.queryRules.limitEnd - joinedTableCriteria.queryRules.limitStart) !== 1))) {
+                        isArray = true;
+                    }
+                    action("UPDATE", _tb, objRow, toBeUpdatedCriteria, isArray);
                 });
             }));
         });

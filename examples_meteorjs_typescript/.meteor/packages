@@ -20,6 +20,6 @@ random
 ejson
 spacebars
 check
-nodets:mysql
 reactive-var
 simple:reactive-method
+nodets:mysql@2.7.5

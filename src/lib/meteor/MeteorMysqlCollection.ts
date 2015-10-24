@@ -64,8 +64,9 @@ class MeteorMysqlCollection<T> extends EventEmitter {
                 let criteriaExistingItem = {};
                 criteriaExistingItem[Helper.toObjectProperty(this.table.primaryKey)] = rowUpdated[this.table.primaryKey];
 
-                let objRow = this.table.objectFromRow(rowUpdated);
-
+                //  let objRow = this.table.objectFromRow(rowUpdated); 
+                //update 24-10-2105:
+                let objRow = this.proccessJoinedTableInsert(this.table.objectFromRow(rowUpdated));
                 // this.collection.update(criteriaExistingItem, objRow);
                 this.collection.update(criteriaExistingItem, objRow);
                 this.emit('UPDATE', objRow);
@@ -192,13 +193,20 @@ class MeteorMysqlCollection<T> extends EventEmitter {
                 let toRemoveOrSetObj: any = {};
 
                 if (event === "DELETE") {
+                    //24-10-2015 kai logika kai edw 9a 9eeli $unset gia objects ,kai $Pull opws exw gia listes... ara na to kanw na to pernw apto isArray
                     toRemoveOrSetObj["$pull"] = {};
                     toRemoveOrSetObj["$pull"]["" + tablePart.propertyName + ""] = selector;
                 } else {
                     //UPDATE
+                    //auto doulevei se arrays( user->stories)
+                    /*
                     toRemoveOrSetObj["$set"] = {};
                     toRemoveOrSetObj["$set"]["" + tablePart.propertyName + ".$"] = objRow;
-
+                    */
+                    //kai auto se objects (story->author) mono ena .$ diaferoun
+                    toRemoveOrSetObj["$set"] = {};
+                    toRemoveOrSetObj["$set"][""+tablePart.propertyName + (isArray? ".$":"")] = objRow;
+                    //console.log('toRemovedOrSetObj: ',toRemoveOrSetObj);
                 }
              
                 
@@ -226,7 +234,7 @@ class MeteorMysqlCollection<T> extends EventEmitter {
                 let joinedTable = this.table.connection.table(tablePart.tableName);
                 selectorForParent[tablePart.propertyName + "." + Helper.toObjectProperty(joinedTable.primaryKey)] = objRow[Helper.toObjectProperty(joinedTable.primaryKey)];
 
-                let res = this.collection.update(selectorForParent, toRemoveOrSetObj, { multi: false, upsert: true });
+                let res = this.collection.update(selectorForParent, toRemoveOrSetObj,{ multi: true, upsert: false });//24-10-2015 change { multi: false, upsert: true });
             }
 
         });

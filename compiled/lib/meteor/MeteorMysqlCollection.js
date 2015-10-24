@@ -41,7 +41,7 @@ var MeteorMysqlCollection = (function (_super) {
                 var rowUpdated = row["after"];
                 var criteriaExistingItem = {};
                 criteriaExistingItem[Helper_1.default.toObjectProperty(_this.table.primaryKey)] = rowUpdated[_this.table.primaryKey];
-                var objRow = _this.table.objectFromRow(rowUpdated);
+                var objRow = _this.proccessJoinedTableInsert(_this.table.objectFromRow(rowUpdated));
                 _this.collection.update(criteriaExistingItem, objRow);
                 _this.emit('UPDATE', objRow);
             });
@@ -127,12 +127,12 @@ var MeteorMysqlCollection = (function (_super) {
                 }
                 else {
                     toRemoveOrSetObj["$set"] = {};
-                    toRemoveOrSetObj["$set"]["" + tablePart.propertyName + ".$"] = objRow;
+                    toRemoveOrSetObj["$set"]["" + tablePart.propertyName + (isArray ? ".$" : "")] = objRow;
                 }
                 var selectorForParent = {};
                 var joinedTable = _this.table.connection.table(tablePart.tableName);
                 selectorForParent[tablePart.propertyName + "." + Helper_1.default.toObjectProperty(joinedTable.primaryKey)] = objRow[Helper_1.default.toObjectProperty(joinedTable.primaryKey)];
-                var res = _this.collection.update(selectorForParent, toRemoveOrSetObj, { multi: false, upsert: true });
+                var res = _this.collection.update(selectorForParent, toRemoveOrSetObj, { multi: true, upsert: false });
             }
         });
     };

@@ -307,8 +307,9 @@ export class SelectQueryRules {
 		}
 
 		if (obj.limit > 0) {
-
-			if (obj.limitEnd > 0) {
+ 			//if (obj.limitEnd > 0) fix 24-10-2015{
+			if (obj.limitEnd > 1) {
+	
 				obj.limitStart = obj.limit;
 
 			} else {

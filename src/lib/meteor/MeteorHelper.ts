@@ -113,9 +113,15 @@ class MeteorHelper {
                     let toBeRemovedCriteria = {};
                     toBeRemovedCriteria[Helper.toObjectProperty(joinedTableObj.primaryKey)] = row[joinedTableObj.primaryKey];
                     //vasika malakies isws kanw, isws einai h  idia akrivws diadikasia me to insert adi gia $push 9a kanw $pull.
-                 
+                  
                     // selector[table.primaryKey]
-                    action("DELETE", _tb, objRow, toBeRemovedCriteria, false);
+                     let isArray = false;
+                    if (joinedTableCriteria === undefined || joinedTableCriteria.queryRules === undefined || 
+                    (joinedTableCriteria.queryRules !== undefined && ((joinedTableCriteria.queryRules.limitEnd - joinedTableCriteria.queryRules.limitStart) !== 1 ))) {
+                        isArray = true;
+                       // console.log('is array on update');
+                    }
+                    action("DELETE", _tb, objRow, toBeRemovedCriteria, isArray);
 
                 });
             }));
@@ -127,7 +133,13 @@ class MeteorHelper {
                     let objRow = joinedTableObj.objectFromRow(rowUpdated);
                     let toBeUpdatedCriteria = {};
                     toBeUpdatedCriteria[Helper.toObjectProperty(joinedTableObj.primaryKey)] = row[joinedTableObj.primaryKey];
-                    action("UPDATE", _tb, objRow, toBeUpdatedCriteria, false);
+                    let isArray = false;
+                    if (joinedTableCriteria === undefined || joinedTableCriteria.queryRules === undefined || 
+                    (joinedTableCriteria.queryRules !== undefined && ((joinedTableCriteria.queryRules.limitEnd - joinedTableCriteria.queryRules.limitStart) !== 1 ))) {
+                        isArray = true;
+                       // console.log('is array on update');
+                    }
+                    action("UPDATE", _tb, objRow, toBeUpdatedCriteria, isArray);
 
                 });
             }));

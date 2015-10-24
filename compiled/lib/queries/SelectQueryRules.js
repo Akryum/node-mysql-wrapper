@@ -250,7 +250,7 @@ var SelectQueryRules = (function () {
             rules.orderBy(obj.orderByDesc, true);
         }
         if (obj.limit > 0) {
-            if (obj.limitEnd > 0) {
+            if (obj.limitEnd > 1) {
                 obj.limitStart = obj.limit;
             }
             else {
