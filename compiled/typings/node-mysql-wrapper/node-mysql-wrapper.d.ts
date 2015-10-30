@@ -8,7 +8,7 @@
 ///<reference path="./../my-meteor/my-meteor.d.ts" />
 
 
-declare module "node-mysql-wrapper" {
+declare namespace NodeMysqlWrapper {
     import * as Mysql from 'mysql';
     import * as Promise from 'bluebird';
     import {EventEmitter} from 'events';
@@ -309,13 +309,13 @@ declare module "node-mysql-wrapper" {
          */
         build(): any;
 
-        static from<T>(table: Table<T>): CriteriaBuilder<T>
+        static from<T>(table: Table<T>): CriteriaBuilder<T>;
 
     }
 
     class SelectQuery<T> implements IQuery<T> { // T for Table's result type.
        
-        _table: Table<T>
+        _table: Table<T>;
         constructor(_table: Table<T>);
 
         private parseQueryResult(result: any, criteria: ICriteriaParts): Promise<any>;
@@ -786,7 +786,7 @@ declare module "node-mysql-wrapper" {
         findById(id: number | string, callback?: (result: T) => any): Promise<T>;
 
         findAll(): Promise<T[]>; // only criteria and promise
-        findAll(tableRules: RawRules): Promise<T[]> // only rules and promise
+        findAll(tableRules: RawRules): Promise<T[]>; // only rules and promise
         findAll(tableRules?: RawRules, callback?: (_results: T[]) => any): Promise<T[]>;
 
 
@@ -928,4 +928,8 @@ declare module "node-mysql-wrapper" {
     function connect(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): Database;
 
     function observable<T>(obj: T): T & ObservableObject;
+}
+
+declare module "node-mysql-wrapper"{
+    export  = NodeMysqlWrapper;
 }
