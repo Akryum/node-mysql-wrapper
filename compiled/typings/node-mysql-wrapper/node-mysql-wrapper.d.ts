@@ -25,7 +25,18 @@ declare class EventEmitter {
 
 
 declare module "node-mysql-wrapper" {
+    	
+	// export function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): NodeMysqlWrapper.Database;
+
+    // /** Same as wrap but it's sync mode - autoconnect to the database without need to use database.ready(callback).
+    //  *  Do not use it yet. It works only on 32/86 bit, use .wrap instead
+    //  */
+    // export function connect(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): NodeMysqlWrapper.Database;
+
+    // export function observable<T>(obj: T): T & NodeMysqlWrapper.ObservableObject;
+	
     export = NodeMysqlWrapper;
+	
 }
 
 
@@ -52,7 +63,7 @@ declare module NodeMysqlWrapper {
 
     };
 
-    export interface TableToSearchPart { tableName: string; propertyName: string;}
+    export type TableToSearchPart = { tableName: string,propertyName: string };
 
     export type PropertyChangedCallback = (args: PropertyChangedArgs) => any;
 

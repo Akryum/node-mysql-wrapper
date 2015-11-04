@@ -52,8 +52,14 @@ var connection = mysql.createConnection({
   database : 'my_db'
 });
 
-var wrapper = require('node-mysql-wrapper');
+var wrapper = require('node-mysql-wrapper'); 
 var db = wrapper.wrap(connection);
+
+/* ES6: */
+import {wrap} from "node-mysql-wrapper";
+let db = wrap(connection);
+/* END ES6*/
+
 //or (without need of require mysql module) ->
 //var db = wrapper.wrap("mysql://user:pass@127.0.0.1/databaseName?debug=false&charset=utf8");
 
