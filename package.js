@@ -10,7 +10,7 @@ Package.describe({
 });
 
 Npm.depends({
-  'node-mysql-wrapper': "2.7.6"
+  'node-mysql-wrapper': "2.7.9"
 });
 
 Package.onUse(function(api) {
