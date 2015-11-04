@@ -3,14 +3,7 @@ import Table from "../Table";
 import {TableToSearchPart} from "../CriteriaDivider";
 import ConditionalConverter from "../ConditionalConverter";
 
-declare module Meteor {
-    var isServer: boolean;
-    var isClient: boolean;
-
-    var bindEnvironment: Function;
-}
-
-class MeteorHelper {
+class LiveHelper {
 
     static canInsert(objRow: any, rawCriteria, joinedRow?: any): boolean {
         let canInsert = true;
@@ -23,7 +16,8 @@ class MeteorHelper {
                 if (objRow[key] !== undefined) {
                     ///edw elenxw to IN (value1,value2,value3).
                     let _valCriteria = rawCriteria[key];
-                    let _valSplited = _valCriteria.split(" ");
+                    let _valSplited = _valCriteria.split(" "); //einai split otan exei '= 16' px alla an einai userId:16 tote ti ginete, boulovitch ?
+
                     if (_valSplited[0] === "IN(") {
                         //convert IN to multi || statements.
 						
@@ -71,7 +65,7 @@ class MeteorHelper {
             //edw pernw ta criteria gia to joined table.
             let joinedTableCriteria = joinedTableObj.criteriaDivider.divide(criteria.rawCriteriaObject[_tb.propertyName]);
 
-            joinedTableObj.on("INSERT", Meteor.bindEnvironment((rows: any[]) => {
+            joinedTableObj.on("INSERT", (rows: any[]) => {
                 rows.forEach(row=> {
                     let objRow = joinedTableObj.objectFromRow(row);
                     collectionArray.forEach(_objInlist=> {
@@ -88,7 +82,7 @@ class MeteorHelper {
                                 //edw ginete catch an to key einai object kai den exei to split method, dld einai eite to table rules eite alla joined tables mesa se auto to joined tables, auto sto mellon 9a to diaxiristw.
                             }
                         });
-                        let canInsert = MeteorHelper.canInsert(objRow, joinedCriteria);
+                        let canInsert = LiveHelper.canInsert(objRow, joinedCriteria);
                         if (canInsert) {
                             let parentPropName = _tb.propertyName;
 
@@ -105,9 +99,9 @@ class MeteorHelper {
                         }
                     });
                 });
-            }));
+            });
 
-            joinedTableObj.on("DELETE", Meteor.bindEnvironment((rows: any[]) => {
+            joinedTableObj.on("DELETE", (rows: any[]) => {
                 rows.forEach(row=> {
                     let objRow = joinedTableObj.objectFromRow(row);
                     let toBeRemovedCriteria = {};
@@ -115,18 +109,18 @@ class MeteorHelper {
                     //vasika malakies isws kanw, isws einai h  idia akrivws diadikasia me to insert adi gia $push 9a kanw $pull.
                   
                     // selector[table.primaryKey]
-                     let isArray = false;
-                    if (joinedTableCriteria === undefined || joinedTableCriteria.queryRules === undefined || 
-                    (joinedTableCriteria.queryRules !== undefined && ((joinedTableCriteria.queryRules.limitEnd - joinedTableCriteria.queryRules.limitStart) !== 1 ))) {
+                    let isArray = false;
+                    if (joinedTableCriteria === undefined || joinedTableCriteria.queryRules === undefined ||
+                        (joinedTableCriteria.queryRules !== undefined && ((joinedTableCriteria.queryRules.limitEnd - joinedTableCriteria.queryRules.limitStart) !== 1))) {
                         isArray = true;
-                       // console.log('is array on update');
+                        // console.log('is array on update');
                     }
                     action("DELETE", _tb, objRow, toBeRemovedCriteria, isArray);
 
                 });
-            }));
+            });
 
-            joinedTableObj.on("UPDATE", Meteor.bindEnvironment((rows: any[]) => {
+            joinedTableObj.on("UPDATE", (rows: any[]) => {
 
                 rows.forEach(row => {
                     let rowUpdated = row["after"];
@@ -134,18 +128,18 @@ class MeteorHelper {
                     let toBeUpdatedCriteria = {};
                     toBeUpdatedCriteria[Helper.toObjectProperty(joinedTableObj.primaryKey)] = row[joinedTableObj.primaryKey];
                     let isArray = false;
-                    if (joinedTableCriteria === undefined || joinedTableCriteria.queryRules === undefined || 
-                    (joinedTableCriteria.queryRules !== undefined && ((joinedTableCriteria.queryRules.limitEnd - joinedTableCriteria.queryRules.limitStart) !== 1 ))) {
+                    if (joinedTableCriteria === undefined || joinedTableCriteria.queryRules === undefined ||
+                        (joinedTableCriteria.queryRules !== undefined && ((joinedTableCriteria.queryRules.limitEnd - joinedTableCriteria.queryRules.limitStart) !== 1))) {
                         isArray = true;
-                       // console.log('is array on update');
+                        // console.log('is array on update');
                     }
                     action("UPDATE", _tb, objRow, toBeUpdatedCriteria, isArray);
 
                 });
-            }));
+            });
 
         });
     }
 }
 
-export default MeteorHelper;
+export default LiveHelper;

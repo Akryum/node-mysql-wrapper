@@ -3,7 +3,7 @@ import Helper from "./Helper";
 import {SelectQueryRules, TABLE_RULES_PROPERTY} from "./queries/SelectQueryRules";
 import {COMPARISON_SYMBOLS} from "./WhereBuilder";
 
-export type TableToSearchPart = { tableName: string, propertyName: string };
+export type TableToSearchPart =  { tableName: string, propertyName: string };
 
 export interface ICriteriaParts {
     rawCriteriaObject: any;

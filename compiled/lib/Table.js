@@ -171,7 +171,7 @@ var Table = (function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
             var criteria = {};
-            criteria[_this.primaryKey] = id;
+            criteria[_this.primaryKey] = "= " + id;
             _this.find(criteria).then(function (results) {
                 resolve(results[0]);
                 if (callback) {

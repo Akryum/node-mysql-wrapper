@@ -1,6 +1,7 @@
 ﻿import Connection from "./lib/Connection";
 import Database from "./lib/Database";
-import {SelectQueryRules} from "./lib/queries/SelectQueryRules";
+import ConditionalConverter from "./lib/ConditionalConverter";
+import {SelectQueryRules,TABLE_RULES_PROPERTY} from "./lib/queries/SelectQueryRules";
 import CriteriaBuilder from "./lib/CriteriaBuilder";
 import {CollectionChangedAction} from "./lib/BaseCollection";
 import Helper from "./lib/Helper";
@@ -67,6 +68,8 @@ export function observable<T>(obj: T): T & ObservableObject {
 }
 
 exports.SelectQueryRules = SelectQueryRules;
+exports.TABLE_RULES_PROPERTY = TABLE_RULES_PROPERTY;
+exports.ConditionalConverter = ConditionalConverter;
 exports.CriteriaBuilder = CriteriaBuilder;
 exports.ObservableObject = ObservableObject;
 exports.CollectionChangedAction = CollectionChangedAction;

@@ -1,5 +1,5 @@
 import Helper from "../Helper";
-import MeteorHelper from "./MeteorHelper";
+import LiveHelper from "../live/LiveHelper";
 import ConditionalConverter from "../ConditionalConverter";
 import Table from "../Table"; //den to kanw apto MeteorTable.
 import {TABLE_RULES_PROPERTY} from "../queries/SelectQueryRules";
@@ -47,7 +47,7 @@ class MeteorMysqlCollection<T> extends EventEmitter {
         this.table.on("INSERT", Meteor.bindEnvironment((rows: any[]) => {
             rows.forEach(row=> {
                 let objRow = this.table.objectFromRow(row);
-                let canInsert = MeteorHelper.canInsert(objRow, this.criteriaRawJsObject);
+                let canInsert = LiveHelper.canInsert(objRow, this.criteriaRawJsObject);
                 if (canInsert) {
                     let _newPureItem = this.proccessJoinedTableInsert(objRow); //edw pernei to object, me ta joins ktlp
                     this.collection.insert(_newPureItem);
@@ -170,7 +170,7 @@ class MeteorMysqlCollection<T> extends EventEmitter {
 
     private listenToJoinedTables(): void {
 
-        MeteorHelper.listenToTable(this.table, this.collection.find().fetch(), this.criteriaRawJsObject, (event, tablePart: TableToSearchPart, objRow, selector, isArray) => {
+        LiveHelper.listenToTable(this.table, this.collection.find().fetch(), this.criteriaRawJsObject, Meteor.bindEnvironment((event, tablePart: TableToSearchPart, objRow, selector, isArray) => {
 
 
             if (event === "INSERT") {
@@ -237,7 +237,7 @@ class MeteorMysqlCollection<T> extends EventEmitter {
                 let res = this.collection.update(selectorForParent, toRemoveOrSetObj,{ multi: true, upsert: false });//24-10-2015 change { multi: false, upsert: true });
             }
 
-        });
+        }));
 
     }
 

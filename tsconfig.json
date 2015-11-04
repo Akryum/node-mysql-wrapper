@@ -31,7 +31,7 @@
     "./src/lib/ObservableObject.ts",
     "./src/lib/BaseCollection.ts",
     "./src/lib/ObservableCollection.ts",
-    "./src/lib/meteor/MeteorHelper.ts",
+    "./src/lib/live/LiveHelper.ts",
     "./src/lib/meteor/MeteorMysqlCollection.ts",
     "./src/lib/meteor/MeteorServerSide.ts",
     "./src/lib/BinaryLogHelper.ts",

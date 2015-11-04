@@ -192,7 +192,7 @@ class Table<T> {
 
         return new Promise<T>((resolve, reject) => {
             let criteria = {};
-            criteria[this.primaryKey] = id;
+            criteria[this.primaryKey] = "= "+id;
 
             this.find(criteria).then((results) => { ///TODO: isws xreiastei an tuxei error na valw to .promise().then alla nomizw to fixara vazontas to then any sto selectquery 
                 resolve(results[0]);

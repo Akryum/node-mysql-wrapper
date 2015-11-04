@@ -1,5 +1,6 @@
 var Connection_1 = require("./lib/Connection");
 var Database_1 = require("./lib/Database");
+var ConditionalConverter_1 = require("./lib/ConditionalConverter");
 var SelectQueryRules_1 = require("./lib/queries/SelectQueryRules");
 var CriteriaBuilder_1 = require("./lib/CriteriaBuilder");
 var BaseCollection_1 = require("./lib/BaseCollection");
@@ -50,6 +51,8 @@ function observable(obj) {
 }
 exports.observable = observable;
 exports.SelectQueryRules = SelectQueryRules_1.SelectQueryRules;
+exports.TABLE_RULES_PROPERTY = SelectQueryRules_1.TABLE_RULES_PROPERTY;
+exports.ConditionalConverter = ConditionalConverter_1.default;
 exports.CriteriaBuilder = CriteriaBuilder_1.default;
 exports.ObservableObject = ObservableObject_1.default;
 exports.CollectionChangedAction = BaseCollection_1.CollectionChangedAction;

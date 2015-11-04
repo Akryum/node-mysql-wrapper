@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var Helper_1 = require("../Helper");
-var MeteorHelper_1 = require("./MeteorHelper");
+var LiveHelper_1 = require("../live/LiveHelper");
 var SelectQueryRules_1 = require("../queries/SelectQueryRules");
 var events_1 = require('events');
 var MeteorMysqlCollection = (function (_super) {
@@ -28,7 +28,7 @@ var MeteorMysqlCollection = (function (_super) {
         this.table.on("INSERT", Meteor.bindEnvironment(function (rows) {
             rows.forEach(function (row) {
                 var objRow = _this.table.objectFromRow(row);
-                var canInsert = MeteorHelper_1.default.canInsert(objRow, _this.criteriaRawJsObject);
+                var canInsert = LiveHelper_1.default.canInsert(objRow, _this.criteriaRawJsObject);
                 if (canInsert) {
                     var _newPureItem = _this.proccessJoinedTableInsert(objRow);
                     _this.collection.insert(_newPureItem);
@@ -103,7 +103,7 @@ var MeteorMysqlCollection = (function (_super) {
     };
     MeteorMysqlCollection.prototype.listenToJoinedTables = function () {
         var _this = this;
-        MeteorHelper_1.default.listenToTable(this.table, this.collection.find().fetch(), this.criteriaRawJsObject, function (event, tablePart, objRow, selector, isArray) {
+        LiveHelper_1.default.listenToTable(this.table, this.collection.find().fetch(), this.criteriaRawJsObject, Meteor.bindEnvironment(function (event, tablePart, objRow, selector, isArray) {
             if (event === "INSERT") {
                 if (isArray) {
                     var toPushArrayObj = {};
@@ -134,7 +134,7 @@ var MeteorMysqlCollection = (function (_super) {
                 selectorForParent[tablePart.propertyName + "." + Helper_1.default.toObjectProperty(joinedTable.primaryKey)] = objRow[Helper_1.default.toObjectProperty(joinedTable.primaryKey)];
                 var res = _this.collection.update(selectorForParent, toRemoveOrSetObj, { multi: true, upsert: false });
             }
-        });
+        }));
     };
     MeteorMysqlCollection.prototype.fill = function (criteriaRawJsObject) {
         var _this = this;

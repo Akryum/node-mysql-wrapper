@@ -185,7 +185,7 @@ console.log('available columns: '+ usersTable.columns);
 console.log('primary key column name: '+ usersTable.primaryKey);
 console.log('find, findById, findAll, save and remove methods can be called from this table');
 
-usersTable.find({mail:'makis@omakis.com'},function(results){
+usersTable.find({mail:"= makis@omakis.com"},function(results){
 
 });
 
@@ -209,15 +209,15 @@ db.table("users").findById(18,function(user){
 ```
 **Simple 'find single' method** , this find method always returns  one result.
 ```js
-db.table("users").findSingle({mail:'makis@ideopod.com'},function(user){
+db.table("users").findSingle({mail:'= makis@ideopod.com'},function(user){
 	console.log("SELECT * FROM users WHERE mail = 'makis@ideopod.com' LIMIT 1");
 	console.dir(user);
 });
 ```
 **Simple 'find by' method** this find method always returns an array.
 ```js
-db.table("users").find({yearsOld:22},function(users){
-	console.log("SELECT * FROM users WHERE yearsOld = 22. results: ";
+db.table("users").find({yearsOld:'>= 18'},function(users){
+	console.log("SELECT * FROM users WHERE yearsOld >= 18. results: ";
 	console.dir(users);
 });
 ```
@@ -255,7 +255,7 @@ var criteria = dbUsers.criteria
 // .build() makes that : 
 /*
 var criteria= {
-	yearsOld:22, //where
+	yearsOld:'= 22', //where
 	info : {  //joined table
 		userId : '=' , //'=' means: put the parent object's property's value.
 		tableRules: {
@@ -316,7 +316,7 @@ db.table("users").save(newUser).then(function(result){ //if you want use a promi
 
 ```js
 //remove/delete all rows from users table where years_old = 22
-db.table("users").remove({yearsOld:22},function(resultAnswer){
+db.table("users").remove({yearsOld:'= 22'},function(resultAnswer){
 	console.log(resultAnswer.affectedRows+ ' rows removed from '+resultAnswer.table);
 });
 ```
@@ -336,8 +336,8 @@ Also you can **wait for multiple query methods to finish** before you do somethi
 
 ```js
 var findAUser = db.table("users").findById(16);
-var findMoreUsers = db.table("users").find({username: 'a username'});
-var findSomeComments = db.table("comments").find({userId:16});
+var findMoreUsers = db.table("users").find({username: '= a username'});
+var findSomeComments = db.table("comments").find({userId:'= 16'});
 
 //you can pass an array of promises too.
 db.when(findAUser,findMoreUsers,findSomeComments).then(function(results) {
