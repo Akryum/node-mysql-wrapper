@@ -21,7 +21,7 @@
     "./src/typings/my-meteor/my-meteor.d.ts",
     "./src/index.ts",
     "./src/lib/CriteriaBuilder.ts",
-    "./src/lib/WhereBuilder",
+    "./src/lib/WhereBuilder.ts",
     "./src/lib/CriteriaDivider.ts",
     "./src/lib/queries/IQuery.ts",
     "./src/lib/queries/SelectQueryRules.ts",
