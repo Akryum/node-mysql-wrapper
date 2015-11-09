@@ -13,6 +13,7 @@ class Database {
     connection: Connection;
     readyListenerCallbacks = new Array<Function>();
     isReady: boolean = false;
+    isConnecting: boolean = false;
 
     constructor(connection?: Connection) {
         this.setConnection(connection);
@@ -56,23 +57,29 @@ class Database {
     }
 
     ready(callback?: () => void): void {
-        if (callback) {
-            this.readyListenerCallbacks.push(callback);
-        }
+        if(callback && this.isReady===true && this.isConnecting === false){
+            callback();
+        
+        }else{
+            if (callback) {
+                this.readyListenerCallbacks.push(callback);
+            }
 
 
-        if (this.readyListenerCallbacks.length <= 1) { //23-09-2015 - no require to have a callback now, it can runs sync with connect( on index.ts)
-            //means the first listener,so  do the link/connect to the connection now. No before.
+            if (this.readyListenerCallbacks.length <=1 && this.isConnecting===false) {
+                //means the first listener,so  do the link/connect to the connection now. No before.
+                this.isConnecting = true;
+                this.connection.link().then(() => {
+                    [].forEach.call(this.connection.tables, (_table: Table<any>) => {
+                        this[Helper.toObjectProperty(_table.name)] = this[_table.name] = _table;
+                    });
 
-            this.connection.link().then(() => {
-                [].forEach.call(this.connection.tables, (_table: Table<any>) => {
-                    this[Helper.toObjectProperty(_table.name)] = this[_table.name] = _table;
+                    this.noticeReady();
+
                 });
-
-                this.noticeReady();
-
-            });
+            }
         }
+        
     }
 
     table<T>(tableName: string): Table<T> {
@@ -84,10 +91,12 @@ class Database {
     }
 
     noticeReady(): void {
+        this.isConnecting = false;
         this.isReady = true;
         for (let i = 0; i < this.readyListenerCallbacks.length; i++) {
             this.readyListenerCallbacks[i]();
         }
+        this.readyListenerCallbacks = [];
     }
 
     removeReadyListener(callback: () => void) {

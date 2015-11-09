@@ -8,6 +8,7 @@ var Database = (function () {
     function Database(connection) {
         this.readyListenerCallbacks = new Array();
         this.isReady = false;
+        this.isConnecting = false;
         this.setConnection(connection);
     }
     Database.when = function () {
@@ -48,16 +49,22 @@ var Database = (function () {
     };
     Database.prototype.ready = function (callback) {
         var _this = this;
-        if (callback) {
-            this.readyListenerCallbacks.push(callback);
+        if (callback && this.isReady === true && this.isConnecting === false) {
+            callback();
         }
-        if (this.readyListenerCallbacks.length <= 1) {
-            this.connection.link().then(function () {
-                [].forEach.call(_this.connection.tables, function (_table) {
-                    _this[Helper_1.default.toObjectProperty(_table.name)] = _this[_table.name] = _table;
+        else {
+            if (callback) {
+                this.readyListenerCallbacks.push(callback);
+            }
+            if (this.readyListenerCallbacks.length <= 1 && this.isConnecting === false) {
+                this.isConnecting = true;
+                this.connection.link().then(function () {
+                    [].forEach.call(_this.connection.tables, function (_table) {
+                        _this[Helper_1.default.toObjectProperty(_table.name)] = _this[_table.name] = _table;
+                    });
+                    _this.noticeReady();
                 });
-                _this.noticeReady();
-            });
+            }
         }
     };
     Database.prototype.table = function (tableName) {
@@ -67,10 +74,12 @@ var Database = (function () {
         return new CriteriaBuilder_1.default(this.table(tableName));
     };
     Database.prototype.noticeReady = function () {
+        this.isConnecting = false;
         this.isReady = true;
         for (var i = 0; i < this.readyListenerCallbacks.length; i++) {
             this.readyListenerCallbacks[i]();
         }
+        this.readyListenerCallbacks = [];
     };
     Database.prototype.removeReadyListener = function (callback) {
         for (var i = 0; i < this.readyListenerCallbacks.length; i++) {

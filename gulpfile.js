@@ -21,7 +21,8 @@ gulp.task("src", function () {
 		.pipe(gulp.dest("./examples_typescript/node_modules/node-mysql-wrapper/compiled/"))
 		.pipe(gulp.dest("./examples_meteorjs_typescript/packages/npm-container/.npm/package/node_modules/node-mysql-wrapper/compiled/"))
 		.pipe(gulp.dest("../Meteor_Projects/taglub/packages/npm-container/.npm/package/node_modules/node-mysql-wrapper/compiled/"))
-		.pipe(gulp.dest("../react-typescript-fullstack-skeleton/node_modules/node-mysql-wrapper/compiled/"));
+		.pipe(gulp.dest("../react-typescript-fullstack-skeleton/node_modules/node-mysql-wrapper/compiled/"))
+		.pipe(gulp.dest("../node-mysql-live/node_modules/node-mysql-wrapper/compiled/"));
 });
 
 gulp.task("typings", function () {
@@ -32,7 +33,8 @@ gulp.task("typings", function () {
 		.pipe(gulp.dest("./examples_typescript/node_modules/node-mysql-wrapper/compiled/typings/"))
 		.pipe(gulp.dest("./examples_typescript/typings/"))
 		.pipe(gulp.dest("./examples_meteorjs_typescript/packages/npm-container/.npm/package/node_modules/node-mysql-wrapper/compiled/typings/"))
-		.pipe(gulp.dest("../react-typescript-fullstack-skeleton/typings/"));
+		.pipe(gulp.dest("../react-typescript-fullstack-skeleton/typings/"))
+		.pipe(gulp.dest("../node-mysql-live/typings/"));
 });
 
 

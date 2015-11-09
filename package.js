@@ -1,7 +1,7 @@
 //This is for Meteor JS Platform.
 Package.describe({
   name: 'nodets:mysql',
-  version: '2.8.0',
+  version: '2.8.1',
   // Brief, one-line summary of the package.
   summary: 'This is a meteor package which brings real and easy support to Mongo.Collection for Mysql databases.',
   // URL to the Git repository containing the source code for this package.
@@ -10,7 +10,7 @@ Package.describe({
 });
 
 Npm.depends({
-  'node-mysql-wrapper': "2.8.0"
+  'node-mysql-wrapper': "2.8.1"
 });
 
 Package.onUse(function(api) {
