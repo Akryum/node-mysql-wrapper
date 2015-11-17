@@ -6,7 +6,6 @@ import SelectQuery from "./queries/SelectQuery";
 import SaveQuery from "./queries/SaveQuery";
 import {default as DeleteQuery, DeleteAnswer} from "./queries/DeleteQuery";
 import CriteriaBuilder from "./CriteriaBuilder";
-import MeteorMysqlCollection from "./meteor/MeteorMysqlCollection";
 import * as Promise from 'bluebird';
 
 class Table<T> {
@@ -146,11 +145,11 @@ class Table<T> {
             if (jsObject.constructor === Array) {
 
             }
-            else if (Helper.isString(jsObject) || Helper.isNumber(jsObject)) { //is already ID:string or number 
+            else if (Helper.isString(jsObject) || Helper.isNumber(jsObject)) { //is already ID:string or number
                 return jsObject;
             }
             else { //is raw criteria object
-           
+
                 if (jsObject.hasOwnProperty(primaryKeyObjectProperty) || jsObject[primaryKeyObjectProperty] !== undefined) { //auto to || to evala gt exw arxisei na kanw to observable property...pou to emurable einai false.
                     returnValue = jsObject[primaryKeyObjectProperty];
 
@@ -162,7 +161,7 @@ class Table<T> {
         }
         return returnValue;
     }
-    
+
     //(Greek-forme)edw exoume tis epiloges: i to kanw na epistrefei kana tablerule i vazw san 3o optional parameter to tablerules, den kserw 9a to dw meta.
     find(criteriaRawJsObject: any): Promise<T[]>; // only criteria and promise
     find(criteriaRawJsObject: any, callback: ((_results: T[]) => any)): Promise<T[]>; // only callback
@@ -194,7 +193,7 @@ class Table<T> {
             let criteria = {};
             criteria[this.primaryKey] = "= "+id;
 
-            this.find(criteria).then((results) => { ///TODO: isws xreiastei an tuxei error na valw to .promise().then alla nomizw to fixara vazontas to then any sto selectquery 
+            this.find(criteria).then((results) => { ///TODO: isws xreiastei an tuxei error na valw to .promise().then alla nomizw to fixara vazontas to then any sto selectquery
                 resolve(results[0]);
                 if (callback) {
                     callback(results[0]);
@@ -220,13 +219,6 @@ class Table<T> {
        return this._deleteQuery.execute(criteriaOrID, callback);
     }
 
-    /*only for meteor js*/
-
-    meteorCollection(collectionName: string, fillWithCriteria?: any): MeteorMysqlCollection<T> {
-        let col = new MeteorMysqlCollection<T>(this, collectionName);
-        col.fill(fillWithCriteria);
-        return col;
-    }
 }
 
 export default Table;

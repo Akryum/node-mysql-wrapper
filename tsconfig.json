@@ -1,4 +1,21 @@
 {
+  "formatCodeOptions": {
+    "indentSize": 4,
+    "tabSize": 4,
+    "newLineCharacter": "\r\n",
+    "convertTabsToSpaces": true,
+    "insertSpaceAfterCommaDelimiter": true,
+    "insertSpaceAfterSemicolonInForStatements": true,
+    "insertSpaceBeforeAndAfterBinaryOperators": true,
+    "insertSpaceAfterKeywordsInControlFlowStatements": true,
+    "insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
+    "insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": false,
+    "placeOpenBraceOnNewLineForFunctions": false,
+    "placeOpenBraceOnNewLineForControlBlocks": false
+  },
+  "buildOnSave": false,
+  "compileOnSave": false,
+  "scripts": {},
   "compilerOptions": {
     "module": "commonjs",
     "noImplicitAny": false,
@@ -18,7 +35,6 @@
   "files": [
     "./src/typings/bluebird/bluebird.d.ts",
     "./src/typings/mysql/mysql.d.ts",
-    "./src/typings/my-meteor/my-meteor.d.ts",
     "./src/index.ts",
     "./src/lib/CriteriaBuilder.ts",
     "./src/lib/WhereBuilder.ts",
@@ -31,9 +47,6 @@
     "./src/lib/ObservableObject.ts",
     "./src/lib/BaseCollection.ts",
     "./src/lib/ObservableCollection.ts",
-    "./src/lib/live/LiveHelper.ts",
-    "./src/lib/meteor/MeteorMysqlCollection.ts",
-    "./src/lib/meteor/MeteorServerSide.ts",
     "./src/lib/BinaryLogHelper.ts",
     "./src/lib/Connection.ts",
     "./src/lib/Table.ts",

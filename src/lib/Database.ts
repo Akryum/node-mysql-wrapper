@@ -1,7 +1,6 @@
 ﻿import Connection from "./Connection";
 import Helper from "./Helper";
 import Table from "./Table";
-import MeteorMysqlCollection from "./meteor/MeteorMysqlCollection";
 import {SelectQueryRules} from "./queries/SelectQueryRules";
 import ObservableObject from "./ObservableObject";
 import ObservableCollection from "./ObservableCollection";
@@ -59,7 +58,7 @@ class Database {
     ready(callback?: () => void): void {
         if(callback && this.isReady===true && this.isConnecting === false){
             callback();
-        
+
         }else{
             if (callback) {
                 this.readyListenerCallbacks.push(callback);
@@ -79,7 +78,7 @@ class Database {
                 });
             }
         }
-        
+
     }
 
     table<T>(tableName: string): Table<T> {
@@ -141,16 +140,6 @@ class Database {
 
     collection<T>(tableName: string, callbackWhenReady?: Function): ObservableCollection<T> {
         return new ObservableCollection(<Table<T>>this.connection.table(tableName), true, callbackWhenReady);
-    }
-
-    meteorCollection<T>(tableOrTableName: string | Table<T>, collectionName: string, fillWithCriteria?: any): MeteorMysqlCollection<T> {
-        let _table;
-        if (Helper.isString(tableOrTableName)) {
-            _table = this.table<T>(<string>tableOrTableName);
-        } else if (_table instanceof Table) {
-            _table = tableOrTableName;
-        }
-        return _table.meteorCollection(collectionName, fillWithCriteria);
     }
 
 }

@@ -4,7 +4,7 @@
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
 ///<reference path='./../bluebird/bluebird.d.ts' />
-///<reference path="./../my-meteor/my-meteor.d.ts" />
+
 
 declare namespace Mysql {
     interface IError {
@@ -25,7 +25,7 @@ declare class EventEmitter {
 
 
 declare module "node-mysql-wrapper" {
-    	
+
 	// export function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): NodeMysqlWrapper.Database;
 
     // /** Same as wrap but it's sync mode - autoconnect to the database without need to use database.ready(callback).
@@ -34,9 +34,9 @@ declare module "node-mysql-wrapper" {
     // export function connect(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): NodeMysqlWrapper.Database;
 
     // export function observable<T>(obj: T): T & NodeMysqlWrapper.ObservableObject;
-	
+
     export = NodeMysqlWrapper;
-	
+
 }
 
 
@@ -158,6 +158,8 @@ declare module NodeMysqlWrapper {
          * @return boolean
          */
         static hasRules(obj: any): boolean;
+
+        static isString(val:any):boolean;
     }
 
 
@@ -166,7 +168,7 @@ declare module NodeMysqlWrapper {
         tables: TableToSearchPart[];
         noDatabaseProperties: string[];
         whereClause: string;
-
+        queryRules: SelectQueryRules;
         selectFromClause<T>(_table: Table<T>): string;
 
     }
@@ -193,6 +195,7 @@ declare module NodeMysqlWrapper {
          * The converted/exported where clause.
          */
         whereClause: string;
+        queryRules: SelectQueryRules;
 
         constructor(rawCriteriaObject: any, tables: TableToSearchPart[], noDatabaseProperties: string[], whereClause: string);
 
@@ -210,7 +213,7 @@ declare module NodeMysqlWrapper {
          * @returnType {Criteria}
          * @return {Criteria}
          */
-        build(rawCriteriaObject: any): CriteriaParts;
+        divide(rawCriteriaObject: any): CriteriaParts;
     }
 
     export class SelectQueryRules {
@@ -520,60 +523,6 @@ declare module NodeMysqlWrapper {
 
     }
 
-    export class MeteorCollection<T> {
-        private collection: Mongo.Collection<T>;
-        protected table: Table<T>;
-
-        constructor(table: Table<T>, name?: string);
-
-        startListeningToDatabase(): void;
-
-        rawCollection: Mongo.Collection<T>;
-
-        fill(criteriaRawJsObject: any): void;
-
-        fillAll(): void;
-
-        fillOne(criteriaRawJsObject: any): void;
-
-        //ONLY MONGO/METEOR COLLECTION METHODS START
-        allow(options: {
-            insert?: (userId: string, doc: T) => boolean;
-            update?: (userId: string, doc: T, fieldNames: string[], modifier: any) => boolean;
-            remove?: (userId: string, doc: T) => boolean;
-            fetch?: string[];
-            transform?: Function;
-        }): boolean;
-
-        deny(options: {
-            insert?: (userId: string, doc: T) => boolean;
-            update?: (userId: string, doc: T, fieldNames: string[], modifier: any) => boolean;
-            remove?: (userId: string, doc: T) => boolean;
-            fetch?: string[];
-            transform?: Function;
-        }): boolean;
-
-        find(selector?: any, options?: {
-            sort?: any;
-            skip?: number;
-            limit?: number;
-            fields?: any;
-            reactive?: boolean;
-            transform?: Function;
-        }): Mongo.Cursor<T>;
-
-        findOne(selector?: any, options?: {
-            sort?: any;
-            skip?: number;
-            fields?: any;
-            reactive?: boolean;
-            transform?: Function;
-        }): T;
-
-        //ONLY MONGO/METEOR COLLECTION METHODS FINISH.
-
-    }
-
 
     export class Connection extends EventEmitter {
 
@@ -866,75 +815,10 @@ declare module NodeMysqlWrapper {
         remove(criteriaRawObject: any): Promise<DeleteAnswer>; // criteria obj without callback
         remove(criteriaOrID: any | number | string, callback?: (_result: DeleteAnswer) => any): Promise<DeleteAnswer>;
 
-        /** Only for Meteor JS
-         * Returns a sync to client, the server  and the actual/real database internal or external actions.
-         */
-        meteorCollection(collectionName: string, fillWithCriteria?: any): MeteorMysqlCollection<T>;
 
     }
 
-    export class MeteorMysqlCollection<T> {
 
-        constructor(table?: Table<T>, name?: string);
-
-        rawCollection(): any;
-
-        rawDatabase(): any;
-
-        _ensureIndex(indexName: string, options?: { [key: string]: any }): void;
-
-        allow(options: {
-            insert?: (userId: string, doc: T) => boolean;
-            update?: (userId: string, doc: T, fieldNames: string[], modifier: any) => boolean;
-            remove?: (userId: string, doc: T) => boolean;
-            fetch?: string[];
-            transform?: Function;
-        }): boolean;
-
-        deny(options: {
-            insert?: (userId: string, doc: T) => boolean;
-            update?: (userId: string, doc: T, fieldNames: string[], modifier: any) => boolean;
-            remove?: (userId: string, doc: T) => boolean;
-            fetch?: string[];
-            transform?: Function;
-        }): boolean;
-
-
-        fill(criteriaRawJsObject: any): MeteorMysqlCollection<T>;
-
-        fillAll(): MeteorMysqlCollection<T>;
-
-        fillOne(criteriaRawJsObject: any): MeteorMysqlCollection<T>;
-
-        find(selector?: any, options?: {
-            sort?: any;
-            skip?: number;
-            limit?: number;
-            fields?: any;
-            reactive?: boolean;
-            transform?: Function;
-        }): Mongo.Cursor<T>;
-
-
-        findOne(selector?: any, options?: {
-            sort?: any;
-            skip?: number;
-            fields?: any;
-            reactive?: boolean;
-            transform?: Function;
-        }): T;
-
-        insert(doc: T, callback?: Function): string;
-
-        remove(selector: any, callback?: Function): void;
-
-        update(selector: any, modifier?: any, options?: {
-            multi?: boolean;
-            upsert?: boolean;
-        }, callback?: Function): number;
-
-
-    }
 
     export class Database {
         connection: Connection;
@@ -991,10 +875,6 @@ declare module NodeMysqlWrapper {
 
         collection<T>(tableName: string, callbackWhenReady?: Function): ObservableCollection<T>;
 
-        /**Meteor js feature only: Returns a  collection which can sync with the client, the ui and the real external database actions */
-        meteorCollection<T>(tableOrTableName: string | Table<T>, collectionName: string, fillWithCriteria?: any): MeteorMysqlCollection<T>;
-
-
     }
 
     export class ConditionalConverter {
@@ -1011,13 +891,6 @@ declare module NodeMysqlWrapper {
 
     export function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): NodeMysqlWrapper.Database;
 
-    /** Same as wrap but it's sync mode - autoconnect to the database without need to use database.ready(callback).
-     *  Do not use it yet. It works only on 32/86 bit, use .wrap instead
-     */
-    export function connect(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): NodeMysqlWrapper.Database;
-
     export function observable<T>(obj: T): T & NodeMysqlWrapper.ObservableObject;
 
 }
-
-

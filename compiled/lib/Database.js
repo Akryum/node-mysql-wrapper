@@ -1,5 +1,4 @@
 var Helper_1 = require("./Helper");
-var Table_1 = require("./Table");
 var SelectQueryRules_1 = require("./queries/SelectQueryRules");
 var ObservableCollection_1 = require("./ObservableCollection");
 var CriteriaBuilder_1 = require("./CriteriaBuilder");
@@ -116,16 +115,6 @@ var Database = (function () {
     };
     Database.prototype.collection = function (tableName, callbackWhenReady) {
         return new ObservableCollection_1.default(this.connection.table(tableName), true, callbackWhenReady);
-    };
-    Database.prototype.meteorCollection = function (tableOrTableName, collectionName, fillWithCriteria) {
-        var _table;
-        if (Helper_1.default.isString(tableOrTableName)) {
-            _table = this.table(tableOrTableName);
-        }
-        else if (_table instanceof Table_1.default) {
-            _table = tableOrTableName;
-        }
-        return _table.meteorCollection(collectionName, fillWithCriteria);
     };
     return Database;
 })();

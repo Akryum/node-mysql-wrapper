@@ -2,7 +2,7 @@
 [![npm version](https://badge.fury.io/js/node-mysql-wrapper.svg)](http://badge.fury.io/js/node-mysql-wrapper)
 
 # node-mysql-wrapper
-#### [nodets:mysql for meteor](https://github.com/nodets/node-mysql-wrapper/blob/master/README_METEOR.md)
+#### [nodets:mysql for meteor](https://github.com/nodets/meteor-mysql/blob/master/README.md)
 #### [NEW mysql-live for live database collections, server and client side!](https://github.com/nodets/node-mysql-live)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/nodets/node-mysql-wrapper?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
