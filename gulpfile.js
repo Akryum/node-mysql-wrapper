@@ -28,7 +28,6 @@ gulp.task("src", function () {
 gulp.task("typings", function () {
 
 	return gulp.src(["definitely_typed/**/*d.ts"])
-		.pipe(gulp.dest("./compiled/typings/"))
 		.pipe(gulp.dest("./examples_javascript/node_modules/node-mysql-wrapper/compiled/typings/"))
 		.pipe(gulp.dest("./examples_typescript/node_modules/node-mysql-wrapper/compiled/typings/"))
 		.pipe(gulp.dest("./examples_typescript/typings/"))

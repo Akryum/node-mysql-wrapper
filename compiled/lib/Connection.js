@@ -17,6 +17,8 @@ var Connection = (function (_super) {
         this.tableNamesToUseOnly = [];
         this.tables = [];
         this.allowBinaryLogs = false;
+        this.mysql_5_6_x_query = "SELECT * from information_schema.GLOBAL_VARIABLES WHERE VARIABLE_NAME = 'LOG_BIN';";
+        this.mysql_5_7_9_query = "SELECT * FROM performance_schema.global_variables WHERE VARIABLE_NAME = 'LOG_BIN';";
         this.create(connection);
     }
     Connection.prototype.create = function (connection) {
@@ -148,18 +150,38 @@ var Connection = (function (_super) {
             }
         }
     };
+    Connection.prototype.getBinaryInformationResult = function (cb, q) {
+        var _this = this;
+        if (!q) {
+            q = this.mysql_5_7_9_query;
+        }
+        this.connection.query(q, function (err) {
+            var results = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                results[_i - 1] = arguments[_i];
+            }
+            if (err) {
+                if (q !== _this.mysql_5_6_x_query) {
+                    _this.getBinaryInformationResult(cb, _this.mysql_5_6_x_query);
+                }
+                else {
+                    cb(err, []);
+                }
+            }
+            else {
+                cb(undefined, results);
+            }
+        });
+    };
     Connection.prototype.fetchBinaryInformation = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            _this.connection.query("SELECT * from information_schema.GLOBAL_VARIABLES WHERE VARIABLE_NAME = 'LOG_BIN';", function (err) {
-                var results = [];
-                for (var _i = 1; _i < arguments.length; _i++) {
-                    results[_i - 1] = arguments[_i];
-                }
-                if (err) {
+            _this.getBinaryInformationResult(function (err, results) {
+                if (err !== undefined) {
                     reject(err);
                 }
                 if (results.length > 0 && Array.isArray(results[0])) {
+                    console.log('all ok results are: ', results);
                     if (results[0][0]["VARIABLE_VALUE"] === 'ON') {
                         _this.allowBinaryLogs = true;
                     }

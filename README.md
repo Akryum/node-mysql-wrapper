@@ -21,6 +21,7 @@
 - [Performing queries](#performing-queries)
 - [Table events](#table-events)
 - [Extending a table](#extending-a-table)
+- [Watch database changes](#watch-database-changes)
 - [Running tests](#running-tests)
 - [Todo](#todo)
 
@@ -439,6 +440,81 @@ if(db.table("users").has('mailExists') === false) //not necessary
 		else console.log('this mail doesnt exists.');
 	});
 ```
+
+## Watch database changes
+
+### Enable Binary Logging
+
+First of all you have to enable binary logs in your MySQL Server,
+In most of the cases this is enabled by default, but if not I will explain you how to enable it.
+
+
+```
+IF MYSQL SERVER VERSION IS GREATER OR EQUAL THAN 5.7 follow this:
+
+  IF OS === Windows 
+	IF (MYSQL INSIDE xampp,wamp) 
+	    1. Open: C:/ xampp/ OR wamp/ mysql/YOUR_MYSQL_VERSION/my.ini 
+	ELSE  
+		1. Open explorer and write : %PROGRAMDATA%/MySQL/MySQL Server 5.7/my.ini
+		
+    2. Go to the lines(119-120) which you can see these contents: 
+	  # Binary Logging.
+	  # log-bin
+    3. Just uncomment the # log-bin, finall result must look like that:
+	  # Binary Logging.
+	  log-bin
+	  								
+    4. Restart the mysql server service and you are ready.
+```   
+``` 
+ ELSE IF OS === (L)Unix
+	IF (MYSQL INSIDE lampp) 
+	    1. Open explorer and open opt/lampp/etc/my.cnf
+	ELSE  
+		1. Find where is my.cnf using these one of these shell commands: 
+			locate my.cnf
+			whereis my.cnf
+			find . -name my.cnf
+			
+		   and open the my.cnf file.
+		
+   2. Go to the line(119-120) which you can see these contents: 
+	  # Binary Logging.
+	  # log-bin
+   3. Just uncomment the # log-bin, finall result must look like that:
+	  # Binary Logging.
+	  log-bin
+	  								
+   4. Restart the mysql server service and you are ready. 
+```  
+```
+ELSE IF MYSQL SERVER VERSION IS LESS OR EQUAL THAN 5.6
+    Watch on youtube this video: https://www.youtube.com/watch?v=xrTBFZyn-Bk
+```
+
+
+
+
+### Example
+This package supports BASIC live watch of your database changes,
+make use of ObservableCollection.
+
+```js
+var usersCollection = db.collection("users",function(){
+    //ready
+    
+    usersCollection.onCollectionChanged(function(event,oldItems,newItems,oldStartingIndex,newStartingIndex){
+      //event has 3 times of events
+      //INSERT,UPDATE,REMOVE
+      //your code here
+    });
+});
+
+```
+For full support and the best experience you evern seen, take a look at [nodets/node-mysql-live](https://github.com/nodets/node-mysql-live)  package.
+
+
 ## Running tests
 
 ### Import this database example to your local server, and have fan!
@@ -550,3 +626,4 @@ This project is licensed under the MIT license.
 [node-version-url]: http://nodejs.org/download/
 [travis-image]: https://img.shields.io/travis/nodets/node-mysql-wrapper/master.svg?label=linux
 [downloads-url]: https://npmjs.org/package/node-mysql-wrapper
+

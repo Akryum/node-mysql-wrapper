@@ -67,7 +67,7 @@ class Connection extends EventEmitter {
             });
         });
     }
-    
+
     watchBinaryLogs(callbackWhenReady?: Function): void {
         if (!this.allowBinaryLogs) {
             console.log("Binary logs are off.\n Please google 'Enable Binary logs in MySQL' , and restart your mysql server and NodeJS/Meteor server.");
@@ -178,12 +178,36 @@ class Connection extends EventEmitter {
         }
     }
 
+    /*Because of new mysql 5.7.9 version has make deprecated my old method to find if log_bin is ON*/
+    /*READ AT ENABLE_BINARY_LOGS.MD FILE IF YOU HAVE PROBLEMS*/
+    private mysql_5_6_x_query = "SELECT * from information_schema.GLOBAL_VARIABLES WHERE VARIABLE_NAME = 'LOG_BIN';" //old style
+    private mysql_5_7_9_query = "SELECT * FROM performance_schema.global_variables WHERE VARIABLE_NAME = 'LOG_BIN';" //new style
+    getBinaryInformationResult(cb: (err: Mysql.IError, results: any[]) => any, q?: string): void {
+        if (!q) {
+            q = this.mysql_5_7_9_query;
+        }
+        this.connection.query(q, (err: Mysql.IError, ...results: any[]) => {
+            if (err) {
+                if (q !== this.mysql_5_6_x_query) {
+                    this.getBinaryInformationResult(cb, this.mysql_5_6_x_query);
+                } else {
+                    cb(err, []);
+                }
+
+            } else {
+                cb(undefined, results);
+            }
+
+        });
+    }
+
     fetchBinaryInformation(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            this.connection.query("SELECT * from information_schema.GLOBAL_VARIABLES WHERE VARIABLE_NAME = 'LOG_BIN';", (err: Mysql.IError, ...results: any[]) => {
-                if (err) {
+            this.getBinaryInformationResult((err, results) => {
+                if (err!==undefined) {
                     reject(err);
                 }
+                
                 if (results.length > 0 && Array.isArray(results[0])) {
 
                     if (results[0][0]["VARIABLE_VALUE"] === 'ON') {

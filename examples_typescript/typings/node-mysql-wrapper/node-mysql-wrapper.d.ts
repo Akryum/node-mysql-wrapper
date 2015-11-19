@@ -5,8 +5,7 @@
 
 ///<reference path='./../bluebird/bluebird.d.ts' />
 
-
-declare namespace Mysql {
+declare module NodeMysql {
     interface IError {
 
     }
@@ -26,12 +25,12 @@ declare class EventEmitter {
 
 declare module "node-mysql-wrapper" {
 
-	// export function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): NodeMysqlWrapper.Database;
+	// export function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection: NodeMysql.IConnection | string, ...useTables: any[]): NodeMysqlWrapper.Database;
 
     // /** Same as wrap but it's sync mode - autoconnect to the database without need to use database.ready(callback).
     //  *  Do not use it yet. It works only on 32/86 bit, use .wrap instead
     //  */
-    // export function connect(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): NodeMysqlWrapper.Database;
+    // export function connect(mysqlUrlOrObjectOrMysqlAlreadyConnection: NodeMysql.IConnection | string, ...useTables: any[]): NodeMysqlWrapper.Database;
 
     // export function observable<T>(obj: T): T & NodeMysqlWrapper.ObservableObject;
 
@@ -169,6 +168,7 @@ declare module NodeMysqlWrapper {
         noDatabaseProperties: string[];
         whereClause: string;
         queryRules: SelectQueryRules;
+
         selectFromClause<T>(_table: Table<T>): string;
 
     }
@@ -195,6 +195,7 @@ declare module NodeMysqlWrapper {
          * The converted/exported where clause.
          */
         whereClause: string;
+
         queryRules: SelectQueryRules;
 
         constructor(rawCriteriaObject: any, tables: TableToSearchPart[], noDatabaseProperties: string[], whereClause: string);
@@ -213,7 +214,7 @@ declare module NodeMysqlWrapper {
          * @returnType {Criteria}
          * @return {Criteria}
          */
-        divide(rawCriteriaObject: any): CriteriaParts;
+         divide(rawCriteriaObject: any): CriteriaParts;
     }
 
     export class SelectQueryRules {
@@ -523,13 +524,12 @@ declare module NodeMysqlWrapper {
 
     }
 
-
     export class Connection extends EventEmitter {
 
         /**
          * The real database connection socket.
          */
-        connection: Mysql.IConnection;
+        connection: NodeMysql.IConnection;
 
         /**
          * Collection of the supported event types for the tables.
@@ -546,23 +546,23 @@ declare module NodeMysqlWrapper {
          */
         tables: Table<any>[];
 
-        constructor(connection: string | Mysql.IConnection | Mysql.IConnectionConfig);
+        constructor(connection: string | NodeMysql.IConnection | NodeMysql.IConnectionConfig);
 
         /**
          * Creates the MysqlConnection from the connection url or the real connection object.
-         * @param {string | Mysql.IConnection |  Mysql.IConnectionConfig} connection the connection url or the real connection object.
+         * @param {string | NodeMysql.IConnection |  NodeMysql.IConnectionConfig} connection the connection url or the real connection object.
          * @returnType {nothing}
          * @return {nothing}
          */
-        create(connection: string | Mysql.IConnection | Mysql.IConnectionConfig): void;
+        create(connection: string | NodeMysql.IConnection | NodeMysql.IConnectionConfig): void;
 
         /**
          * Attach a real connection.
-         * @param {Mysql.IConnection} connection the real connection object.
+         * @param {NodeMysql.IConnection} connection the real connection object.
          * @returnType {nothing}
          * @return {nothing}
          */
-        attach(connection: Mysql.IConnection): void;
+        attach(connection: NodeMysql.IConnection): void;
 
         /**
          * Close the entire real connection and remove all event's listeners (if exist).
@@ -654,7 +654,7 @@ declare module NodeMysqlWrapper {
          * @returnType {nothing}
          * @return {nothing}
          */
-        query(queryStr: string, callback: (err: Mysql.IError, results: any) => any, queryArguments?: any[]): void;
+        query(queryStr: string, callback: (err: NodeMysql.IError, results: any) => any, queryArguments?: any[]): void;
 
         /**
          * Returns a MysqlTable object from the database factory. (Note: this method doesn't create anything, just finds and returns the correct table, you don't have to create anything at all. Tables are fetched by the library itself.)
@@ -815,10 +815,7 @@ declare module NodeMysqlWrapper {
         remove(criteriaRawObject: any): Promise<DeleteAnswer>; // criteria obj without callback
         remove(criteriaOrID: any | number | string, callback?: (_result: DeleteAnswer) => any): Promise<DeleteAnswer>;
 
-
     }
-
-
 
     export class Database {
         connection: Connection;
@@ -849,7 +846,7 @@ declare module NodeMysqlWrapper {
 
         removeReadyListener(callback: () => void): void;
 
-        query(queryStr: string, callback: (err: Mysql.IError, results: any) => any, queryArguments?: any[]): void;
+        query(queryStr: string, callback: (err: NodeMysql.IError, results: any) => any, queryArguments?: any[]): void;
 
         /**
          * Close the entire real connection and remove all event's listeners (if exist).
@@ -874,7 +871,6 @@ declare module NodeMysqlWrapper {
         criteriaFor<T>(tableName: string): CriteriaBuilder<T>;
 
         collection<T>(tableName: string, callbackWhenReady?: Function): ObservableCollection<T>;
-
     }
 
     export class ConditionalConverter {
@@ -889,7 +885,7 @@ declare module NodeMysqlWrapper {
     }
 
 
-    export function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection: Mysql.IConnection | string, ...useTables: any[]): NodeMysqlWrapper.Database;
+    export function wrap(mysqlUrlOrObjectOrMysqlAlreadyConnection: NodeMysql.IConnection | string, ...useTables: any[]): NodeMysqlWrapper.Database;
 
     export function observable<T>(obj: T): T & NodeMysqlWrapper.ObservableObject;
 
