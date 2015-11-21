@@ -181,7 +181,6 @@ var Connection = (function (_super) {
                     reject(err);
                 }
                 if (results.length > 0 && Array.isArray(results[0])) {
-                    console.log('all ok results are: ', results);
                     if (results[0][0]["VARIABLE_VALUE"] === 'ON') {
                         _this.allowBinaryLogs = true;
                     }

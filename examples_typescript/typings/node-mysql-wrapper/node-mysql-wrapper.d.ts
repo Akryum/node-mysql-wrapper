@@ -142,7 +142,7 @@ declare module NodeMysqlWrapper {
          * @return {U}
          */
 
-        static forEachKey<T, U>(map: Map<T>, callback: (key: string) => U): U;
+        static forEachKey<U>(map: any, callback: (key: string) => U): U;
 
         /**
          * Checks if anything is a function.
