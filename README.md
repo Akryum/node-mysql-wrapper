@@ -12,17 +12,18 @@
 
 - [Install](#install)
 - [Introduction](#introduction)
-- [Contributors](#contributors)
-- [Community](#community)
 - [Establishing connections](#establishing-connections)
 - [Connection options](#connection-options)
 - [Terminating connections](#terminating-connections)
 - [Tables](#tables)
 - [Performing queries](#performing-queries)
+- [Stored procedures](#stored-procedures)
 - [Table events](#table-events)
 - [Extending a table](#extending-a-table)
 - [Watch database changes](#watch-database-changes)
 - [Running tests](#running-tests)
+- [Contributors](#contributors)
+- [Community](#community)
 - [Todo](#todo)
 
 ## Install
@@ -369,6 +370,49 @@ db.query('SELECT * FROM `users` WHERE `user_id` = 18', function (error, results)
 });
 ```
 ( to escape a value here just use db.connection.escape(value) )
+
+
+
+
+
+## Stored procedures
+
+You can call stored procedures from your queries as with any other mysql driver. If the stored procedure produces several result sets, they are exposed to you the same way as the results for multiple statement queries.
+
+Make sure you create connection or wrap a connection with multipleStatements flag set to true: var db = wrap({ user: 'kataras', password: 'mypass', database: 'test', multipleStatements: true});
+
+```js
+//first way: 
+var myParams = "'arg1', 'arg2', ... ";
+myParams.map(function(arg){ return db.connection.escape(arg);});
+
+db.query("CALL MyStoredProcedure(" + myParams + ")", function(err, results, fields) {
+    if (err || results[0].res === 0) {
+        throw new Error("Error ... ");
+    } else {
+        // Stuff...
+
+    }
+});
+
+//second way, recommended:
+var myParams = [];
+myParams.push('arg1');
+myparams.push('arg2');
+
+
+try{
+  
+  db.call('MyStoredProcedure', myParams, function(results, fields) { //arg1,arg2 here are auto-escaping.
+    console.log('Results returned: ',results);
+  });
+  
+}catch(ex){
+  console.log('Error info: ',ex);
+}
+
+
+```
 
 ## Table events
 

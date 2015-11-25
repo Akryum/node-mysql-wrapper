@@ -56,16 +56,16 @@ class Database {
     }
 
     ready(callback?: () => void): void {
-        if(callback && this.isReady===true && this.isConnecting === false){
+        if (callback && this.isReady === true && this.isConnecting === false) {
             callback();
 
-        }else{
+        } else {
             if (callback) {
                 this.readyListenerCallbacks.push(callback);
             }
 
 
-            if (this.readyListenerCallbacks.length <=1 && this.isConnecting===false) {
+            if (this.readyListenerCallbacks.length <= 1 && this.isConnecting === false) {
                 //means the first listener,so  do the link/connect to the connection now. No before.
                 this.isConnecting = true;
                 this.connection.link().then(() => {
@@ -140,6 +140,33 @@ class Database {
 
     collection<T>(tableName: string, callbackWhenReady?: Function): ObservableCollection<T> {
         return new ObservableCollection(<Table<T>>this.connection.table(tableName), true, callbackWhenReady);
+    }
+    
+    /* for stored Procedures*/
+    call(procedureName: string, params: any[], callback?: (results: any, fields?: any) => any): void {
+
+        if ((this.connection.connection.config["connectionConfig"] !== undefined && (this.connection.connection.config["connectionConfig"]["multipleStatements"] === undefined || this.connection.connection.config["connectionConfig"]["multipleStatements"] === false)) ||
+            (this.connection.connection.config["multipleStatements"] === undefined || this.connection.connection.config["multipleStatements"] === false)) {
+            throw new Error("[MySQL] Error calling a procedure " + procedureName + ". Please create your connection with setted option multipleStatements = true. \n" +
+                "eg. At node-mysql-wrapper do: wrap({ user: 'kataras', password :'password', database: 'test', multipleStatements: true}); \n " +
+                "eg. At mysql-live package do: live({ user: 'kataras', password: 'password', database: 'test', multipleStatements: true},http); \n" +
+                "eg. At Meteor's package nodets:mysql do: Mysql.connect({ user: 'kataras', password: 'password', database: 'test', multipleStatements: true});\n" +
+                "Your parameters will be auto-escape, so dont worry for mysql injections at this point.\n" +
+                "The callback's results will be at the row mysql column's name, means that for example user_id will be reamain as user_id, if you want the userId format,\n" +
+                "then use the Helper.toObjectProperty(propertyName); class inside node-mysql-wrapper package.\n" +
+                "Please keep noice that, this is a beta feature if you have any issue please post it to https://github.com/nodets/node-mysql-wrapper/issues");
+        }
+
+        params.map(param=> { return this.connection.escape(param); });
+
+        this.connection.query("CALL " + procedureName + "(" + params.join(',') + ")", (err, results, fields) => {
+            if (err || results[0].res === 0) {
+                throw new Error("[MySQL] Error calling a procedure " + procedureName + " . Error info:" + err);
+            } else {
+                // My Callback Stuff ...
+                callback(results, fields);
+            }
+        });
     }
 
 }

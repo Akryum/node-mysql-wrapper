@@ -116,6 +116,29 @@ var Database = (function () {
     Database.prototype.collection = function (tableName, callbackWhenReady) {
         return new ObservableCollection_1.default(this.connection.table(tableName), true, callbackWhenReady);
     };
+    Database.prototype.call = function (procedureName, params, callback) {
+        var _this = this;
+        if ((this.connection.connection.config["connectionConfig"] !== undefined && (this.connection.connection.config["connectionConfig"]["multipleStatements"] === undefined || this.connection.connection.config["connectionConfig"]["multipleStatements"] === false)) ||
+            (this.connection.connection.config["multipleStatements"] === undefined || this.connection.connection.config["multipleStatements"] === false)) {
+            throw new Error("[MySQL] Error calling a procedure " + procedureName + ". Please create your connection with setted option multipleStatements = true. \n" +
+                "eg. At node-mysql-wrapper do: wrap({ user: 'kataras', password :'password', database: 'test', multipleStatements: true}); \n " +
+                "eg. At mysql-live package do: live({ user: 'kataras', password: 'password', database: 'test', multipleStatements: true},http); \n" +
+                "eg. At Meteor's package nodets:mysql do: Mysql.connect({ user: 'kataras', password: 'password', database: 'test', multipleStatements: true});\n" +
+                "Your parameters will be auto-escape, so dont worry for mysql injections at this point.\n" +
+                "The callback's results will be at the row mysql column's name, means that for example user_id will be reamain as user_id, if you want the userId format,\n" +
+                "then use the Helper.toObjectProperty(propertyName); class inside node-mysql-wrapper package.\n" +
+                "Please keep noice that, this is a beta feature if you have any issue please post it to https://github.com/nodets/node-mysql-wrapper/issues");
+        }
+        params.map(function (param) { return _this.connection.escape(param); });
+        this.connection.query("CALL " + procedureName + "(" + params.join(',') + ")", function (err, results, fields) {
+            if (err || results[0].res === 0) {
+                throw new Error("[MySQL] Error calling a procedure " + procedureName + " . Error info:" + err);
+            }
+            else {
+                callback(results, fields);
+            }
+        });
+    };
     return Database;
 })();
 Object.defineProperty(exports, "__esModule", { value: true });

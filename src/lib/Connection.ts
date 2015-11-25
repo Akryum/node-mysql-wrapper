@@ -333,25 +333,25 @@ class Connection extends EventEmitter {
         ///TODO: edw an dn exoun minei alla events tote na kanw turn off to zonji na min trexei adika(??)
     }
 
-    query(queryStr: string, callback: (err: Mysql.IError, results: any) => any, queryArguments?: any[]): void {
+    query(queryStr: string, callback: (err: Mysql.IError, results: any, fields?:any) => any, queryArguments?: any[]): void {
 
         if (queryArguments) {
 
-            this.connection.query(queryStr, queryArguments, (err, results) => {
+            this.connection.query(queryStr, queryArguments, (err, results,fields) => {
                 if (results === undefined) {
                     results = [];
                 }
-                callback(err, results);
+                callback(err, results,fields);
             });
         } else {        //means only: queryStr and the callback
           
-            this.connection.query(queryStr, (err, results) => {
+            this.connection.query(queryStr, (err, results,fields) => {
                 //in order to developer see the error in his/her console window->
                 if (results === undefined) {
                     results = [];
                 }
                 //end
-                callback(err, results);
+                callback(err, results,fields);
             });
         }
     }

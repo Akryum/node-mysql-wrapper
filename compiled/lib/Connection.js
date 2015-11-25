@@ -274,19 +274,19 @@ var Connection = (function (_super) {
     };
     Connection.prototype.query = function (queryStr, callback, queryArguments) {
         if (queryArguments) {
-            this.connection.query(queryStr, queryArguments, function (err, results) {
+            this.connection.query(queryStr, queryArguments, function (err, results, fields) {
                 if (results === undefined) {
                     results = [];
                 }
-                callback(err, results);
+                callback(err, results, fields);
             });
         }
         else {
-            this.connection.query(queryStr, function (err, results) {
+            this.connection.query(queryStr, function (err, results, fields) {
                 if (results === undefined) {
                     results = [];
                 }
-                callback(err, results);
+                callback(err, results, fields);
             });
         }
     };

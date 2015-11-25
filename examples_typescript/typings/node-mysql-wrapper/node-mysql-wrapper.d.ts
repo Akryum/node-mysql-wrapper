@@ -871,6 +871,8 @@ declare module NodeMysqlWrapper {
         criteriaFor<T>(tableName: string): CriteriaBuilder<T>;
 
         collection<T>(tableName: string, callbackWhenReady?: Function): ObservableCollection<T>;
+        
+        call(procedureName: string, params: any[], callback?: (results: any, fields?: any) => any);
     }
 
     export class ConditionalConverter {
