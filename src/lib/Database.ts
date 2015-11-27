@@ -159,7 +159,7 @@ class Database {
 
         params.map(param=> { return this.connection.escape(param); });
 
-        this.connection.query("CALL " + procedureName + "(" + params.join(',') + ")", (err, results, fields) => {
+        this.connection.query("CALL " + procedureName + "(" + (params !== undefined && params.length>0? params.join(','):"")+ ")", (err, results, fields) => {
             if (err || results[0].res === 0) {
                 throw new Error("[MySQL] Error calling a procedure " + procedureName + " . Error info:" + err);
             } else {
