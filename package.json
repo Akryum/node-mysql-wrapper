@@ -1,7 +1,7 @@
 {
-  "name": "node-mysql-wrapper",
-  "version": "2.8.7",
-  "description": "This is a node js module, written in TypeScript (module is compiled to JavaScript), which manages mysql (node-mysql) connection and models in a way that you expected!",
+  "name": "mysql-al",
+  "version": "0.0.1",
+  "description": "Mysql Abstraction Layer. This is a node js module, written in TypeScript (module is compiled to JavaScript), which manages mysql (node-mysql) connection and models in a way that you expected! (Fork)",
   "main": "./compiled/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -22,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nodets/node-mysql-wrapper.git"
+    "url": "https://github.com/Akryum/node-mysql-wrapper.git"
   },
   "keywords": [
     "node-mysql-wrapper",
@@ -35,16 +35,19 @@
     "README.md",
     "compiled/"
   ],
-  "author": "Makis Maropoulos <makis@ideopod.com> (https://github.com/nodets)",
+  "contributors": [
+    "Makis Maropoulos <makis@ideopod.com> (https://github.com/nodets)",
+    "Akryum (https://github.com/Akryum)"
+  ],
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/nodets/node-mysql-wrapper/blob/master/LICENSE"
+      "url": "https://github.com/Akryum/node-mysql-wrapper/blob/master/LICENSE"
     }
   ],
   "bugs": {
-    "url": "https://github.com/nodets/node-mysql-wrapper/issues"
+    "url": "https://github.com/Akryum/node-mysql-wrapper/issues"
   },
   "typings": "compiled/typings/node-mysql-wrapper/node-mysql-wrapper.d.ts",
-  "homepage": "https://github.com/nodets/node-mysql-wrapper#readme"
+  "homepage": "https://github.com/Akryum/node-mysql-wrapper#readme"
 }
