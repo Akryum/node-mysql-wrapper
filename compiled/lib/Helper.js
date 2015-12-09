@@ -18,10 +18,10 @@ var Helper = (function () {
         return objectCopy;
     };
     Helper.toObjectProperty = function (columnKey) {
-        return columnKey.replace(/(_.)/g, function (x) { return x[1].toUpperCase(); });
+        return columnKey;
     };
     Helper.toRowProperty = function (objectKey) {
-        return objectKey.replace(/([A-Z]+)/g, "_$1").replace(/^_/, "").toLowerCase();
+        return objectKey;
     };
     Helper.forEachValue = function (map, callback) {
         var result;
