@@ -28,12 +28,14 @@ class Helper {
 
     static toObjectProperty(columnKey: string): string {
         //convert column_key to objectKey
-        return columnKey.replace(/(_.)/g, (x) => { return x[1].toUpperCase() });
+        //return columnKey.replace(/(_.)/g, (x) => { return x[1].toUpperCase() });
+        return columnKey;
     }
 
     static toRowProperty(objectKey: string): string {
         //convert objectKey to column_key
-        return objectKey.replace(/([A-Z]+)/g, "_$1").replace(/^_/, "").toLowerCase();
+        //return objectKey.replace(/([A-Z]+)/g, "_$1").replace(/^_/, "").toLowerCase();
+        return objectKey;
     }
 
     static forEachValue<T, U>(map: Map<T>, callback: (value: T) => U): U {
